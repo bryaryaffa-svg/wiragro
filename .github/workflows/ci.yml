@@ -72,6 +72,15 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
+      - name: Verify portable Gradle config
+        run: |
+          echo "gradle-wrapper.properties:"
+          cat gradle/wrapper/gradle-wrapper.properties
+          echo
+          echo "gradle.properties:"
+          cat gradle.properties
+          ! grep -R -n -E 'file:/|C:/Users|C:\\Users|OneDrive' gradle/wrapper/gradle-wrapper.properties gradle.properties
+
       - name: Make Gradle executable
         run: chmod +x ./gradlew
 
