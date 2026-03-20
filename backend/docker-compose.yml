@@ -1,0 +1,36 @@
+services:
+  api:
+    build:
+      context: .
+    container_name: kios-sidomakmur-api
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+      - redis
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:16
+    container_name: kios-sidomakmur-postgres
+    environment:
+      POSTGRES_DB: kios_sidomakmur
+      POSTGRES_USER: kios_user
+      POSTGRES_PASSWORD: kios_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  redis:
+    image: redis:7
+    container_name: kios-sidomakmur-redis
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+
+volumes:
+  postgres_data:

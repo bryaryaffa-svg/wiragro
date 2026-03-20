@@ -1,0 +1,9 @@
+<resources>
+    <style name="Theme.KiosSidomakmur" parent="Theme.Material3.DayNight">
+        <item name="android:windowBackground">@color/kios_window_background</item>
+        <item name="android:colorBackground">@color/kios_window_background</item>
+        <item name="android:windowLightNavigationBar">true</item>
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+</resources>

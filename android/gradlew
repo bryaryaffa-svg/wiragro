@@ -1,0 +1,29 @@
+#!/usr/bin/env sh
+
+APP_HOME="$(cd "$(dirname "$0")" && pwd -P)"
+CLASSPATH="$APP_HOME/gradle/wrapper/gradle-wrapper.jar"
+
+if [ -z "$GRADLE_USER_HOME" ]; then
+  GRADLE_USER_HOME="$APP_HOME/.gradle-user"
+  export GRADLE_USER_HOME
+fi
+
+if [ -z "$ANDROID_USER_HOME" ]; then
+  ANDROID_USER_HOME="$APP_HOME/.android"
+  export ANDROID_USER_HOME
+fi
+mkdir -p "$ANDROID_USER_HOME" >/dev/null 2>&1
+
+# Fallback to bundled JDK 17 when JAVA_HOME is not set.
+if [ -z "$JAVA_HOME" ] && [ -x "$APP_HOME/.tools/jdk17/jdk-17.0.18+8/bin/java" ]; then
+  JAVA_HOME="$APP_HOME/.tools/jdk17/jdk-17.0.18+8"
+  export JAVA_HOME
+fi
+
+if [ -n "$JAVA_HOME" ]; then
+  JAVA_EXE="$JAVA_HOME/bin/java"
+else
+  JAVA_EXE="java"
+fi
+
+exec "$JAVA_EXE" -Dorg.gradle.appname=gradlew -classpath "$CLASSPATH" org.gradle.wrapper.GradleWrapperMain "$@"

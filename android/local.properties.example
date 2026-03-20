@@ -1,0 +1,6 @@
+# Salin file ini menjadi android/local.properties untuk konfigurasi lokal.
+# Jangan commit android/local.properties ke Git.
+
+sdk.dir=C\:\\Users\\YOUR_USER\\AppData\\Local\\Android\\Sdk
+KIOS_GOOGLE_SERVER_CLIENT_ID=
+
