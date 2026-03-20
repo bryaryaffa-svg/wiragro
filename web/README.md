@@ -46,3 +46,29 @@ npm run dev
 - login Google mengirim Google ID token ke `/api/v1/customer/auth/google`
 - create payment memakai `/api/v1/customer/payments/duitku/create`
 - cache manifest awal memakai `/api/v1/sync/cache-manifest`
+
+## Deploy ke Hostinger dari GitHub
+
+Repo ini adalah monorepo, jadi deploy web harus memakai folder root `web`.
+
+Pengaturan yang disarankan:
+
+- framework preset: `Next.js`
+- branch production: `main`
+- root directory: `web`
+- Node.js version: `22.x`
+
+Environment variable minimum yang harus diisi di Hostinger:
+
+- `API_BASE_URL=https://API-ANDA/api/v1`
+- `NEXT_PUBLIC_API_BASE_URL=https://API-ANDA/api/v1`
+- `STORE_CODE=SIDO-JATIM-ONLINE`
+- `NEXT_PUBLIC_STORE_CODE=SIDO-JATIM-ONLINE`
+- `NEXT_PUBLIC_SITE_URL=https://wiragro.id`
+- `NEXT_PUBLIC_GOOGLE_CLIENT_ID=<google-web-client-id>`
+
+Catatan:
+
+- `API_BASE_URL` dan `NEXT_PUBLIC_API_BASE_URL` harus menunjuk ke backend publik, bukan `localhost`.
+- Jika backend memproteksi CORS, origin `https://wiragro.id` dan bila perlu `https://www.wiragro.id` harus diizinkan.
+- Google Sign-In production juga harus mengizinkan origin domain yang sama.
