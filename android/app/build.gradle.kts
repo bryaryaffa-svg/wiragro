@@ -15,11 +15,10 @@ val localProperties = Properties().apply {
     }
 }
 
-val isOneDriveProject = project.projectDir.absolutePath.contains("OneDrive", ignoreCase = true)
-if (isOneDriveProject) {
-    layout.buildDirectory.set(
-        file("${System.getenv("LOCALAPPDATA") ?: System.getProperty("java.io.tmpdir")}/KiosSidomakmurBuild/app")
-    )
+val customBuildDir = (findProperty("KIOS_ANDROID_BUILD_DIR") as String?)
+    ?: System.getenv("KIOS_ANDROID_BUILD_DIR")
+if (!customBuildDir.isNullOrBlank()) {
+    layout.buildDirectory.set(file(customBuildDir))
 }
 
 val apiBaseUrlRaw = (findProperty("KIOS_API_BASE_URL") as String?)

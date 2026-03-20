@@ -122,3 +122,4 @@ Aturan:
 
 - [Blueprint solusi](docs/solution-blueprint.md)
 - [Panduan instalasi backend](docs/install-backend.md)
+- [Panduan deploy Hostinger](docs/hostinger-deploy.md)
