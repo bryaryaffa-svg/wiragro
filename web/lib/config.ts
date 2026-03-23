@@ -1,37 +1,43 @@
 export const storeCode =
   process.env.STORE_CODE ?? process.env.NEXT_PUBLIC_STORE_CODE ?? "SIDO-JATIM-ONLINE";
 
-export const storefrontApiBaseUrl =
+function trimTrailingSlash(url: string) {
+  return url.replace(/\/+$/, "");
+}
+
+function toPublicApiBase(url: string) {
+  const trimmed = trimTrailingSlash(url);
+  return trimmed.endsWith("/v1") ? trimmed.replace(/\/v1$/, "") : trimmed;
+}
+
+function toCustomerApiBase(url: string) {
+  const trimmed = trimTrailingSlash(url);
+  return trimmed.endsWith("/v1") ? trimmed : `${trimmed}/v1`;
+}
+
+const configuredPublicApiBase =
   process.env.PUBLIC_API_BASE_URL ??
   process.env.API_BASE_URL ??
-  process.env.NEXT_PUBLIC_PUBLIC_API_BASE_URL ??
-  process.env.NEXT_PUBLIC_API_BASE_URL ??
-  "http://localhost:8000/api";
+  process.env.NEXT_PUBLIC_PUBLIC_API_BASE_URL;
 
-const inferredCustomerApiBaseUrl = (() => {
-  const publicBase =
-    process.env.NEXT_PUBLIC_CUSTOMER_API_BASE_URL ??
-    process.env.CUSTOMER_API_BASE_URL ??
-    process.env.NEXT_PUBLIC_API_BASE_URL;
+const configuredCustomerApiBase =
+  process.env.NEXT_PUBLIC_CUSTOMER_API_BASE_URL ??
+  process.env.CUSTOMER_API_BASE_URL ??
+  process.env.NEXT_PUBLIC_API_BASE_URL;
 
-  if (publicBase) {
-    return publicBase;
-  }
+export const storefrontApiBaseUrl = trimTrailingSlash(
+  configuredPublicApiBase
+    ? toPublicApiBase(configuredPublicApiBase)
+    : configuredCustomerApiBase
+      ? toPublicApiBase(configuredCustomerApiBase)
+      : "http://localhost:8000/api",
+);
 
-  const publicCatalogBase =
-    process.env.NEXT_PUBLIC_PUBLIC_API_BASE_URL ??
-    process.env.PUBLIC_API_BASE_URL ??
-    process.env.API_BASE_URL;
-
-  if (!publicCatalogBase) {
-    return "http://localhost:8000/api/v1";
-  }
-
-  return `${publicCatalogBase.replace(/\/+$/, "")}/v1`;
-})();
-
-export const customerApiBaseUrl =
-  inferredCustomerApiBaseUrl;
+export const customerApiBaseUrl = trimTrailingSlash(
+  configuredCustomerApiBase
+    ? toCustomerApiBase(configuredCustomerApiBase)
+    : toCustomerApiBase(storefrontApiBaseUrl),
+);
 
 export const siteUrl =
   process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";

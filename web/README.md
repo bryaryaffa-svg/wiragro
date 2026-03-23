@@ -23,9 +23,14 @@ Copy-Item .env.example .env
 Isi minimal:
 
 - `PUBLIC_API_BASE_URL=http://localhost:8000/api`
+- `API_BASE_URL=http://localhost:8000/api`
+- `NEXT_PUBLIC_API_BASE_URL=http://localhost:8000/api/v1`
+- `NEXT_PUBLIC_GOOGLE_CLIENT_ID=<google-web-client-id>`
+
+Opsional jika ingin override eksplisit:
+
 - `NEXT_PUBLIC_PUBLIC_API_BASE_URL=http://localhost:8000/api`
 - `NEXT_PUBLIC_CUSTOMER_API_BASE_URL=http://localhost:8000/api/v1`
-- `NEXT_PUBLIC_GOOGLE_CLIENT_ID=<google-web-client-id>`
 
 2. Install dependency:
 
@@ -44,7 +49,7 @@ npm run dev
 ## Catatan integrasi
 
 - katalog publik sekarang dibaca dari backend Laravel melalui `PUBLIC_API_BASE_URL` / `API_BASE_URL`
-- flow customer untuk guest cart, checkout, tracking, auth customer, wishlist, dan create payment juga diarahkan ke backend Laravel melalui `NEXT_PUBLIC_CUSTOMER_API_BASE_URL`
+- flow customer untuk guest cart, checkout, tracking, auth customer, wishlist, logout, dan create payment juga diarahkan ke backend Laravel yang sama
 - endpoint Laravel yang dipakai web:
   - `/api/v1/public/store`
   - `/api/v1/public/categories`
@@ -75,17 +80,21 @@ Environment variable minimum yang harus diisi di Hostinger:
 
 - `PUBLIC_API_BASE_URL=https://api.wiragro.id/api`
 - `API_BASE_URL=https://api.wiragro.id/api`
-- `NEXT_PUBLIC_PUBLIC_API_BASE_URL=https://api.wiragro.id/api`
-- `NEXT_PUBLIC_CUSTOMER_API_BASE_URL=https://api.wiragro.id/api/v1`
 - `NEXT_PUBLIC_API_BASE_URL=https://api.wiragro.id/api/v1`
 - `STORE_CODE=SIDO-JATIM-ONLINE`
 - `NEXT_PUBLIC_STORE_CODE=SIDO-JATIM-ONLINE`
 - `NEXT_PUBLIC_SITE_URL=https://wiragro.id`
 - `NEXT_PUBLIC_GOOGLE_CLIENT_ID=<google-web-client-id>`
 
+Opsional jika ingin override eksplisit:
+
+- `NEXT_PUBLIC_PUBLIC_API_BASE_URL=https://api.wiragro.id/api`
+- `NEXT_PUBLIC_CUSTOMER_API_BASE_URL=https://api.wiragro.id/api/v1`
+
 Catatan:
 
 - `PUBLIC_API_BASE_URL` dan `API_BASE_URL` harus menunjuk ke backend Laravel publik, bukan `localhost`.
-- `NEXT_PUBLIC_PUBLIC_API_BASE_URL`, `NEXT_PUBLIC_CUSTOMER_API_BASE_URL`, dan `NEXT_PUBLIC_API_BASE_URL` sebaiknya menunjuk ke domain Laravel yang sama untuk full cutover.
+- `NEXT_PUBLIC_API_BASE_URL` harus menunjuk ke path customer Laravel, yaitu `/api/v1`.
+- bila override dipakai, `NEXT_PUBLIC_PUBLIC_API_BASE_URL` dan `NEXT_PUBLIC_CUSTOMER_API_BASE_URL` tetap harus menunjuk ke domain Laravel yang sama untuk full cutover.
 - Jika backend memproteksi CORS, origin `https://wiragro.id` dan bila perlu `https://www.wiragro.id` harus diizinkan.
 - Google Sign-In production juga harus mengizinkan origin domain yang sama.

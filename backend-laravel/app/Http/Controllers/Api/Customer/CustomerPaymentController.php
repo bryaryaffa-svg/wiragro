@@ -26,7 +26,9 @@ class CustomerPaymentController extends Controller
             $payments->createDuitkuPayment(
                 $order,
                 (string) $data['callback_url'],
-                (string) $data['return_url']
+                (string) $data['return_url'],
+                null,
+                isset($data['customer_phone']) ? (string) $data['customer_phone'] : null,
             )
         );
     }
@@ -49,7 +51,7 @@ class CustomerPaymentController extends Controller
                 $order,
                 (string) $data['callback_url'],
                 (string) $data['return_url'],
-                $customer
+                $customer,
             )
         );
     }

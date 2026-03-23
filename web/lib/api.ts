@@ -222,6 +222,8 @@ export interface CheckoutResponse {
     payment_status: string;
     grand_total: string;
     auto_cancel_at: string;
+    shipping_method?: string;
+    payment_method?: string;
   };
   payment_instruction: {
     method: string;
@@ -943,18 +945,42 @@ export async function submitGuestCheckout(payload: {
   });
 }
 
-export async function createDuitkuPayment(orderId: string) {
-  return fetchCustomerClientJson<DuitkuCreateResponse>(
-    "/customer/payments/duitku/create",
-    {
-      method: "POST",
-      body: JSON.stringify({
-        order_id: orderId,
-        callback_url: `${customerApiBaseUrl}/payments/duitku/callback`,
-        return_url: `${siteUrl}/checkout?payment=return`,
-      }),
+export async function logoutCustomer(accessToken: string) {
+  return fetchCustomerClientJson<{ status: string }>("/customer/auth/logout", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
     },
-  );
+  });
+}
+
+export async function createDuitkuPayment(
+  orderId: string,
+  options?: {
+    accessToken?: string;
+    customerPhone?: string;
+  },
+) {
+  const path = options?.accessToken
+    ? "/customer/payments/duitku/create/me"
+    : "/customer/payments/duitku/create";
+
+  const headers = options?.accessToken
+    ? {
+        Authorization: `Bearer ${options.accessToken}`,
+      }
+    : undefined;
+
+  return fetchCustomerClientJson<DuitkuCreateResponse>(path, {
+    method: "POST",
+    headers,
+    body: JSON.stringify({
+      order_id: orderId,
+      customer_phone: options?.customerPhone ?? null,
+      callback_url: `${customerApiBaseUrl}/payments/duitku/callback`,
+      return_url: `${siteUrl}/checkout?payment=return`,
+    }),
+  });
 }
 
 export async function trackOrder(orderNumber: string, phone: string) {

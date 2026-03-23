@@ -26,7 +26,9 @@ export function CheckoutForm() {
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<{
     orderNumber: string;
-    paymentUrl: string;
+    paymentUrl?: string | null;
+    paymentStatus: string;
+    nextAction: string;
     total: string;
   } | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -76,12 +78,25 @@ export function CheckoutForm() {
                   paymentMethod: form.paymentMethod,
                   notes: form.notes,
                 });
-                const payment = await createDuitkuPayment(checkout.order.id);
-                setResult({
-                  orderNumber: checkout.order.order_number,
-                  paymentUrl: payment.payment_url,
-                  total: checkout.order.grand_total,
-                });
+                if (checkout.next_action === "OPEN_PAYMENT") {
+                  const payment = await createDuitkuPayment(checkout.order.id, {
+                    customerPhone: form.phone,
+                  });
+                  setResult({
+                    orderNumber: checkout.order.order_number,
+                    paymentUrl: payment.payment_url,
+                    paymentStatus: checkout.order.payment_status,
+                    nextAction: checkout.next_action,
+                    total: checkout.order.grand_total,
+                  });
+                } else {
+                  setResult({
+                    orderNumber: checkout.order.order_number,
+                    paymentStatus: checkout.order.payment_status,
+                    nextAction: checkout.next_action,
+                    total: checkout.order.grand_total,
+                  });
+                }
                 clearCart();
               } catch (submitError) {
                 setError(
@@ -239,14 +254,21 @@ export function CheckoutForm() {
             <div className="success-card">
               <strong>Order {result.orderNumber} sudah dibuat</strong>
               <p>Total: {formatCurrency(result.total)}</p>
-              <a
-                className="btn btn-primary btn-block"
-                href={result.paymentUrl}
-                rel="noreferrer"
-                target="_blank"
-              >
-                Buka halaman pembayaran
-              </a>
+              <p>Status pembayaran: {result.paymentStatus}</p>
+              {result.paymentUrl ? (
+                <a
+                  className="btn btn-primary btn-block"
+                  href={result.paymentUrl}
+                  rel="noreferrer"
+                  target="_blank"
+                >
+                  Buka halaman pembayaran
+                </a>
+              ) : (
+                <p className="inline-note">
+                  Order diterima dan menunggu konfirmasi toko.
+                </p>
+              )}
             </div>
           ) : null}
 

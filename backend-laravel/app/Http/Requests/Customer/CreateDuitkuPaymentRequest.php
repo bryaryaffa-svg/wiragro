@@ -15,6 +15,7 @@ class CreateDuitkuPaymentRequest extends FormRequest
     {
         return [
             'order_id' => ['required', 'uuid'],
+            'customer_phone' => ['nullable', 'string', 'max:30'],
             'callback_url' => ['required', 'url'],
             'return_url' => ['required', 'url'],
         ];

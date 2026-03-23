@@ -23,13 +23,18 @@ Isi di dashboard Hostinger:
 ```text
 PUBLIC_API_BASE_URL=https://api.wiragro.id/api
 API_BASE_URL=https://api.wiragro.id/api
-NEXT_PUBLIC_PUBLIC_API_BASE_URL=https://api.wiragro.id/api
-NEXT_PUBLIC_CUSTOMER_API_BASE_URL=https://api.wiragro.id/api/v1
 NEXT_PUBLIC_API_BASE_URL=https://api.wiragro.id/api/v1
 STORE_CODE=SIDO-JATIM-ONLINE
 NEXT_PUBLIC_STORE_CODE=SIDO-JATIM-ONLINE
 NEXT_PUBLIC_SITE_URL=https://wiragro.id
 NEXT_PUBLIC_GOOGLE_CLIENT_ID=113842081997-b3otlfb7thkjalpkmf9pedor5ufrf4eb.apps.googleusercontent.com
+```
+
+Override opsional jika ingin memisahkan base URL public dan customer secara eksplisit:
+
+```text
+NEXT_PUBLIC_PUBLIC_API_BASE_URL=https://api.wiragro.id/api
+NEXT_PUBLIC_CUSTOMER_API_BASE_URL=https://api.wiragro.id/api/v1
 ```
 
 ## Yang Masih Harus Siap di Sisi Backend
@@ -55,3 +60,4 @@ NEXT_PUBLIC_GOOGLE_CLIENT_ID=113842081997-b3otlfb7thkjalpkmf9pedor5ufrf4eb.apps.
 - app web ini adalah Next.js server app, bukan static export.
 - deploy akan gagal atau app tidak berfungsi penuh bila environment variable masih menunjuk ke `localhost`.
 - untuk full cutover, semua env web di atas harus menunjuk ke `api.wiragro.id` dan bukan backend lama.
+- checkout guest web sekarang hanya membuat payment Duitku bila metode pembayaran memang `duitku-va`; untuk guest flow, backend juga memverifikasi `customer_phone` sebelum membuat payment link.

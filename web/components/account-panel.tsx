@@ -46,7 +46,13 @@ export function AccountPanel() {
             </p>
           </article>
         </div>
-        <button className="btn btn-secondary" onClick={logout} type="button">
+        <button
+          className="btn btn-secondary"
+          onClick={() => {
+            void logout();
+          }}
+          type="button"
+        >
           Logout
         </button>
       </section>

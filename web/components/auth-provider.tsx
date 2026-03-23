@@ -12,6 +12,7 @@ import {
 import {
   type CustomerSession,
   loginGoogleIdToken,
+  logoutCustomer,
   requestWhatsAppOtp,
   verifyWhatsAppOtp,
 } from "@/lib/api";
@@ -29,7 +30,7 @@ interface AuthContextValue {
   loginGoogle: (idToken: string) => Promise<void>;
   requestOtpCode: (phone: string) => Promise<OtpChallengeState>;
   verifyOtpCode: (challengeId: string, otpCode: string) => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
 }
 
 const STORAGE_KEY = "kios-sidomakmur-web-auth";
@@ -107,7 +108,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
-  function logout() {
+  async function logout() {
+    if (session?.access_token) {
+      try {
+        await logoutCustomer(session.access_token);
+      } catch {
+        // Clear local session even if remote token revocation fails.
+      }
+    }
     if (typeof window !== "undefined") {
       window.google?.accounts.id.disableAutoSelect();
     }

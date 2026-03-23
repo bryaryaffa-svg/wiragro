@@ -11,10 +11,26 @@ use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 class CustomerPaymentService
 {
-    public function createDuitkuPayment(Order $order, string $callbackUrl, string $returnUrl, ?Customer $customer = null): array
+    public function createDuitkuPayment(
+        Order $order,
+        string $callbackUrl,
+        string $returnUrl,
+        ?Customer $customer = null,
+        ?string $customerPhone = null,
+    ): array
     {
         if ($customer && $order->customer_id !== $customer->id) {
             throw new NotFoundHttpException('Order tidak ditemukan untuk akun ini.');
+        }
+
+        if (! $customer) {
+            if (! $customerPhone) {
+                throw new UnprocessableEntityHttpException('Nomor customer wajib diisi untuk membuat pembayaran guest.');
+            }
+
+            if ($this->normalizePhone($customerPhone) !== $this->normalizePhone((string) $order->customer_phone)) {
+                throw new NotFoundHttpException('Order tidak ditemukan untuk nomor customer ini.');
+            }
         }
 
         if (strcasecmp((string) $order->payment_method, 'duitku-va') !== 0) {
@@ -96,6 +112,25 @@ class CustomerPaymentService
             'payment_reference' => $payment->payment_reference,
             'payment_status' => $payment->status,
         ];
+    }
+
+    private function normalizePhone(string $phone): string
+    {
+        $digits = preg_replace('/\D+/', '', $phone) ?? '';
+
+        if ($digits === '') {
+            return $phone;
+        }
+
+        if (Str::startsWith($digits, '0')) {
+            $digits = '62'.substr($digits, 1);
+        }
+
+        if (! Str::startsWith($digits, '62')) {
+            $digits = '62'.$digits;
+        }
+
+        return '+'.$digits;
     }
 
     private function generateReference(): string
