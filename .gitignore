@@ -28,6 +28,12 @@ backend/dist/
 backend/build/
 backend/*.egg-info/
 
+# Laravel / SiGe Manager
+backend-laravel/.env
+backend-laravel/vendor/
+backend-laravel/bootstrap/cache/*.php
+backend-laravel/storage/*.key
+
 # Node / web
 web/.env
 web/node_modules/

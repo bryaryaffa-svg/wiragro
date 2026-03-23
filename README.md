@@ -3,6 +3,7 @@
 Monorepo aplikasi Kios Sidomakmur yang terdiri dari:
 
 - backend FastAPI yang terintegrasi ke SiGe Manajer
+- backend Laravel MVP untuk SiGe Manager terpusat
 - storefront web Next.js
 - aplikasi Android Kotlin + Jetpack Compose
 
@@ -12,6 +13,8 @@ Repo ini disiapkan untuk workflow `main -> feature branch -> pull request -> rev
 
 - `backend/`
   Backend API, auth, katalog, cart, checkout, payment, order, sync SiGe.
+- `backend-laravel/`
+  Skeleton Laravel REST API untuk MVP SiGe Manager terpusat.
 - `web/`
   Frontend web Next.js App Router untuk desktop dan mobile browser.
 - `android/`
@@ -26,6 +29,8 @@ Repo ini disiapkan untuk workflow `main -> feature branch -> pull request -> rev
 ## Prasyarat Lokal
 
 - Python `3.12+`
+- PHP `8.2+`
+- Composer `2+`
 - Node.js `20+`
 - Java `17`
 - Android Studio untuk build/run Android
@@ -35,12 +40,14 @@ Repo ini disiapkan untuk workflow `main -> feature branch -> pull request -> rev
 File sensitif tidak disimpan ke repo. Gunakan file contoh berikut:
 
 - backend: `backend/.env.example`
+- backend Laravel: `backend-laravel/.env.example`
 - web: `web/.env.example`
 - android: `android/local.properties.example`
 
 File lokal yang tidak boleh dipush:
 
 - `backend/.env`
+- `backend-laravel/.env`
 - `web/.env`
 - `android/local.properties`
 
@@ -76,6 +83,22 @@ cd web
 npm run build
 npm run start
 ```
+
+## Menjalankan Backend Laravel MVP
+
+```powershell
+cd backend-laravel
+Copy-Item .env.example .env
+composer install
+php artisan key:generate
+php artisan migrate --seed
+php artisan storage:link
+php artisan serve
+```
+
+Catatan:
+
+- skeleton Laravel ditambahkan langsung ke repo, tetapi belum bisa divalidasi di mesin ini karena `php` dan `composer` belum tersedia di environment kerja Codex saat ini.
 
 ## Menjalankan Android
 
@@ -116,6 +139,7 @@ Aturan:
 
 - `web/` adalah Next.js server app, bukan static export murni. Untuk Hostinger, gunakan hosting yang mendukung Node.js atau deploy melalui VPS/container.
 - `backend/` perlu service terpisah dan env production sendiri.
+- `backend-laravel/` juga perlu deploy PHP + MySQL sendiri, idealnya di subdomain seperti `api.wiragro.id`.
 - `android/` tidak dipakai untuk deploy Hostinger, tetapi tetap dijaga di monorepo yang sama.
 
 ## Dokumen Tambahan
