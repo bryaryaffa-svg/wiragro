@@ -147,3 +147,4 @@ Aturan:
 - [Blueprint solusi](docs/solution-blueprint.md)
 - [Panduan instalasi backend](docs/install-backend.md)
 - [Panduan deploy Hostinger](docs/hostinger-deploy.md)
+- [Panduan deploy backend Laravel MVP](backend-laravel/docs/deploy-hostinger.md)

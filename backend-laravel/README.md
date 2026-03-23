@@ -68,3 +68,9 @@ SESSION_DOMAIN=.wiragro.id
 CORS_ALLOWED_ORIGINS=https://wiragro.id,https://www.wiragro.id
 FILESYSTEM_DISK=public
 ```
+
+File contoh production lengkap ada di [`.env.production.example`](C:/Users/BRYAN/OneDrive/Dokumen/Playground/kios-sidomakmur/backend-laravel/.env.production.example).
+
+## Deploy ke Hostinger
+
+Panduan deploy operasional ada di [deploy-hostinger.md](C:/Users/BRYAN/OneDrive/Dokumen/Playground/kios-sidomakmur/backend-laravel/docs/deploy-hostinger.md).
