@@ -34,6 +34,11 @@ export interface ProductSummary {
     member_level?: string | null;
     is_promo?: boolean;
   };
+  availability: {
+    state: "in_stock" | "low_stock" | "out_of_stock";
+    label: string;
+    stock_qty: number | null;
+  };
   category?: {
     id: string;
     name: string;
@@ -452,6 +457,7 @@ function mapCategory(dto: LaravelCategoryDto): CategoryItem {
 
 function mapProductSummary(dto: LaravelProductDto): ProductSummary {
   const description = stripHtml(dto.description);
+  const stockQty = dto.stock_qty ?? null;
   const currentPrice =
     normalizeNumber(dto.current_price) ??
     normalizeNumber(dto.promo_price) ??
@@ -486,6 +492,31 @@ function mapProductSummary(dto: LaravelProductDto): ProductSummary {
     !Number.isNaN(new Date(dto.created_at).getTime()) &&
     Date.now() - new Date(dto.created_at).getTime() < 1000 * 60 * 60 * 24 * 30;
 
+  const availability =
+    stockQty === null
+      ? {
+          state: "in_stock" as const,
+          label: "Siap dipesan",
+          stock_qty: stockQty,
+        }
+      : stockQty <= 0
+        ? {
+            state: "out_of_stock" as const,
+            label: "Stok habis",
+            stock_qty: stockQty,
+          }
+        : stockQty <= 10
+          ? {
+              state: "low_stock" as const,
+              label: `Stok menipis (${stockQty})`,
+              stock_qty: stockQty,
+            }
+          : {
+              state: "in_stock" as const,
+              label: `Stok tersedia (${stockQty})`,
+              stock_qty: stockQty,
+            };
+
   return {
     id: String(dto.id),
     sku: dto.sku,
@@ -509,6 +540,7 @@ function mapProductSummary(dto: LaravelProductDto): ProductSummary {
       member_level: null,
       is_promo: isPromo,
     },
+    availability,
     category: dto.category
       ? {
           id: String(dto.category.id),
@@ -541,6 +573,24 @@ function sortProductItems(items: ProductSummary[], sort?: string | null) {
     sorted.sort((a, b) => a.name.localeCompare(b.name, "id"));
   } else if (sort === "name_desc") {
     sorted.sort((a, b) => b.name.localeCompare(a.name, "id"));
+  } else if (sort === "price_asc") {
+    sorted.sort(
+      (a, b) =>
+        Number.parseFloat(a.price.amount ?? "0") - Number.parseFloat(b.price.amount ?? "0"),
+    );
+  } else if (sort === "price_desc") {
+    sorted.sort(
+      (a, b) =>
+        Number.parseFloat(b.price.amount ?? "0") - Number.parseFloat(a.price.amount ?? "0"),
+    );
+  } else if (sort === "promo") {
+    sorted.sort((a, b) => Number(b.price.is_promo) - Number(a.price.is_promo));
+  } else if (sort === "best_seller") {
+    sorted.sort((a, b) => {
+      const aRank = Number(a.badges.best_seller) * 3 + Number(a.badges.featured);
+      const bRank = Number(b.badges.best_seller) * 3 + Number(b.badges.featured);
+      return bRank - aRank;
+    });
   }
 
   return sorted;

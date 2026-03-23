@@ -5,7 +5,13 @@ import { useState, useTransition } from "react";
 import { useWishlist } from "@/components/wishlist-provider";
 import type { ProductSummary } from "@/lib/api";
 
-export function WishlistButton({ product }: { product: ProductSummary }) {
+export function WishlistButton({
+  product,
+  buttonClassName,
+}: {
+  product: ProductSummary;
+  buttonClassName?: string;
+}) {
   const { isWishlisted, toggleWishlist } = useWishlist();
   const [message, setMessage] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -14,7 +20,7 @@ export function WishlistButton({ product }: { product: ProductSummary }) {
   return (
     <div className="inline-action-stack">
       <button
-        className="btn btn-secondary"
+        className={buttonClassName ?? "btn btn-secondary"}
         disabled={isPending}
         onClick={() => {
           startTransition(async () => {
@@ -34,7 +40,11 @@ export function WishlistButton({ product }: { product: ProductSummary }) {
       >
         {isPending ? "Menyimpan..." : saved ? "Tersimpan" : "Simpan"}
       </button>
-      {message ? <span className="inline-note">{message}</span> : null}
+      {message ? (
+        <span aria-live="polite" className="inline-note">
+          {message}
+        </span>
+      ) : null}
     </div>
   );
 }

@@ -18,7 +18,7 @@ export function ArticleCard({
       <h3>
         <Link href={`/artikel/${article.slug}`}>{article.title}</Link>
       </h3>
-      <p>{article.excerpt}</p>
+      <p>{article.excerpt || "Artikel ini sedang disiapkan untuk modul konten storefront."}</p>
       <div className="article-card__footer">
         <span>{formatDate(article.published_at)}</span>
         <Link href={`/artikel/${article.slug}`}>Baca lengkap</Link>

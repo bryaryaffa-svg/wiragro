@@ -1,25 +1,50 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useSearchParams } from "next/navigation";
+import { useEffect, useState, useTransition } from "react";
 
 import { trackOrder } from "@/lib/api";
 import { formatDate } from "@/lib/format";
 
 export function OrderTracker() {
-  const [orderNumber, setOrderNumber] = useState("");
-  const [phone, setPhone] = useState("");
+  const searchParams = useSearchParams();
+  const queryOrder = searchParams.get("order") ?? "";
+  const queryPhone = searchParams.get("phone") ?? "";
+  const [orderNumber, setOrderNumber] = useState(queryOrder);
+  const [phone, setPhone] = useState(queryPhone);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<Awaited<ReturnType<typeof trackOrder>> | null>(null);
   const [isPending, startTransition] = useTransition();
 
+  useEffect(() => {
+    setOrderNumber(queryOrder);
+    setPhone(queryPhone);
+  }, [queryOrder, queryPhone]);
+
+  useEffect(() => {
+    if (!queryOrder || !queryPhone) {
+      return;
+    }
+
+    startTransition(async () => {
+      try {
+        const nextResult = await trackOrder(queryOrder, queryPhone);
+        setResult(nextResult);
+        setError(null);
+      } catch (fetchError) {
+        setError(
+          fetchError instanceof Error ? fetchError.message : "Pesanan tidak dapat ditemukan",
+        );
+      }
+    });
+  }, [queryOrder, queryPhone]);
+
   return (
-    <section className="tracker-layout">
-      <div className="page-intro">
-        <span className="eyebrow-label">Tracking Pesanan</span>
+    <section className="tracker-layout page-stack">
+      <div className="page-intro page-intro--compact">
+        <span className="eyebrow-label">Tracking pesanan</span>
         <h1>Lacak order tanpa harus login</h1>
-        <p>
-          Masukkan nomor order dan nomor WhatsApp yang dipakai saat checkout guest.
-        </p>
+        <p>Masukkan nomor order dan WhatsApp yang dipakai saat checkout guest.</p>
       </div>
 
       <div className="tracker-card">

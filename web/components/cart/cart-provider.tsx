@@ -22,6 +22,12 @@ interface StoredSession {
   guestToken: string;
 }
 
+interface StoredCartState {
+  session: StoredSession | null;
+  cart: CartPayload | null;
+  updatedAt: string;
+}
+
 interface CartContextValue {
   cart: CartPayload | null;
   isReady: boolean;
@@ -42,6 +48,52 @@ async function createSession(): Promise<StoredSession> {
   return { cartId: response.cart_id, guestToken: response.guest_token };
 }
 
+function persistCartState(session: StoredSession | null, cart: CartPayload | null) {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  if (!session) {
+    window.localStorage.removeItem(STORAGE_KEY);
+    return;
+  }
+
+  const payload: StoredCartState = {
+    session,
+    cart,
+    updatedAt: new Date().toISOString(),
+  };
+
+  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+}
+
+function readStoredState(): StoredCartState | null {
+  if (typeof window === "undefined") {
+    return null;
+  }
+
+  const raw = window.localStorage.getItem(STORAGE_KEY);
+  if (!raw) {
+    return null;
+  }
+
+  try {
+    const parsed = JSON.parse(raw) as StoredCartState | StoredSession;
+    if ("session" in parsed) {
+      return parsed;
+    }
+
+    return {
+      session: parsed,
+      cart: null,
+      updatedAt: new Date(0).toISOString(),
+    };
+  } catch {
+    window.localStorage.removeItem(STORAGE_KEY);
+    return null;
+  }
+}
+
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<StoredSession | null>(null);
   const [cart, setCart] = useState<CartPayload | null>(null);
@@ -49,6 +101,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [isReady, setIsReady] = useState(false);
   const [isBusy, setIsBusy] = useState(false);
   const hydrated = useRef(false);
+  const sessionRef = useRef<StoredSession | null>(null);
+  const sessionPromiseRef = useRef<Promise<StoredSession> | null>(null);
+  const requestIdRef = useRef(0);
+
+  useEffect(() => {
+    sessionRef.current = session;
+  }, [session]);
 
   useEffect(() => {
     if (hydrated.current) {
@@ -56,15 +115,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
 
     hydrated.current = true;
-    const raw = window.localStorage.getItem(STORAGE_KEY);
-    if (raw) {
-      try {
-        const parsed = JSON.parse(raw) as StoredSession;
-        setSession(parsed);
-      } catch {
-        window.localStorage.removeItem(STORAGE_KEY);
-      }
+    const stored = readStoredState();
+    if (stored?.session) {
+      setSession(stored.session);
+      setCart(stored.cart);
     }
+
     setIsReady(true);
   }, []);
 
@@ -73,50 +129,107 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    if (!session) {
-      setCart(null);
-      window.localStorage.removeItem(STORAGE_KEY);
+    persistCartState(session, cart);
+  }, [cart, isReady, session]);
+
+  useEffect(() => {
+    if (!isReady) {
       return;
     }
 
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(session));
+    function handleStorage(event: StorageEvent) {
+      if (event.key !== STORAGE_KEY) {
+        return;
+      }
+
+      const stored = readStoredState();
+      startTransition(() => {
+        setSession(stored?.session ?? null);
+        setCart(stored?.cart ?? null);
+        setError(null);
+      });
+    }
+
+    window.addEventListener("storage", handleStorage);
+    return () => window.removeEventListener("storage", handleStorage);
+  }, [isReady]);
+
+  useEffect(() => {
+    if (!isReady || !session) {
+      if (isReady && !session) {
+        setCart(null);
+      }
+      return;
+    }
+
+    const nextRequestId = ++requestIdRef.current;
+
     void getGuestCart(session.cartId, session.guestToken)
       .then((nextCart) => {
+        if (requestIdRef.current !== nextRequestId) {
+          return;
+        }
+
         startTransition(() => {
           setCart(nextCart);
           setError(null);
         });
       })
       .catch(() => {
-        setSession(null);
-        setCart(null);
+        if (requestIdRef.current !== nextRequestId) {
+          return;
+        }
+
+        startTransition(() => {
+          setSession(null);
+          setCart(null);
+          setError("Keranjang sebelumnya sudah tidak tersedia. Silakan mulai lagi.");
+        });
       });
   }, [isReady, session]);
 
   async function ensureSession() {
-    if (session) {
-      return session;
+    if (sessionRef.current) {
+      return sessionRef.current;
     }
 
-    const nextSession = await createSession();
-    setSession(nextSession);
-    return nextSession;
+    if (!sessionPromiseRef.current) {
+      sessionPromiseRef.current = createSession()
+        .then((nextSession) => {
+          sessionRef.current = nextSession;
+          setSession(nextSession);
+          return nextSession;
+        })
+        .finally(() => {
+          sessionPromiseRef.current = null;
+        });
+    }
+
+    return sessionPromiseRef.current;
   }
 
   async function refreshCart() {
-    if (!session) {
+    if (!sessionRef.current) {
       return;
     }
 
     setIsBusy(true);
+    const nextRequestId = ++requestIdRef.current;
     try {
-      const nextCart = await getGuestCart(session.cartId, session.guestToken);
+      const nextCart = await getGuestCart(
+        sessionRef.current.cartId,
+        sessionRef.current.guestToken,
+      );
+      if (requestIdRef.current !== nextRequestId) {
+        return;
+      }
       startTransition(() => {
         setCart(nextCart);
         setError(null);
       });
     } catch (fetchError) {
       setError(fetchError instanceof Error ? fetchError.message : "Gagal memuat keranjang");
+      throw fetchError;
     } finally {
       setIsBusy(false);
     }
@@ -124,6 +237,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   async function addItem(productId: string, qty = 1) {
     setIsBusy(true);
+    const nextRequestId = ++requestIdRef.current;
     try {
       const activeSession = await ensureSession();
       const nextCart = await addItemToCart(
@@ -132,6 +246,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         productId,
         qty,
       );
+      if (requestIdRef.current !== nextRequestId) {
+        return;
+      }
       startTransition(() => {
         setCart(nextCart);
         setError(null);
@@ -145,13 +262,22 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }
 
   async function setItemQty(itemId: string, qty: number) {
-    if (!session) {
+    if (!sessionRef.current) {
       throw new Error("Keranjang guest belum tersedia");
     }
 
     setIsBusy(true);
+    const nextRequestId = ++requestIdRef.current;
     try {
-      const nextCart = await updateCartItem(itemId, session.cartId, session.guestToken, qty);
+      const nextCart = await updateCartItem(
+        itemId,
+        sessionRef.current.cartId,
+        sessionRef.current.guestToken,
+        qty,
+      );
+      if (requestIdRef.current !== nextRequestId) {
+        return;
+      }
       startTransition(() => {
         setCart(nextCart);
         setError(null);
@@ -169,9 +295,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }
 
   function clearCart() {
+    sessionRef.current = null;
     setSession(null);
     setCart(null);
     setError(null);
+    persistCartState(null, null);
   }
 
   return (
