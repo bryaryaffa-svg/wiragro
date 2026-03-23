@@ -16,6 +16,9 @@ Skeleton ini adalah backend Laravel baru untuk SiGe Manager dan API publik Kios 
 - guest cart
 - guest checkout
 - pelacakan order guest
+- auth customer Google + WhatsApp OTP
+- wishlist customer
+- create payment Duitku stub
 
 ## Struktur utama
 
@@ -59,6 +62,11 @@ php artisan serve
 - `POST /api/v1/customer/checkout/guest`
 - `GET /api/v1/customer/orders/track`
 - `GET /api/v1/customer/orders/{orderNumber}?phone=...`
+- `POST /api/v1/customer/auth/google`
+- `POST /api/v1/customer/auth/whatsapp/request-otp`
+- `POST /api/v1/customer/auth/whatsapp/verify-otp`
+- `GET /api/v1/customer/wishlist`
+- `POST /api/v1/customer/payments/duitku/create`
 
 ## Env production minimum
 
@@ -73,6 +81,8 @@ ORDER_AUTO_CANCEL_HOURS=24
 CHECKOUT_SHIPPING_METHODS=delivery,pickup
 CHECKOUT_PAYMENT_METHODS=duitku-va,COD
 CHECKOUT_INVOICE_SOURCE=STORE
+GOOGLE_OIDC_AUDIENCES=YOUR_GOOGLE_WEB_CLIENT_ID
+DUITKU_MERCHANT_CODE=YOUR_DUITKU_MERCHANT_CODE
 ADMIN_URL=https://api.wiragro.id/admin
 DB_HOST=YOUR_MYSQL_HOST
 DB_PORT=3306

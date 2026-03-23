@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\EnsureAdminIsActive;
+use App\Http\Middleware\EnsureCustomerIsAuthenticated;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Foundation\Application;
@@ -23,6 +24,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
             'admin.active' => EnsureAdminIsActive::class,
+            'customer.auth' => EnsureCustomerIsAuthenticated::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

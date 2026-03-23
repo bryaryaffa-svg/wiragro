@@ -169,7 +169,12 @@ export interface CustomerSession {
     full_name: string;
     phone?: string | null;
     email?: string | null;
+    member_tier?: string | null;
   };
+  mode?: string;
+  role?: string;
+  pricing_mode?: string;
+  auth_provider?: string;
 }
 
 export interface WishlistPayload {
@@ -307,6 +312,16 @@ interface LaravelBannerDto {
   starts_at?: string | null;
   ends_at?: string | null;
   is_active?: boolean;
+}
+
+interface LaravelWishlistPayload {
+  items: Array<{
+    product_id: string | number;
+    product_name: string;
+    product_slug: string;
+    product: LaravelProductDto | ProductSummary;
+    created_at: string;
+  }>;
 }
 
 function buildUrl(
@@ -983,7 +998,7 @@ export async function loginGoogleIdToken(idToken: string) {
 }
 
 export async function getWishlist(accessToken: string) {
-  return fetchCustomerClientJson<WishlistPayload>(
+  const payload = await fetchCustomerClientJson<LaravelWishlistPayload | WishlistPayload>(
     "/customer/wishlist",
     {
       headers: {
@@ -991,6 +1006,19 @@ export async function getWishlist(accessToken: string) {
       },
     },
   );
+
+  return {
+    items: payload.items.map((item) => ({
+      product_id: String(item.product_id),
+      product_name: item.product_name,
+      product_slug: item.product_slug,
+      product:
+        "badges" in item.product
+          ? item.product
+          : mapProductSummary(item.product),
+      created_at: item.created_at,
+    })),
+  } satisfies WishlistPayload;
 }
 
 export async function addWishlistItem(accessToken: string, productId: string) {

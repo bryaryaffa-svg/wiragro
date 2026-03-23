@@ -6,6 +6,9 @@ use App\Http\Controllers\Api\Admin\CategoryController;
 use App\Http\Controllers\Api\Admin\ProductController;
 use App\Http\Controllers\Api\Admin\StockController;
 use App\Http\Controllers\Api\Admin\StoreSettingController;
+use App\Http\Controllers\Api\Customer\CustomerAuthController;
+use App\Http\Controllers\Api\Customer\CustomerPaymentController;
+use App\Http\Controllers\Api\Customer\CustomerWishlistController;
 use App\Http\Controllers\Api\Customer\GuestCartController;
 use App\Http\Controllers\Api\Customer\GuestCheckoutController;
 use App\Http\Controllers\Api\Customer\GuestOrderController;
@@ -24,16 +27,31 @@ Route::prefix('v1/public')->group(function (): void {
 });
 
 Route::prefix('v1/customer')->group(function (): void {
+    Route::post('/auth/google', [CustomerAuthController::class, 'loginGoogle']);
+    Route::post('/auth/whatsapp/request-otp', [CustomerAuthController::class, 'requestOtp']);
+    Route::post('/auth/whatsapp/verify-otp', [CustomerAuthController::class, 'verifyOtp']);
+
     Route::post('/carts/guest', [GuestCartController::class, 'create']);
     Route::get('/carts/current', [GuestCartController::class, 'current']);
     Route::post('/carts/items', [GuestCartController::class, 'addItem']);
     Route::patch('/carts/items/{item}', [GuestCartController::class, 'updateItem']);
 
     Route::post('/checkout/guest', [GuestCheckoutController::class, 'store']);
+    Route::post('/payments/duitku/create', [CustomerPaymentController::class, 'create']);
 
     Route::get('/orders/track', [GuestOrderController::class, 'track']);
     Route::get('/orders/{orderNumber}', [GuestOrderController::class, 'show']);
+
+    Route::middleware('customer.auth')->group(function (): void {
+        Route::post('/auth/logout', [CustomerAuthController::class, 'logout']);
+        Route::get('/wishlist', [CustomerWishlistController::class, 'index']);
+        Route::post('/wishlist/items', [CustomerWishlistController::class, 'store']);
+        Route::delete('/wishlist/items/{productId}', [CustomerWishlistController::class, 'destroy']);
+        Route::post('/payments/duitku/create/me', [CustomerPaymentController::class, 'createForCurrentCustomer']);
+    });
 });
+
+Route::post('v1/payments/duitku/callback', [CustomerPaymentController::class, 'callback']);
 
 Route::prefix('v1/admin')->group(function (): void {
     Route::post('/login', [AuthController::class, 'login']);

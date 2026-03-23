@@ -23,7 +23,8 @@ Copy-Item .env.example .env
 Isi minimal:
 
 - `PUBLIC_API_BASE_URL=http://localhost:8000/api`
-- `NEXT_PUBLIC_CUSTOMER_API_BASE_URL=http://localhost:8001/api/v1`
+- `NEXT_PUBLIC_PUBLIC_API_BASE_URL=http://localhost:8000/api`
+- `NEXT_PUBLIC_CUSTOMER_API_BASE_URL=http://localhost:8000/api/v1`
 - `NEXT_PUBLIC_GOOGLE_CLIENT_ID=<google-web-client-id>`
 
 2. Install dependency:
@@ -32,11 +33,9 @@ Isi minimal:
 npm install
 ```
 
-3. Jalankan backend Laravel publik terlebih dahulu pada `http://localhost:8000`
+3. Jalankan backend Laravel terlebih dahulu pada `http://localhost:8000`
 
-4. Jika flow cart / checkout / auth customer masih memakai backend lama, jalankan backend customer di `http://localhost:8001`
-
-5. Jalankan web:
+4. Jalankan web:
 
 ```powershell
 npm run dev
@@ -45,13 +44,21 @@ npm run dev
 ## Catatan integrasi
 
 - katalog publik sekarang dibaca dari backend Laravel melalui `PUBLIC_API_BASE_URL` / `API_BASE_URL`
+- flow customer untuk guest cart, checkout, tracking, auth customer, wishlist, dan create payment juga diarahkan ke backend Laravel melalui `NEXT_PUBLIC_CUSTOMER_API_BASE_URL`
 - endpoint Laravel yang dipakai web:
   - `/api/v1/public/store`
   - `/api/v1/public/categories`
   - `/api/v1/public/products`
   - `/api/v1/public/banners`
-- flow customer yang belum dipindahkan ke Laravel tetap memakai `NEXT_PUBLIC_CUSTOMER_API_BASE_URL`
-- kompatibilitas lama tetap dijaga dengan `NEXT_PUBLIC_API_BASE_URL` sebagai fallback customer API
+  - `/api/v1/customer/carts/guest`
+  - `/api/v1/customer/carts/current`
+  - `/api/v1/customer/checkout/guest`
+  - `/api/v1/customer/orders/track`
+  - `/api/v1/customer/auth/google`
+  - `/api/v1/customer/auth/whatsapp/request-otp`
+  - `/api/v1/customer/auth/whatsapp/verify-otp`
+  - `/api/v1/customer/wishlist`
+  - `/api/v1/customer/payments/duitku/create`
 
 ## Deploy ke Hostinger dari GitHub
 
@@ -68,8 +75,9 @@ Environment variable minimum yang harus diisi di Hostinger:
 
 - `PUBLIC_API_BASE_URL=https://api.wiragro.id/api`
 - `API_BASE_URL=https://api.wiragro.id/api`
-- `NEXT_PUBLIC_CUSTOMER_API_BASE_URL=https://CUSTOMER-API-ANDA/api/v1`
-- `NEXT_PUBLIC_API_BASE_URL=https://CUSTOMER-API-ANDA/api/v1`
+- `NEXT_PUBLIC_PUBLIC_API_BASE_URL=https://api.wiragro.id/api`
+- `NEXT_PUBLIC_CUSTOMER_API_BASE_URL=https://api.wiragro.id/api/v1`
+- `NEXT_PUBLIC_API_BASE_URL=https://api.wiragro.id/api/v1`
 - `STORE_CODE=SIDO-JATIM-ONLINE`
 - `NEXT_PUBLIC_STORE_CODE=SIDO-JATIM-ONLINE`
 - `NEXT_PUBLIC_SITE_URL=https://wiragro.id`
@@ -78,7 +86,6 @@ Environment variable minimum yang harus diisi di Hostinger:
 Catatan:
 
 - `PUBLIC_API_BASE_URL` dan `API_BASE_URL` harus menunjuk ke backend Laravel publik, bukan `localhost`.
-- bila flow customer masih memakai backend lama, isi `NEXT_PUBLIC_CUSTOMER_API_BASE_URL` dengan URL backend customer yang masih aktif.
-- jika semua flow customer nantinya juga dipindahkan ke Laravel, `NEXT_PUBLIC_CUSTOMER_API_BASE_URL` bisa diarahkan ke backend baru yang sama.
+- `NEXT_PUBLIC_PUBLIC_API_BASE_URL`, `NEXT_PUBLIC_CUSTOMER_API_BASE_URL`, dan `NEXT_PUBLIC_API_BASE_URL` sebaiknya menunjuk ke domain Laravel yang sama untuk full cutover.
 - Jika backend memproteksi CORS, origin `https://wiragro.id` dan bila perlu `https://www.wiragro.id` harus diizinkan.
 - Google Sign-In production juga harus mengizinkan origin domain yang sama.

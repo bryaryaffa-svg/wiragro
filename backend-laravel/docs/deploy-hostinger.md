@@ -35,6 +35,14 @@ GUEST_MINIMUM_ORDER_AMOUNT=0
 CHECKOUT_SHIPPING_METHODS=delivery,pickup
 CHECKOUT_PAYMENT_METHODS=duitku-va,COD
 CHECKOUT_INVOICE_SOURCE=STORE
+GOOGLE_OIDC_AUDIENCES=YOUR_GOOGLE_WEB_CLIENT_ID
+GOOGLE_TOKENINFO_URL=https://oauth2.googleapis.com/tokeninfo
+CUSTOMER_OTP_EXPIRY_SECONDS=300
+CUSTOMER_OTP_DEBUG_CODE=
+CUSTOMER_ACCESS_TOKEN_NAME=web-customer
+DUITKU_MERCHANT_CODE=YOUR_DUITKU_MERCHANT_CODE
+DUITKU_PAYMENT_MODE=server-stub-until-merchant-credentials-enabled
+DUITKU_SANDBOX_PAYMENT_URL=https://sandbox.duitku.com/topup/topupdirectv2.aspx
 
 DB_CONNECTION=mysql
 DB_HOST=YOUR_MYSQL_HOST
@@ -93,6 +101,10 @@ php artisan route:cache
 - `https://api.wiragro.id/api/v1/customer/carts/guest` bisa membuat guest cart
 - `https://api.wiragro.id/api/v1/customer/orders/track?order_number=...&phone=...` bisa melacak order guest
 - `https://api.wiragro.id/api/v1/customer/orders/{orderNumber}?phone=...` bisa membuka detail order guest
+- `https://api.wiragro.id/api/v1/customer/auth/google` bisa login customer Google
+- `https://api.wiragro.id/api/v1/customer/auth/whatsapp/request-otp` bisa request OTP
+- `https://api.wiragro.id/api/v1/customer/wishlist` bisa diakses dengan Bearer token customer
+- `https://api.wiragro.id/api/v1/customer/payments/duitku/create` bisa membuat link pembayaran stub
 - URL gambar `https://api.wiragro.id/storage/...` bisa diakses
 
 ## Catatan Hostinger
