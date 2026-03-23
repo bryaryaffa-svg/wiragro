@@ -28,6 +28,13 @@ APP_DEBUG=false
 APP_URL=https://api.wiragro.id
 FRONTEND_URL=https://wiragro.id
 ADMIN_URL=https://api.wiragro.id/admin
+DEFAULT_STORE_CODE=SIDO-JATIM-ONLINE
+DEFAULT_CURRENCY=IDR
+ORDER_AUTO_CANCEL_HOURS=24
+GUEST_MINIMUM_ORDER_AMOUNT=0
+CHECKOUT_SHIPPING_METHODS=delivery,pickup
+CHECKOUT_PAYMENT_METHODS=duitku-va,COD
+CHECKOUT_INVOICE_SOURCE=STORE
 
 DB_CONNECTION=mysql
 DB_HOST=YOUR_MYSQL_HOST
@@ -83,6 +90,9 @@ php artisan route:cache
 - `https://api.wiragro.id/api/v1/public/store` merespons JSON toko
 - `https://api.wiragro.id/api/v1/public/products` merespons daftar produk
 - `https://api.wiragro.id/api/v1/admin/login` bisa dipanggil via Postman
+- `https://api.wiragro.id/api/v1/customer/carts/guest` bisa membuat guest cart
+- `https://api.wiragro.id/api/v1/customer/orders/track?order_number=...&phone=...` bisa melacak order guest
+- `https://api.wiragro.id/api/v1/customer/orders/{orderNumber}?phone=...` bisa membuka detail order guest
 - URL gambar `https://api.wiragro.id/storage/...` bisa diakses
 
 ## Catatan Hostinger

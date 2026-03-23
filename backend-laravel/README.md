@@ -13,6 +13,9 @@ Skeleton ini adalah backend Laravel baru untuk SiGe Manager dan API publik Kios 
 - update pengaturan toko
 - endpoint public untuk website
 - endpoint admin yang diproteksi login
+- guest cart
+- guest checkout
+- pelacakan order guest
 
 ## Struktur utama
 
@@ -49,6 +52,13 @@ php artisan serve
 - `PUT /api/v1/admin/products/{product}/stock`
 - `GET /api/v1/public/products`
 - `GET /api/v1/public/banners`
+- `POST /api/v1/customer/carts/guest`
+- `GET /api/v1/customer/carts/current`
+- `POST /api/v1/customer/carts/items`
+- `PATCH /api/v1/customer/carts/items/{item}`
+- `POST /api/v1/customer/checkout/guest`
+- `GET /api/v1/customer/orders/track`
+- `GET /api/v1/customer/orders/{orderNumber}?phone=...`
 
 ## Env production minimum
 
@@ -57,6 +67,12 @@ APP_ENV=production
 APP_DEBUG=false
 APP_URL=https://api.wiragro.id
 FRONTEND_URL=https://wiragro.id
+DEFAULT_STORE_CODE=SIDO-JATIM-ONLINE
+DEFAULT_CURRENCY=IDR
+ORDER_AUTO_CANCEL_HOURS=24
+CHECKOUT_SHIPPING_METHODS=delivery,pickup
+CHECKOUT_PAYMENT_METHODS=duitku-va,COD
+CHECKOUT_INVOICE_SOURCE=STORE
 ADMIN_URL=https://api.wiragro.id/admin
 DB_HOST=YOUR_MYSQL_HOST
 DB_PORT=3306

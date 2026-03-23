@@ -9,6 +9,7 @@ use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Throwable;
 
@@ -66,8 +67,23 @@ return Application::configure(basePath: dirname(__DIR__))
 
             return response()->json([
                 'success' => false,
-                'message' => 'Resource tidak ditemukan.',
+                'message' => $exception->getMessage() !== ''
+                    ? $exception->getMessage()
+                    : 'Resource tidak ditemukan.',
             ], Response::HTTP_NOT_FOUND);
+        });
+
+        $exceptions->render(function (HttpExceptionInterface $exception, Request $request) {
+            if (! $request->expectsJson()) {
+                return null;
+            }
+
+            return response()->json([
+                'success' => false,
+                'message' => $exception->getMessage() !== ''
+                    ? $exception->getMessage()
+                    : (Response::$statusTexts[$exception->getStatusCode()] ?? 'Request gagal diproses.'),
+            ], $exception->getStatusCode(), $exception->getHeaders());
         });
 
         $exceptions->render(function (Throwable $exception, Request $request) {

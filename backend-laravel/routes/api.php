@@ -6,6 +6,9 @@ use App\Http\Controllers\Api\Admin\CategoryController;
 use App\Http\Controllers\Api\Admin\ProductController;
 use App\Http\Controllers\Api\Admin\StockController;
 use App\Http\Controllers\Api\Admin\StoreSettingController;
+use App\Http\Controllers\Api\Customer\GuestCartController;
+use App\Http\Controllers\Api\Customer\GuestCheckoutController;
+use App\Http\Controllers\Api\Customer\GuestOrderController;
 use App\Http\Controllers\Api\PublicApi\PublicBannerController;
 use App\Http\Controllers\Api\PublicApi\PublicCategoryController;
 use App\Http\Controllers\Api\PublicApi\PublicProductController;
@@ -18,6 +21,18 @@ Route::prefix('v1/public')->group(function (): void {
     Route::get('/products', [PublicProductController::class, 'index']);
     Route::get('/products/{product:slug}', [PublicProductController::class, 'show']);
     Route::get('/banners', [PublicBannerController::class, 'index']);
+});
+
+Route::prefix('v1/customer')->group(function (): void {
+    Route::post('/carts/guest', [GuestCartController::class, 'create']);
+    Route::get('/carts/current', [GuestCartController::class, 'current']);
+    Route::post('/carts/items', [GuestCartController::class, 'addItem']);
+    Route::patch('/carts/items/{item}', [GuestCartController::class, 'updateItem']);
+
+    Route::post('/checkout/guest', [GuestCheckoutController::class, 'store']);
+
+    Route::get('/orders/track', [GuestOrderController::class, 'track']);
+    Route::get('/orders/{orderNumber}', [GuestOrderController::class, 'show']);
 });
 
 Route::prefix('v1/admin')->group(function (): void {
