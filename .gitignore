@@ -10,6 +10,8 @@ Thumbs.db
 !.env.example
 !backend/.env.example
 !web/.env.example
+!backend-laravel/.env.example
+!backend-laravel/.env.production.example
 
 # Python / backend
 backend/.env

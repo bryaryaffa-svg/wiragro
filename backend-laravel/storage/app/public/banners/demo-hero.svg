@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="600" viewBox="0 0 1600 600" fill="none">
+  <rect width="1600" height="600" fill="#E8F5E9"/>
+  <rect x="60" y="60" width="1480" height="480" rx="40" fill="#C8E6C9"/>
+  <circle cx="1340" cy="180" r="120" fill="#A5D6A7"/>
+  <circle cx="1210" cy="380" r="90" fill="#81C784"/>
+  <text x="120" y="210" fill="#1B5E20" font-family="Arial, sans-serif" font-size="64" font-weight="700">
+    Promo Musim Tanam
+  </text>
+  <text x="120" y="290" fill="#2E7D32" font-family="Arial, sans-serif" font-size="30">
+    Backend Laravel MVP SiGe Manager siap menampilkan banner publik tanpa gambar rusak.
+  </text>
+  <text x="120" y="360" fill="#2E7D32" font-family="Arial, sans-serif" font-size="28">
+    Gunakan file ini sebagai placeholder awal sampai admin mengganti banner dari panel.
+  </text>
+</svg>

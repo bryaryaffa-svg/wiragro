@@ -6,7 +6,9 @@
 /storage/*.key
 /storage/app/public/*
 !/storage/app/public/.gitignore
+!/storage/app/public/banners
 !/storage/app/public/banners/
+!/storage/app/public/banners/.gitignore
 !/storage/app/public/banners/demo-hero.svg
 /storage/framework/cache/data/*
 !/storage/framework/cache/data/.gitignore
