@@ -35,6 +35,8 @@ backend-laravel/.env
 backend-laravel/vendor/
 backend-laravel/bootstrap/cache/*.php
 backend-laravel/storage/*.key
+backend-laravel/database/*.sqlite
+backend-laravel/database/*.sqlite3
 
 # Node / web
 web/.env
