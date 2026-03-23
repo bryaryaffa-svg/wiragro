@@ -522,6 +522,13 @@ textarea {
   align-items: end;
 }
 
+.price-strike {
+  display: block;
+  margin-top: 0.25rem;
+  color: var(--text-soft);
+  text-decoration: line-through;
+}
+
 .product-card__actions,
 .product-detail__actions {
   display: flex;

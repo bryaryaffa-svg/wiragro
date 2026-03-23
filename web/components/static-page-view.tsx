@@ -4,8 +4,9 @@ import { notFound } from "next/navigation";
 import { getStaticPage } from "@/lib/api";
 
 export async function StaticPageView({ slug }: { slug: string }) {
-  const page = await getStaticPage(slug);
-  if ("detail" in (page as unknown as { detail?: string })) {
+  const page = await getStaticPage(slug).catch(() => null);
+
+  if (!page) {
     notFound();
   }
 

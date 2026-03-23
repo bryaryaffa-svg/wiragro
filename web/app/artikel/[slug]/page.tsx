@@ -26,9 +26,9 @@ export async function generateMetadata({
 
 export default async function ArticleDetailPage({ params }: { params: Params }) {
   const { slug } = await params;
-  const article = await getArticle(slug);
+  const article = await getArticle(slug).catch(() => null);
 
-  if ("detail" in (article as unknown as { detail?: string })) {
+  if (!article) {
     notFound();
   }
 

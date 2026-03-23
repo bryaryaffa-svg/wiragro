@@ -8,6 +8,7 @@ import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { WishlistProvider } from "@/components/wishlist-provider";
 import "@/app/globals.css";
+import { siteUrl } from "@/lib/config";
 
 const bodyFont = Manrope({
   subsets: ["latin"],
@@ -23,7 +24,7 @@ export const metadata: Metadata = {
   title: "Kios Sidomakmur",
   description:
     "Marketplace produk pertanian Sidomakmur yang terhubung dengan SiGe Manajer.",
-  metadataBase: new URL("https://sidomakmur.com"),
+  metadataBase: new URL(siteUrl),
 };
 
 export const viewport: Viewport = {
