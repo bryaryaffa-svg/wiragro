@@ -20,7 +20,8 @@ export default async function ArticlesPage({
         <span className="eyebrow-label">Artikel / Blog</span>
         <h1>Konten edukasi pertanian</h1>
         <p>
-          Halaman artikel ini disiapkan untuk SEO dan penguatan konten produk pertanian.
+          Artikel disusun untuk SEO dan edukasi customer, dengan layout yang lebih rapi dan
+          konsisten dengan storefront produk.
         </p>
       </div>
 
@@ -31,11 +32,22 @@ export default async function ArticlesPage({
         </button>
       </form>
 
-      <div className="article-grid">
-        {articles.items.map((article) => (
-          <ArticleCard article={article} key={article.slug} />
-        ))}
-      </div>
+      {articles.items.length ? (
+        <div className="article-grid">
+          {articles.items.map((article) => (
+            <ArticleCard article={article} key={article.slug} />
+          ))}
+        </div>
+      ) : (
+        <article className="panel-card">
+          <span className="eyebrow-label">Konten belum tersedia</span>
+          <h2>Artikel dari SiGe Manager belum dipublikasikan.</h2>
+          <p>
+            Katalog produk publik sudah dipindahkan ke backend Laravel. Modul artikel akan
+            diaktifkan setelah endpoint konten tersedia di backend yang sama.
+          </p>
+        </article>
+      )}
     </section>
   );
 }

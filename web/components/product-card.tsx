@@ -43,6 +43,11 @@ export function ProductCard({ product }: { product: ProductSummary }) {
         <div className="product-card__footer">
           <div>
             <strong>{formatCurrency(product.price.amount)}</strong>
+            {product.price.compare_at_amount ? (
+              <small className="price-strike">
+                {formatCurrency(product.price.compare_at_amount)}
+              </small>
+            ) : null}
             {product.price.min_qty && product.price.min_qty > 1 ? (
               <small>Mulai {product.price.min_qty} {product.unit}</small>
             ) : null}

@@ -1,4 +1,9 @@
-import { apiBaseUrl, publicApiBaseUrl, siteUrl, storeCode } from "@/lib/config";
+import {
+  customerApiBaseUrl,
+  siteUrl,
+  storefrontApiBaseUrl,
+  storeCode,
+} from "@/lib/config";
 
 export interface StorefrontSeo {
   title?: string | null;
@@ -24,8 +29,15 @@ export interface ProductSummary {
   price: {
     type?: string | null;
     amount?: string | null;
+    compare_at_amount?: string | null;
     min_qty?: number | null;
     member_level?: string | null;
+    is_promo?: boolean;
+  };
+  category?: {
+    id: string;
+    name: string;
+    slug: string;
   };
   images: Array<{
     id: string;
@@ -46,10 +58,14 @@ export interface HomePayload {
   store: {
     code: string;
     name: string;
+    address?: string | null;
+    whatsapp_number?: string | null;
+    operational_hours?: string | null;
   };
   banners: Array<{
     title: string;
     subtitle?: string | null;
+    image_url?: string | null;
     target_url?: string | null;
   }>;
   featured_products: ProductSummary[];
@@ -153,7 +169,12 @@ export interface CustomerSession {
     full_name: string;
     phone?: string | null;
     email?: string | null;
+    member_tier?: string | null;
   };
+  mode?: string;
+  role?: string;
+  pricing_mode?: string;
+  auth_provider?: string;
 }
 
 export interface WishlistPayload {
@@ -201,6 +222,8 @@ export interface CheckoutResponse {
     payment_status: string;
     grand_total: string;
     auto_cancel_at: string;
+    shipping_method?: string;
+    payment_method?: string;
   };
   payment_instruction: {
     method: string;
@@ -216,6 +239,91 @@ export interface DuitkuCreateResponse {
   request_payload: Record<string, unknown>;
   mode: string;
   merchant_code: string;
+}
+
+interface LaravelEnvelope<T> {
+  success: boolean;
+  message?: string;
+  data: T;
+  errors?: Record<string, string[]>;
+}
+
+interface LaravelPaginated<T> {
+  current_page: number;
+  data: T[];
+  per_page: number;
+  total: number;
+}
+
+interface LaravelStoreDto {
+  id: number | string;
+  store_name: string;
+  store_code: string;
+  store_address?: string | null;
+  whatsapp_number?: string | null;
+  operational_hours?: string | null;
+  is_active?: boolean;
+}
+
+interface LaravelCategoryDto {
+  id: number | string;
+  name: string;
+  slug: string;
+  description?: string | null;
+  is_active?: boolean;
+}
+
+interface LaravelProductImageDto {
+  id: number | string;
+  image_path?: string | null;
+  image_url?: string | null;
+  alt_text?: string | null;
+  sort_order?: number | null;
+  is_primary?: boolean;
+}
+
+interface LaravelProductDto {
+  id: number | string;
+  category_id?: number | string | null;
+  category?: LaravelCategoryDto | null;
+  sku: string;
+  name: string;
+  slug: string;
+  description?: string | null;
+  unit: string;
+  price: string | number;
+  promo_price?: string | number | null;
+  reseller_price?: string | number | null;
+  stock_qty?: number | null;
+  is_active?: boolean;
+  current_price?: string | number | null;
+  primary_image_url?: string | null;
+  images?: LaravelProductImageDto[];
+  created_at?: string | null;
+  updated_at?: string | null;
+}
+
+interface LaravelBannerDto {
+  id: number | string;
+  title: string;
+  subtitle?: string | null;
+  image_path?: string | null;
+  image_url?: string | null;
+  link_url?: string | null;
+  sort_order?: number | null;
+  starts_at?: string | null;
+  ends_at?: string | null;
+  is_active?: boolean;
+}
+
+interface LaravelWishlistPayload {
+  items: Array<{
+    product_id: string | number;
+    product_name: string;
+    product_slug: string;
+    product: LaravelProductDto | ProductSummary;
+    created_at: string;
+  }>;
 }
 
 function buildUrl(
@@ -234,28 +342,47 @@ function buildUrl(
   return url.toString();
 }
 
-async function parseResponse<T>(response: Response): Promise<T> {
+async function parseStorefrontResponse<T>(response: Response): Promise<T> {
+  const payload = (await response.json().catch(() => null)) as LaravelEnvelope<T> | null;
+
   if (!response.ok) {
+    throw new Error(payload?.message || "Request API publik gagal");
+  }
+
+  if (!payload || typeof payload !== "object" || !("data" in payload)) {
+    throw new Error("Response API publik tidak valid");
+  }
+
+  return payload.data;
+}
+
+async function parseCustomerResponse<T>(response: Response): Promise<T> {
+  if (!response.ok) {
+    const payload = await response.json().catch(() => null);
+    if (payload && typeof payload === "object" && "message" in payload) {
+      throw new Error(String(payload.message));
+    }
+
     const message = await response.text();
-    throw new Error(message || "Request API gagal");
+    throw new Error(message || "Request API customer gagal");
   }
 
   return response.json() as Promise<T>;
 }
 
-export async function fetchServerJson<T>(
+async function fetchStorefrontServerJson<T>(
   path: string,
   query?: Record<string, string | number | undefined | null>,
   revalidate = 120,
 ): Promise<T> {
-  const response = await fetch(buildUrl(apiBaseUrl, path, query), {
+  const response = await fetch(buildUrl(storefrontApiBaseUrl, path, query), {
     next: { revalidate },
   });
 
-  return parseResponse<T>(response);
+  return parseStorefrontResponse<T>(response);
 }
 
-export async function fetchClientJson<T>(
+async function fetchCustomerClientJson<T>(
   path: string,
   init?: RequestInit,
   query?: Record<string, string | number | undefined | null>,
@@ -265,78 +392,465 @@ export async function fetchClientJson<T>(
     headers.set("Content-Type", "application/json");
   }
 
-  const response = await fetch(buildUrl(publicApiBaseUrl, path, query), {
+  const response = await fetch(buildUrl(customerApiBaseUrl, path, query), {
     ...init,
     headers,
   });
 
-  return parseResponse<T>(response);
+  return parseCustomerResponse<T>(response);
 }
 
-export async function getHomeData() {
-  return fetchServerJson<HomePayload>("/storefront/home", { store_code: storeCode }, 120);
+function toStorageUrl(path?: string | null): string | null {
+  if (!path) {
+    return null;
+  }
+
+  try {
+    const parsed = new URL(path);
+    return parsed.toString();
+  } catch {
+    const origin = new URL(storefrontApiBaseUrl).origin;
+    return `${origin}/storage/${String(path).replace(/^\/+/, "")}`;
+  }
+}
+
+function stripHtml(input?: string | null): string {
+  return (input ?? "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+}
+
+function truncate(input: string, length = 120): string {
+  if (input.length <= length) {
+    return input;
+  }
+
+  return `${input.slice(0, length - 1).trimEnd()}…`;
+}
+
+function normalizeNumber(value: string | number | null | undefined): string | null {
+  if (value === null || value === undefined || value === "") {
+    return null;
+  }
+
+  const amount =
+    typeof value === "string" ? Number.parseFloat(value) : Number(value);
+
+  if (Number.isNaN(amount)) {
+    return null;
+  }
+
+  return amount.toFixed(2);
+}
+
+function mapCategory(dto: LaravelCategoryDto): CategoryItem {
+  return {
+    id: String(dto.id),
+    name: dto.name,
+    slug: dto.slug,
+    parent_id: null,
+  };
+}
+
+function mapProductSummary(dto: LaravelProductDto): ProductSummary {
+  const description = stripHtml(dto.description);
+  const currentPrice =
+    normalizeNumber(dto.current_price) ??
+    normalizeNumber(dto.promo_price) ??
+    normalizeNumber(dto.price);
+  const basePrice = normalizeNumber(dto.price);
+  const isPromo = Boolean(
+    dto.promo_price !== null &&
+      dto.promo_price !== undefined &&
+      normalizeNumber(dto.promo_price) !== basePrice,
+  );
+  const images = (dto.images ?? []).map((image) => ({
+    id: String(image.id),
+    url: image.image_url ?? toStorageUrl(image.image_path) ?? "",
+    alt_text: image.alt_text ?? dto.name,
+    is_primary: Boolean(image.is_primary),
+  }));
+  const primaryImageUrl =
+    dto.primary_image_url ?? images.find((image) => image.is_primary)?.url ?? null;
+
+  if (primaryImageUrl && !images.some((image) => image.url === primaryImageUrl)) {
+    images.unshift({
+      id: `primary-${dto.id}`,
+      url: primaryImageUrl,
+      alt_text: dto.name,
+      is_primary: true,
+    });
+  }
+
+  const isNewArrival =
+    dto.created_at !== null &&
+    dto.created_at !== undefined &&
+    !Number.isNaN(new Date(dto.created_at).getTime()) &&
+    Date.now() - new Date(dto.created_at).getTime() < 1000 * 60 * 60 * 24 * 30;
+
+  return {
+    id: String(dto.id),
+    sku: dto.sku,
+    slug: dto.slug,
+    name: dto.name,
+    summary: description ? truncate(description) : null,
+    description: description || null,
+    product_type: dto.category?.name ?? "Produk",
+    unit: dto.unit,
+    weight_grams: "0",
+    badges: {
+      featured: isPromo,
+      new_arrival: isNewArrival,
+      best_seller: false,
+    },
+    price: {
+      type: isPromo ? "PROMO" : "NORMAL",
+      amount: currentPrice ?? basePrice ?? "0.00",
+      compare_at_amount: isPromo ? basePrice : null,
+      min_qty: null,
+      member_level: null,
+      is_promo: isPromo,
+    },
+    category: dto.category
+      ? {
+          id: String(dto.category.id),
+          name: dto.category.name,
+          slug: dto.category.slug,
+        }
+      : undefined,
+    images,
+    videos: [],
+    seo: {
+      title: dto.name,
+      description: description ? truncate(description, 155) : `${dto.name} - ${storeCode}`,
+    },
+  };
+}
+
+function mapBanner(dto: LaravelBannerDto) {
+  return {
+    title: dto.title,
+    subtitle: dto.subtitle ?? null,
+    image_url: dto.image_url ?? toStorageUrl(dto.image_path),
+    target_url: dto.link_url ?? null,
+  };
+}
+
+function sortProductItems(items: ProductSummary[], sort?: string | null) {
+  const sorted = [...items];
+
+  if (sort === "name_asc") {
+    sorted.sort((a, b) => a.name.localeCompare(b.name, "id"));
+  } else if (sort === "name_desc") {
+    sorted.sort((a, b) => b.name.localeCompare(a.name, "id"));
+  }
+
+  return sorted;
+}
+
+async function fetchStoreProfile() {
+  const dto = await fetchStorefrontServerJson<LaravelStoreDto>("/v1/public/store", undefined, 300);
+
+  return {
+    code: dto.store_code,
+    name: dto.store_name,
+    address: dto.store_address ?? null,
+    whatsapp_number: dto.whatsapp_number ?? null,
+    operational_hours: dto.operational_hours ?? null,
+  };
+}
+
+async function resolveCategoryId(categorySlug?: string | null) {
+  if (!categorySlug) {
+    return undefined;
+  }
+
+  const categories = await getCategories();
+  return categories.find((category) => category.slug === categorySlug)?.id;
+}
+
+function buildStaticPageContent(
+  slug: string,
+  store: Awaited<ReturnType<typeof fetchStoreProfile>>,
+): ContentPagePayload {
+  const defaultDescription =
+    "Halaman informasi storefront ini ditampilkan dengan struktur baru yang siap dipindahkan sepenuhnya ke SiGe Manager.";
+
+  const pages: Record<string, ContentPagePayload> = {
+    "tentang-kami": {
+      slug,
+      title: `Tentang ${store.name}`,
+      excerpt: `${store.name} adalah storefront resmi yang menampilkan katalog dan informasi toko dari backend terpusat SiGe Manager.`,
+      body_html: `
+        <p>${store.name} hadir untuk memudahkan customer melihat produk aktif, harga terbaru, dan informasi toko dari satu sumber data yang sama.</p>
+        <p>Semua katalog publik di website ini sekarang disiapkan untuk membaca API terpusat, sehingga perubahan produk, harga, stok, dan banner tidak perlu lagi dikelola terpisah.</p>
+        <p><strong>Alamat toko:</strong> ${store.address ?? "-"}</p>
+        <p><strong>Jam operasional:</strong> ${store.operational_hours ?? "-"}</p>
+      `,
+      seo: {
+        title: `Tentang Kami | ${store.name}`,
+        description: defaultDescription,
+      },
+    },
+    kontak: {
+      slug,
+      title: "Kontak Toko",
+      excerpt: `Hubungi ${store.name} melalui alamat dan WhatsApp resmi yang dikelola dari sistem pusat.`,
+      body_html: `
+        <p><strong>Nama toko:</strong> ${store.name}</p>
+        <p><strong>Alamat:</strong> ${store.address ?? "-"}</p>
+        <p><strong>WhatsApp:</strong> ${store.whatsapp_number ?? "-"}</p>
+        <p><strong>Jam operasional:</strong> ${store.operational_hours ?? "-"}</p>
+      `,
+      seo: {
+        title: `Kontak | ${store.name}`,
+        description: defaultDescription,
+      },
+    },
+    faq: {
+      slug,
+      title: "FAQ",
+      excerpt: "Jawaban singkat untuk pertanyaan yang paling sering muncul saat menggunakan storefront.",
+      body_html: `
+        <h2>Apakah harga di website selalu terbaru?</h2>
+        <p>Website membaca data dari backend terpusat, sehingga harga dan status produk mengikuti data yang dikelola admin.</p>
+        <h2>Bagaimana cara menghubungi toko?</h2>
+        <p>Anda bisa menghubungi toko melalui WhatsApp resmi: ${store.whatsapp_number ?? "-"}</p>
+        <h2>Apakah semua produk selalu tersedia?</h2>
+        <p>Ketersediaan mengikuti stok yang dicatat di sistem admin. Produk yang nonaktif tidak akan ditampilkan di katalog publik.</p>
+      `,
+      seo: {
+        title: `FAQ | ${store.name}`,
+        description: defaultDescription,
+      },
+    },
+    "kebijakan-privasi": {
+      slug,
+      title: "Kebijakan Privasi",
+      excerpt: "Ringkasan kebijakan privasi storefront Kios Sidomakmur.",
+      body_html: `
+        <p>Data yang ditampilkan di website ini digunakan untuk kebutuhan informasi produk, kontak toko, dan proses transaksi sesuai kebutuhan operasional toko.</p>
+        <p>Data customer hanya dipakai untuk menjalankan layanan yang diminta, seperti proses checkout, pelacakan pesanan, dan komunikasi terkait transaksi.</p>
+      `,
+      seo: {
+        title: `Kebijakan Privasi | ${store.name}`,
+        description: defaultDescription,
+      },
+    },
+    "syarat-dan-ketentuan": {
+      slug,
+      title: "Syarat dan Ketentuan",
+      excerpt: "Ketentuan dasar penggunaan storefront dan pemesanan produk.",
+      body_html: `
+        <p>Seluruh informasi produk, harga, dan ketersediaan dapat berubah mengikuti data yang dikelola toko melalui sistem admin.</p>
+        <p>Pemesanan dianggap sah setelah data order diterima sistem dan diverifikasi sesuai metode pembayaran yang dipilih.</p>
+      `,
+      seo: {
+        title: `Syarat dan Ketentuan | ${store.name}`,
+        description: defaultDescription,
+      },
+    },
+  };
+
+  const page = pages[slug];
+  if (!page) {
+    throw new Error("Halaman tidak ditemukan");
+  }
+
+  return page;
+}
+
+export async function getHomeData(): Promise<HomePayload> {
+  const [store, banners, categories, products] = await Promise.all([
+    fetchStoreProfile(),
+    fetchStorefrontServerJson<LaravelBannerDto[]>("/v1/public/banners", undefined, 120),
+    getCategories(),
+    getProducts({ page_size: 12, sort: "latest" }),
+  ]);
+
+  const promoProducts = products.items.filter((product) => product.price.is_promo);
+
+  return {
+    store,
+    banners: banners.map(mapBanner),
+    featured_products: products.items.slice(0, 4),
+    new_arrivals: products.items.slice(0, 4),
+    best_sellers: (promoProducts.length ? promoProducts : products.items).slice(0, 4),
+    category_highlights: categories.slice(0, 8).map((item) => ({
+      name: item.name,
+      slug: item.slug,
+    })),
+    seo: {
+      title: `${store.name} | Katalog Produk`,
+      description: `Lihat katalog aktif ${store.name}, termasuk produk pertanian, kebutuhan toko, dan promo terbaru.`,
+    },
+  };
 }
 
 export async function getCategories() {
-  const payload = await fetchServerJson<{ items: CategoryItem[] }>(
-    "/storefront/categories",
-    { store_code: storeCode },
+  const payload = await fetchStorefrontServerJson<LaravelCategoryDto[]>(
+    "/v1/public/categories",
+    undefined,
     300,
   );
 
-  return payload.items;
+  return payload.map(mapCategory);
 }
 
 export async function getProducts(query?: Record<string, string | number | undefined | null>) {
-  return fetchServerJson<ProductListPayload>(
-    "/storefront/products",
-    { store_code: storeCode, ...query },
+  const categorySlug =
+    typeof query?.category_slug === "string" ? query.category_slug : undefined;
+  const categoryId =
+    typeof query?.category_id === "string" || typeof query?.category_id === "number"
+      ? query.category_id
+      : await resolveCategoryId(categorySlug);
+  const sort = typeof query?.sort === "string" ? query.sort : undefined;
+  const search = typeof query?.q === "string" ? query.q : undefined;
+  const page =
+    typeof query?.page === "number"
+      ? query.page
+      : typeof query?.page === "string"
+        ? Number.parseInt(query.page, 10)
+        : 1;
+  const pageSize =
+    typeof query?.page_size === "number"
+      ? query.page_size
+      : typeof query?.page_size === "string"
+        ? Number.parseInt(query.page_size, 10)
+        : 20;
+
+  const payload = await fetchStorefrontServerJson<LaravelPaginated<LaravelProductDto>>(
+    "/v1/public/products",
+    {
+      search,
+      category_id: categoryId,
+      page,
+      per_page: pageSize,
+    },
     120,
   );
+
+  const items = sortProductItems(payload.data.map(mapProductSummary), sort);
+
+  return {
+    items,
+    pagination: {
+      page: payload.current_page,
+      page_size: payload.per_page,
+      count: payload.total,
+    },
+    available_filters: {
+      category_slug: categorySlug ?? null,
+      sort: sort ?? "latest",
+    },
+    seo: {
+      title: categorySlug ? `Kategori ${categorySlug}` : "Katalog Produk",
+      description: search
+        ? `Hasil pencarian produk untuk kata kunci ${search}.`
+        : "Daftar produk aktif dari SiGe Manager.",
+    },
+  } satisfies ProductListPayload;
 }
 
-export async function getProduct(slug: string) {
-  return fetchServerJson<ProductDetailPayload>(
-    `/storefront/products/${slug}`,
-    { store_code: storeCode },
+export async function getProduct(slug: string): Promise<ProductDetailPayload> {
+  const dto = await fetchStorefrontServerJson<LaravelProductDto>(
+    `/v1/public/products/${slug}`,
+    undefined,
     120,
   );
+
+  const product = mapProductSummary(dto);
+  let relatedProducts: ProductSummary[] = [];
+
+  if (dto.category_id) {
+    try {
+      const related = await getProducts({
+        category_id: dto.category_id,
+        page_size: 4,
+      });
+
+      relatedProducts = related.items.filter((item) => item.id !== String(dto.id)).slice(0, 4);
+    } catch {
+      relatedProducts = [];
+    }
+  }
+
+  return {
+    ...product,
+    promotions: product.price.is_promo
+      ? [
+          {
+            code: "PROMO-HARGA",
+            name: "Harga promo aktif",
+            rule_payload: {
+              normal_price: product.price.compare_at_amount,
+              promo_price: product.price.amount,
+            },
+          },
+        ]
+      : [],
+    related_products: relatedProducts,
+    stock_badge:
+      (dto.stock_qty ?? 0) > 0
+        ? {
+            state: (dto.stock_qty ?? 0) <= 10 ? "low" : "available",
+            message:
+              (dto.stock_qty ?? 0) <= 10
+                ? `Stok menipis (${dto.stock_qty} tersisa)`
+                : `Tersedia ${dto.stock_qty} item`,
+          }
+        : {
+            state: "empty",
+            message: "Stok habis",
+          },
+  };
 }
 
 export async function getStaticPage(slug: string) {
-  return fetchServerJson<ContentPagePayload>(
-    `/storefront/pages/${slug}`,
-    { store_code: storeCode },
-    300,
-  );
+  const store = await fetchStoreProfile();
+  return buildStaticPageContent(slug, store);
 }
 
-export async function getArticles(query?: Record<string, string | number | undefined | null>) {
-  return fetchServerJson<ArticleListPayload>(
-    "/storefront/articles",
-    { store_code: storeCode, ...query },
-    120,
-  );
+export async function getArticles(
+  query?: Record<string, string | number | undefined | null>,
+): Promise<ArticleListPayload> {
+  const page =
+    typeof query?.page === "number"
+      ? query.page
+      : typeof query?.page === "string"
+        ? Number.parseInt(query.page, 10)
+        : 1;
+  const pageSize =
+    typeof query?.page_size === "number"
+      ? query.page_size
+      : typeof query?.page_size === "string"
+        ? Number.parseInt(query.page_size, 10)
+        : 9;
+
+  return {
+    items: [],
+    pagination: {
+      page,
+      page_size: pageSize,
+      count: 0,
+    },
+  };
 }
 
-export async function getArticle(slug: string) {
-  return fetchServerJson<ContentPagePayload>(
-    `/storefront/articles/${slug}`,
-    { store_code: storeCode },
-    120,
-  );
+export async function getArticle(_slug: string): Promise<ContentPagePayload> {
+  throw new Error("Artikel belum dipublikasikan dari backend Laravel MVP.");
 }
 
 export async function getSeo(path: string) {
-  return fetchServerJson<StorefrontSeo & { canonical_url?: string }>(
-    "/storefront/seo",
-    { store_code: storeCode, path },
-    300,
-  );
+  const store = await fetchStoreProfile();
+
+  return {
+    title: `${store.name} | ${path === "/" ? "Beranda" : path.replace(/\//g, " ").trim()}`,
+    description: `Storefront ${store.name} menampilkan produk aktif, banner, dan informasi toko dari backend SiGe Manager.`,
+    canonical_url: `${siteUrl}${path}`,
+  };
 }
 
 export async function createGuestCart() {
-  return fetchClientJson<{ cart_id: string; guest_token: string }>(
+  return fetchCustomerClientJson<{ cart_id: string; guest_token: string }>(
     "/customer/carts/guest",
     {
       method: "POST",
@@ -346,7 +860,7 @@ export async function createGuestCart() {
 }
 
 export async function getGuestCart(cartId: string, guestToken: string) {
-  return fetchClientJson<CartPayload>(
+  return fetchCustomerClientJson<CartPayload>(
     "/customer/carts/current",
     undefined,
     { cart_id: cartId, guest_token: guestToken },
@@ -359,7 +873,7 @@ export async function addItemToCart(
   productId: string,
   qty: number,
 ) {
-  return fetchClientJson<CartPayload>("/customer/carts/items", {
+  return fetchCustomerClientJson<CartPayload>("/customer/carts/items", {
     method: "POST",
     body: JSON.stringify({
       cart_id: cartId,
@@ -376,7 +890,7 @@ export async function updateCartItem(
   guestToken: string,
   qty: number,
 ) {
-  return fetchClientJson<CartPayload>(`/customer/carts/items/${itemId}`, {
+  return fetchCustomerClientJson<CartPayload>(`/customer/carts/items/${itemId}`, {
     method: "PATCH",
     body: JSON.stringify({
       cart_id: cartId,
@@ -401,7 +915,7 @@ export async function submitGuestCheckout(payload: {
   paymentMethod: string;
   notes?: string;
 }) {
-  return fetchClientJson<CheckoutResponse>("/customer/checkout/guest", {
+  return fetchCustomerClientJson<CheckoutResponse>("/customer/checkout/guest", {
     method: "POST",
     body: JSON.stringify({
       cart_id: payload.cartId,
@@ -431,22 +945,46 @@ export async function submitGuestCheckout(payload: {
   });
 }
 
-export async function createDuitkuPayment(orderId: string) {
-  return fetchClientJson<DuitkuCreateResponse>(
-    "/customer/payments/duitku/create",
-    {
-      method: "POST",
-      body: JSON.stringify({
-        order_id: orderId,
-        callback_url: `${publicApiBaseUrl}/payments/duitku/callback`,
-        return_url: `${siteUrl}/checkout?payment=return`,
-      }),
+export async function logoutCustomer(accessToken: string) {
+  return fetchCustomerClientJson<{ status: string }>("/customer/auth/logout", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
     },
-  );
+  });
+}
+
+export async function createDuitkuPayment(
+  orderId: string,
+  options?: {
+    accessToken?: string;
+    customerPhone?: string;
+  },
+) {
+  const path = options?.accessToken
+    ? "/customer/payments/duitku/create/me"
+    : "/customer/payments/duitku/create";
+
+  const headers = options?.accessToken
+    ? {
+        Authorization: `Bearer ${options.accessToken}`,
+      }
+    : undefined;
+
+  return fetchCustomerClientJson<DuitkuCreateResponse>(path, {
+    method: "POST",
+    headers,
+    body: JSON.stringify({
+      order_id: orderId,
+      customer_phone: options?.customerPhone ?? null,
+      callback_url: `${customerApiBaseUrl}/payments/duitku/callback`,
+      return_url: `${siteUrl}/checkout?payment=return`,
+    }),
+  });
 }
 
 export async function trackOrder(orderNumber: string, phone: string) {
-  return fetchClientJson<TrackOrderPayload>(
+  return fetchCustomerClientJson<TrackOrderPayload>(
     "/customer/orders/track",
     undefined,
     { order_number: orderNumber, phone },
@@ -454,7 +992,7 @@ export async function trackOrder(orderNumber: string, phone: string) {
 }
 
 export async function requestWhatsAppOtp(phone: string) {
-  return fetchClientJson<{
+  return fetchCustomerClientJson<{
     challenge_id: string;
     expires_in_seconds: number;
     debug_otp_code?: string;
@@ -465,7 +1003,7 @@ export async function requestWhatsAppOtp(phone: string) {
 }
 
 export async function verifyWhatsAppOtp(challengeId: string, otpCode: string) {
-  return fetchClientJson<CustomerSession>("/customer/auth/whatsapp/verify-otp", {
+  return fetchCustomerClientJson<CustomerSession>("/customer/auth/whatsapp/verify-otp", {
     method: "POST",
     body: JSON.stringify({
       store_code: storeCode,
@@ -476,7 +1014,7 @@ export async function verifyWhatsAppOtp(challengeId: string, otpCode: string) {
 }
 
 export async function loginGoogleIdToken(idToken: string) {
-  return fetchClientJson<CustomerSession>("/customer/auth/google", {
+  return fetchCustomerClientJson<CustomerSession>("/customer/auth/google", {
     method: "POST",
     body: JSON.stringify({
       store_code: storeCode,
@@ -486,7 +1024,7 @@ export async function loginGoogleIdToken(idToken: string) {
 }
 
 export async function getWishlist(accessToken: string) {
-  return fetchClientJson<WishlistPayload>(
+  const payload = await fetchCustomerClientJson<LaravelWishlistPayload | WishlistPayload>(
     "/customer/wishlist",
     {
       headers: {
@@ -494,10 +1032,23 @@ export async function getWishlist(accessToken: string) {
       },
     },
   );
+
+  return {
+    items: payload.items.map((item) => ({
+      product_id: String(item.product_id),
+      product_name: item.product_name,
+      product_slug: item.product_slug,
+      product:
+        "badges" in item.product
+          ? item.product
+          : mapProductSummary(item.product),
+      created_at: item.created_at,
+    })),
+  } satisfies WishlistPayload;
 }
 
 export async function addWishlistItem(accessToken: string, productId: string) {
-  return fetchClientJson<{ status: string; product_id: string }>(
+  return fetchCustomerClientJson<{ status: string; product_id: string }>(
     "/customer/wishlist/items",
     {
       method: "POST",
@@ -510,7 +1061,7 @@ export async function addWishlistItem(accessToken: string, productId: string) {
 }
 
 export async function removeWishlistItem(accessToken: string, productId: string) {
-  return fetchClientJson<{ status: string; product_id: string }>(
+  return fetchCustomerClientJson<{ status: string; product_id: string }>(
     `/customer/wishlist/items/${productId}`,
     {
       method: "DELETE",
@@ -521,10 +1072,27 @@ export async function removeWishlistItem(accessToken: string, productId: string)
   );
 }
 
-export async function getCacheManifest() {
-  return fetchServerJson<SyncManifestPayload>(
-    "/sync/cache-manifest",
-    { store_code: storeCode, since_version: 0 },
-    120,
-  );
+export async function getCacheManifest(): Promise<SyncManifestPayload> {
+  const [categories, products, banners, store] = await Promise.all([
+    getCategories(),
+    getProducts({ page_size: 50 }),
+    fetchStorefrontServerJson<LaravelBannerDto[]>("/v1/public/banners", undefined, 120),
+    fetchStoreProfile(),
+  ]);
+
+  return {
+    cursor: "laravel-mvp",
+    etag: `${products.pagination.count}-${categories.length}-${banners.length}`,
+    categories: categories.map((category) => ({ ...category })),
+    products: products.items.map((product) => ({ ...product })),
+    prices: products.items.map((product) => ({
+      product_id: product.id,
+      amount: product.price.amount,
+      compare_at_amount: product.price.compare_at_amount ?? null,
+      price_type: product.price.type ?? "NORMAL",
+    })),
+    banners: banners.map(mapBanner),
+    content_pages: [],
+    settings: [store],
+  };
 }

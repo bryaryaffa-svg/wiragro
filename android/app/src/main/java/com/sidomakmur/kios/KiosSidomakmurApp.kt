@@ -6,16 +6,22 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.NotificationsNone
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.ShoppingCart
+import androidx.compose.material.icons.outlined.Storefront
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -93,8 +99,13 @@ private val bottomDestinations = listOf(
         icon = Icons.Outlined.Home,
     ),
     BottomDestination(
+        route = AppRoute.Catalog,
+        label = "Produk",
+        icon = Icons.Outlined.Storefront,
+    ),
+    BottomDestination(
         route = AppRoute.Cart,
-        label = "Cart",
+        label = "Keranjang",
         icon = Icons.Outlined.ShoppingCart,
     ),
     BottomDestination(
@@ -152,6 +163,7 @@ fun KiosSidomakmurApp(
     val accountDataState = sessionViewModel.accountDataUiState.collectAsStateWithLifecycle().value
     val wishlistState = sessionViewModel.wishlistUiState.collectAsStateWithLifecycle().value
     val cartState = cartViewModel.uiState.collectAsStateWithLifecycle().value
+    val cartItemCount = cartState.cart?.items?.sumOf { it.qty } ?: 0
 
     KiosTheme {
         Surface(
@@ -162,31 +174,94 @@ fun KiosSidomakmurApp(
                 modifier = Modifier.fillMaxSize(),
                 containerColor = androidx.compose.material3.MaterialTheme.colorScheme.background,
                 topBar = {
-                    LargeTopAppBar(
-                        title = {
-                            Text(
-                                text = when {
-                                    currentRoute == AppRoute.Cart -> "Keranjang"
-                                    currentRoute == AppRoute.Wishlist -> "Wishlist"
-                                    currentRoute == AppRoute.Account -> "Akun"
-                                    currentRoute == AppRoute.Profile -> "Edit Profil"
-                                    currentRoute == AppRoute.Addresses -> "Buku Alamat"
-                                    currentRoute == AppRoute.Catalog -> "Katalog"
-                                    currentRoute == AppRoute.Articles -> "Artikel"
-                                    currentRoute == AppRoute.ArticleDetail -> "Detail Artikel"
-                                    currentRoute == AppRoute.Pages -> "Halaman Info"
-                                    currentRoute == AppRoute.PageDetail -> "Detail Halaman"
-                                    currentRoute == AppRoute.Checkout -> "Checkout"
-                                    currentRoute == AppRoute.OrderHistory -> "Pesanan"
-                                    currentRoute == AppRoute.OrderDetail -> "Detail Pesanan"
-                                    currentRoute == AppRoute.ProductDetail -> "Detail Produk"
-                                    else -> "Kios Sidomakmur"
-                                },
-                                fontWeight = FontWeight.Bold,
-                            )
-                        },
-                        colors = TopAppBarDefaults.largeTopAppBarColors(),
-                    )
+                    if (currentRoute == AppRoute.Catalog) {
+                        TopAppBar(
+                            title = {
+                                Text(
+                                    text = "Produk",
+                                    fontWeight = FontWeight.Bold,
+                                )
+                            },
+                            actions = {
+                                IconButton(
+                                    onClick = {
+                                        navController.navigate(AppRoute.Wishlist) {
+                                            launchSingleTop = true
+                                        }
+                                    },
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Outlined.FavoriteBorder,
+                                        contentDescription = "Wishlist",
+                                    )
+                                }
+                                IconButton(
+                                    onClick = {
+                                        navController.navigate(
+                                            if (sessionState.session == null) AppRoute.Account else AppRoute.OrderHistory,
+                                        ) {
+                                            launchSingleTop = true
+                                        }
+                                    },
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Outlined.NotificationsNone,
+                                        contentDescription = "Update pesanan",
+                                    )
+                                }
+                                IconButton(
+                                    onClick = {
+                                        navController.navigate(AppRoute.Cart) {
+                                            launchSingleTop = true
+                                        }
+                                    },
+                                ) {
+                                    BadgedBox(
+                                        badge = {
+                                            if (cartItemCount > 0) {
+                                                Badge {
+                                                    Text(
+                                                        text = cartItemCount.coerceAtMost(99).toString(),
+                                                    )
+                                                }
+                                            }
+                                        },
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Outlined.ShoppingCart,
+                                            contentDescription = "Keranjang",
+                                        )
+                                    }
+                                }
+                            },
+                        )
+                    } else {
+                        LargeTopAppBar(
+                            title = {
+                                Text(
+                                    text = when {
+                                        currentRoute == AppRoute.Cart -> "Keranjang"
+                                        currentRoute == AppRoute.Wishlist -> "Wishlist"
+                                        currentRoute == AppRoute.Account -> "Akun"
+                                        currentRoute == AppRoute.Profile -> "Edit Profil"
+                                        currentRoute == AppRoute.Addresses -> "Buku Alamat"
+                                        currentRoute == AppRoute.Catalog -> "Produk"
+                                        currentRoute == AppRoute.Articles -> "Artikel"
+                                        currentRoute == AppRoute.ArticleDetail -> "Detail Artikel"
+                                        currentRoute == AppRoute.Pages -> "Halaman Info"
+                                        currentRoute == AppRoute.PageDetail -> "Detail Halaman"
+                                        currentRoute == AppRoute.Checkout -> "Checkout"
+                                        currentRoute == AppRoute.OrderHistory -> "Pesanan"
+                                        currentRoute == AppRoute.OrderDetail -> "Detail Pesanan"
+                                        currentRoute == AppRoute.ProductDetail -> "Detail Produk"
+                                        else -> "Kios Sidomakmur"
+                                    },
+                                    fontWeight = FontWeight.Bold,
+                                )
+                            },
+                            colors = TopAppBarDefaults.largeTopAppBarColors(),
+                        )
+                    }
                 },
                 bottomBar = {
                     if (
@@ -306,6 +381,8 @@ fun KiosSidomakmurApp(
                             wishlistProductIds = wishlistState.items.mapTo(linkedSetOf()) { it.productId },
                             pendingWishlistProductIds = wishlistState.pendingProductIds,
                             pendingCartProductIds = cartState.pendingProductIds,
+                            pendingCartItemIds = cartState.pendingItemIds,
+                            cart = cartState.cart,
                             onToggleWishlist = { product ->
                                 if (sessionState.session == null) {
                                     navController.navigate(AppRoute.Account)
@@ -320,8 +397,34 @@ fun KiosSidomakmurApp(
                                     cartViewModel.addProduct(product.id)
                                 }
                             },
+                            onIncreaseQty = { product ->
+                                if (sessionState.session == null) {
+                                    navController.navigate(AppRoute.Account)
+                                } else {
+                                    val cartItem = cartState.cart?.items?.firstOrNull { it.productId == product.id }
+                                    if (cartItem == null) {
+                                        cartViewModel.addProduct(product.id)
+                                    } else {
+                                        cartViewModel.updateItemQty(cartItem.id, cartItem.qty + 1)
+                                    }
+                                }
+                            },
+                            onDecreaseQty = { product ->
+                                val cartItem = cartState.cart?.items?.firstOrNull { it.productId == product.id }
+                                if (cartItem != null) {
+                                    cartViewModel.updateItemQty(
+                                        itemId = cartItem.id,
+                                        qty = (cartItem.qty - 1).coerceAtLeast(0),
+                                    )
+                                }
+                            },
                             onOpenProduct = { slug ->
                                 navController.navigate(AppRoute.productDetail(slug))
+                            },
+                            onOpenCart = {
+                                navController.navigate(AppRoute.Cart) {
+                                    launchSingleTop = true
+                                }
                             },
                         )
                     }

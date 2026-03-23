@@ -5,16 +5,22 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.sidomakmur.kios.data.repository.CatalogFeed
 import com.sidomakmur.kios.data.repository.CatalogQuery
+import com.sidomakmur.kios.data.repository.HomeFeed
 import com.sidomakmur.kios.data.repository.StorefrontRepository
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 data class CatalogUiState(
+    val homeFeed: HomeFeed? = null,
     val feed: CatalogFeed? = null,
     val isLoading: Boolean = false,
     val message: String? = null,
+    val searchHistory: List<String> = emptyList(),
 )
 
 class CatalogViewModel(
@@ -41,6 +47,7 @@ class CatalogViewModel(
         sort: String,
         memberLevel: String?,
     ) {
+        rememberSearchTerm(search)
         loadCatalog(
             CatalogQuery(
                 search = search,
@@ -55,30 +62,62 @@ class CatalogViewModel(
         _uiState.value = _uiState.value.copy(message = null)
     }
 
+    fun clearSearchHistory() {
+        _uiState.update { it.copy(searchHistory = emptyList()) }
+    }
+
     private fun loadCatalog(
         query: CatalogQuery,
     ) {
         activeQuery = query
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(
+            val previous = _uiState.value
+            _uiState.value = previous.copy(
                 isLoading = true,
                 message = null,
             )
             _uiState.value = runCatching {
-                repository.getCatalog(query)
+                coroutineScope {
+                    val homeDeferred = async { repository.getHomeFeed() }
+                    val catalogDeferred = async { repository.getCatalog(query) }
+                    homeDeferred.await() to catalogDeferred.await()
+                }
             }.fold(
-                onSuccess = { feed ->
+                onSuccess = { (homeFeed, feed) ->
                     CatalogUiState(
+                        homeFeed = homeFeed,
                         feed = feed,
                         isLoading = false,
+                        searchHistory = previous.searchHistory,
                     )
                 },
                 onFailure = { error ->
-                    _uiState.value.copy(
+                    previous.copy(
                         isLoading = false,
                         message = error.message ?: "Katalog belum dapat dimuat.",
                     )
                 },
+            )
+        }
+    }
+
+    private fun rememberSearchTerm(
+        term: String,
+    ) {
+        val normalized = term.trim()
+        if (normalized.isBlank()) {
+            return
+        }
+        _uiState.update { state ->
+            state.copy(
+                searchHistory = buildList {
+                    add(normalized)
+                    state.searchHistory.forEach { existing ->
+                        if (!existing.equals(normalized, ignoreCase = true)) {
+                            add(existing)
+                        }
+                    }
+                }.take(6),
             )
         }
     }

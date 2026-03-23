@@ -1,27 +1,23 @@
 import Link from "next/link";
 
-import { ArticleCard } from "@/components/article-card";
 import { ProductCard } from "@/components/product-card";
-import { getArticles, getCacheManifest, getHomeData } from "@/lib/api";
+import { getHomeData } from "@/lib/api";
 
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
-  const [home, articles, cacheManifest] = await Promise.all([
-    getHomeData(),
-    getArticles({ page_size: 3 }),
-    getCacheManifest(),
-  ]);
+  const home = await getHomeData();
 
   return (
     <div className="page-stack">
       <section className="hero-panel">
         <div className="hero-panel__copy">
           <span className="eyebrow-label">Storefront terhubung pusat</span>
-          <h1>Belanja sarana pertanian dengan tampilan ringan dan alur order yang rapi.</h1>
+          <h1>Belanja kebutuhan pertanian dengan storefront yang modern dan terasa profesional.</h1>
           <p>
-            Kios Sidomakmur membawa katalog pusat SiGe Manajer ke web yang ramah desktop
-            dan mobile, dengan nuansa hijau muda yang modern dan tetap mudah dikembangkan.
+            Wiragro / Kios Sidomakmur membawa katalog pusat SiGe Manajer ke web yang
+            ramah desktop dan mobile, dengan alur order, promo, dan konten publik yang
+            tampil lebih konsisten.
           </p>
           <div className="hero-panel__actions">
             <Link className="btn btn-primary" href="/produk">
@@ -41,18 +37,59 @@ export default async function HomePage() {
         </div>
 
         <div className="hero-panel__stats">
+          <div className="stats-card stats-card--highlight">
+            <span>Fokus storefront</span>
+            <strong>Belanja cepat, konten rapi, dan checkout yang mudah dipahami.</strong>
+          </div>
           <div className="stats-card">
-            <span>Delta cache awal</span>
-            <strong>{cacheManifest.products.length} produk siap dimuat</strong>
+            <span>Produk aktif</span>
+            <strong>{home.featured_products.length + home.new_arrivals.length} item tampil</strong>
           </div>
           <div className="stats-card">
             <span>Banner aktif</span>
             <strong>{home.banners.length} slot homepage</strong>
           </div>
           <div className="stats-card">
-            <span>Konten publik</span>
-            <strong>{cacheManifest.content_pages.length} halaman & artikel</strong>
+            <span>Info toko</span>
+            <strong>{home.store.operational_hours || "Jam operasional tersedia"}</strong>
           </div>
+        </div>
+      </section>
+
+      {home.banners.length ? (
+        <section className="section-block section-block--contrast">
+          <div className="section-heading">
+            <div>
+              <span className="eyebrow-label">Banner toko</span>
+              <h2>Promo dan pengumuman yang dikelola dari admin.</h2>
+            </div>
+          </div>
+          <div className="feature-grid">
+            {home.banners.map((banner) => (
+              <article className="feature-card" key={`${banner.title}-${banner.target_url ?? "no-link"}`}>
+                <strong>{banner.title}</strong>
+                <p>{banner.subtitle || "Banner publik aktif dari backend Laravel SiGe Manager."}</p>
+                {banner.target_url ? <Link href={banner.target_url}>Buka tautan</Link> : null}
+              </article>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
+      <section className="section-block">
+        <div className="section-heading">
+          <div>
+            <span className="eyebrow-label">Kategori utama</span>
+            <h2>Pilih alur belanja yang terasa jelas sejak halaman pertama.</h2>
+          </div>
+        </div>
+        <div className="feature-grid feature-grid--categories">
+          {home.category_highlights.map((category) => (
+            <Link className="feature-card feature-card--link" href={`/produk?kategori=${category.slug}`} key={category.slug}>
+              <strong>{category.name}</strong>
+              <p>Buka katalog {category.name.toLowerCase()} dengan filter yang lebih fokus.</p>
+            </Link>
+          ))}
         </div>
       </section>
 
@@ -112,17 +149,17 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="section-block">
+      <section className="section-block section-block--contrast">
         <div className="section-heading">
           <div>
-            <span className="eyebrow-label">Edukasi</span>
-            <h2>Artikel pertanian</h2>
+            <span className="eyebrow-label">Promo pilihan</span>
+            <h2>Produk yang sedang ditonjolkan dari data backend.</h2>
           </div>
-          <Link href="/artikel">Buka blog</Link>
+          <Link href="/produk?sort=latest">Lihat katalog</Link>
         </div>
-        <div className="article-grid">
-          {articles.items.map((article) => (
-            <ArticleCard article={article} key={article.slug} />
+        <div className="product-grid">
+          {home.best_sellers.map((product) => (
+            <ProductCard key={product.id} product={product} />
           ))}
         </div>
       </section>

@@ -10,15 +10,32 @@ export function SiteFooter() {
           Kanal belanja online Sidomakmur untuk alat pertanian, herbisida, benih, dan
           nutrisi dengan alur order yang terintegrasi ke SiGe Manajer.
         </p>
+        <div className="site-footer__badges">
+          <span>Desktop-friendly</span>
+          <span>Mobile-ready</span>
+          <span>Terhubung pusat</span>
+        </div>
       </div>
 
-      <div className="site-footer__links">
-        <Link href="/tentang-kami">Tentang Kami</Link>
-        <Link href="/kontak">Kontak</Link>
-        <Link href="/kebijakan-privasi">Kebijakan Privasi</Link>
-        <Link href="/syarat-dan-ketentuan">Syarat dan Ketentuan</Link>
-        <Link href="/faq">FAQ</Link>
-        <Link href="/artikel">Artikel</Link>
+      <div className="site-footer__columns">
+        <div className="site-footer__links">
+          <h3>Jelajahi</h3>
+          <Link href="/produk">Produk</Link>
+          <Link href="/artikel">Artikel</Link>
+          <Link href="/lacak-pesanan">Lacak Pesanan</Link>
+          <Link href="/akun">Akun</Link>
+        </div>
+        <div className="site-footer__links">
+          <h3>Informasi</h3>
+          <Link href="/tentang-kami">Tentang Kami</Link>
+          <Link href="/kontak">Kontak</Link>
+          <Link href="/faq">FAQ</Link>
+        </div>
+        <div className="site-footer__links">
+          <h3>Kebijakan</h3>
+          <Link href="/kebijakan-privasi">Kebijakan Privasi</Link>
+          <Link href="/syarat-dan-ketentuan">Syarat dan Ketentuan</Link>
+        </div>
       </div>
     </footer>
   );

@@ -27,6 +27,9 @@ export default async function ProductsPage({
       <aside className="catalog-sidebar">
         <span className="eyebrow-label">Filter katalog</span>
         <h1>Produk pertanian</h1>
+        <p className="catalog-sidebar__lead">
+          Cari produk, ubah urutan, dan lompat cepat ke kategori yang paling relevan.
+        </p>
         <form className="filter-form">
           <label>
             Cari produk
@@ -55,14 +58,19 @@ export default async function ProductsPage({
       </aside>
 
       <section className="catalog-content">
-        <div className="section-heading">
+        <div className="page-intro page-intro--compact">
+          <span className="eyebrow-label">Katalog</span>
+          <h1>{category ? `Kategori: ${category}` : "Semua produk yang aktif di storefront"}</h1>
+          <p>
+            Tampilan katalog disusun agar lebih nyaman dipindai, baik dari desktop maupun mobile.
+          </p>
+        </div>
+        <div className="section-heading section-heading--catalog">
           <div>
-            <span className="eyebrow-label">Katalog</span>
-            <h2>
-              {category ? `Kategori: ${category}` : "Semua produk yang aktif di storefront"}
-            </h2>
+            <span className="eyebrow-label">Hasil pencarian</span>
+            <h2>{products.pagination.count} item ditemukan</h2>
           </div>
-          <span>{products.pagination.count} item di halaman ini</span>
+          <span>{search ? `Kata kunci: "${search}"` : "Semua produk aktif"}</span>
         </div>
         <div className="product-grid">
           {products.items.map((product) => (

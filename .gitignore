@@ -10,6 +10,8 @@ Thumbs.db
 !.env.example
 !backend/.env.example
 !web/.env.example
+!backend-laravel/.env.example
+!backend-laravel/.env.production.example
 
 # Python / backend
 backend/.env
@@ -27,6 +29,14 @@ backend/data/
 backend/dist/
 backend/build/
 backend/*.egg-info/
+
+# Laravel / SiGe Manager
+backend-laravel/.env
+backend-laravel/vendor/
+backend-laravel/bootstrap/cache/*.php
+backend-laravel/storage/*.key
+backend-laravel/database/*.sqlite
+backend-laravel/database/*.sqlite3
 
 # Node / web
 web/.env

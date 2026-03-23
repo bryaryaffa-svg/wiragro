@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -33,6 +34,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.sidomakmur.kios.data.pricing.priceDisplay
@@ -49,9 +51,13 @@ fun ProductCard(
     isWishlisted: Boolean,
     isWishlistBusy: Boolean,
     isCartBusy: Boolean,
+    cartQty: Int = 0,
     onOpenProduct: (String) -> Unit,
     onToggleWishlist: (ProductSummary) -> Unit,
     onAddToCart: (ProductSummary) -> Unit,
+    onIncreaseQty: (() -> Unit)? = null,
+    onDecreaseQty: (() -> Unit)? = null,
+    compact: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
     val imageUrl = product.images.firstOrNull { it.isPrimary }?.url ?: product.images.firstOrNull()?.url
@@ -61,7 +67,11 @@ fun ProductCard(
         if (product.badges.newArrival) add("Baru")
         if (product.badges.bestSeller) add("Terlaris")
         if (priceDisplay.isResellerPrice) add("Harga Reseller")
+        if (priceDisplay.compareAmount != null && !priceDisplay.isResellerPrice) add("Promo")
     }
+    val stockLabel = if (priceDisplay.amount.isNullOrBlank()) "Cek stok" else "Stok aktif"
+    val imageHeight = if (compact) 128.dp else 180.dp
+    val bodyPadding = if (compact) 12.dp else 16.dp
 
     Card(
         modifier = modifier,
@@ -70,14 +80,15 @@ fun ProductCard(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                .fillMaxHeight()
                 .clickable { onOpenProduct(product.slug) }
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+                .padding(bodyPadding),
+            verticalArrangement = Arrangement.spacedBy(if (compact) 10.dp else 12.dp),
         ) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(180.dp)
+                    .height(imageHeight)
                     .clip(RoundedCornerShape(20.dp))
                     .background(
                         brush = Brush.linearGradient(
@@ -149,19 +160,32 @@ fun ProductCard(
             Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 Text(
                     text = product.name,
-                    style = MaterialTheme.typography.titleMedium,
+                    style = if (compact) MaterialTheme.typography.titleSmall else MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
+                    maxLines = if (compact) 2 else 3,
                 )
-                Text(
-                    text = product.productType.ifBlank { "Produk" },
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.primary,
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        text = product.productType.ifBlank { "Produk" },
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.primary,
+                    )
+                    Text(
+                        text = product.unit.ifBlank { "pcs" },
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
                 product.summary?.takeIf { it.isNotBlank() }?.let { summary ->
                     Text(
                         text = summary,
-                        style = MaterialTheme.typography.bodyMedium,
+                        style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = if (compact) 2 else 3,
                     )
                 }
             }
@@ -173,7 +197,11 @@ fun ProductCard(
                 ) {
                     tags.forEach { label ->
                         Surface(
-                            color = MaterialTheme.colorScheme.primaryContainer,
+                            color = if (label == "Harga Reseller") {
+                                MaterialTheme.colorScheme.tertiaryContainer
+                            } else {
+                                MaterialTheme.colorScheme.primaryContainer
+                            },
                             shape = MaterialTheme.shapes.large,
                         ) {
                             Text(
@@ -192,27 +220,85 @@ fun ProductCard(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(5.dp),
+                ) {
                     PricePill(
                         amount = priceDisplay.amount,
                         label = priceDisplay.label,
                         compareAmount = priceDisplay.compareAmount,
                     )
+                    priceDisplay.compareAmount?.takeIf { it.isNotBlank() }?.let { compare ->
+                        Text(
+                            text = formatCurrency(compare),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            textDecoration = TextDecoration.LineThrough,
+                        )
+                    }
                     Text(
                         text = priceDisplay.minQty?.let { "Min. beli $it ${product.unit}" } ?: "Min. beli 1 ${product.unit}",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
-                }
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    FilledTonalButton(onClick = { onOpenProduct(product.slug) }) {
-                        Text("Lihat detail")
-                    }
-                    OutlinedButton(
-                        onClick = { onAddToCart(product) },
-                        enabled = !isCartBusy,
+                    Surface(
+                        color = MaterialTheme.colorScheme.surfaceVariant,
+                        shape = RoundedCornerShape(999.dp),
                     ) {
-                        Text(if (isCartBusy) "Memproses..." else "Tambah cart")
+                        Text(
+                            text = stockLabel,
+                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
+                            style = MaterialTheme.typography.labelSmall,
+                        )
+                    }
+                }
+                Column(
+                    horizontalAlignment = Alignment.End,
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    FilledTonalButton(onClick = { onOpenProduct(product.slug) }) {
+                        Text(if (compact) "Detail" else "Lihat detail")
+                    }
+                    if (cartQty > 0 && onIncreaseQty != null && onDecreaseQty != null) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            OutlinedButton(
+                                onClick = onDecreaseQty,
+                                enabled = !isCartBusy,
+                                modifier = Modifier.size(42.dp),
+                            ) {
+                                Text("-")
+                            }
+                            Text(
+                                text = cartQty.toString(),
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                            )
+                            OutlinedButton(
+                                onClick = onIncreaseQty,
+                                enabled = !isCartBusy,
+                                modifier = Modifier.size(42.dp),
+                            ) {
+                                Text("+")
+                            }
+                        }
+                    } else {
+                        OutlinedButton(
+                            onClick = { onAddToCart(product) },
+                            enabled = !isCartBusy,
+                        ) {
+                            Text(
+                                when {
+                                    isCartBusy -> "Memproses..."
+                                    sessionRole == SessionRole.GUEST -> "Login dulu"
+                                    compact -> "Tambah"
+                                    else -> "Tambah cart"
+                                },
+                            )
+                        }
                     }
                 }
             }

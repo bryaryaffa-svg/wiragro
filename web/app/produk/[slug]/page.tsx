@@ -35,9 +35,9 @@ export async function generateMetadata({
 
 export default async function ProductDetailPage({ params }: { params: Params }) {
   const { slug } = await params;
-  const product = await getProduct(slug);
+  const product = await getProduct(slug).catch(() => null);
 
-  if ("detail" in (product as unknown as { detail?: string })) {
+  if (!product) {
     notFound();
   }
 
@@ -92,8 +92,13 @@ export default async function ProductDetailPage({ params }: { params: Params }) 
           <p>{product.summary}</p>
           <div className="price-panel">
             <strong>{formatCurrency(product.price.amount)}</strong>
+            {product.price.compare_at_amount ? (
+              <small className="price-strike">
+                {formatCurrency(product.price.compare_at_amount)}
+              </small>
+            ) : null}
             <span>
-              {product.price.type || "RETAIL"}
+              {product.price.type || "NORMAL"}
               {product.price.min_qty ? ` | min ${product.price.min_qty}` : ""}
             </span>
           </div>
@@ -103,8 +108,8 @@ export default async function ProductDetailPage({ params }: { params: Params }) 
               <strong>{product.unit}</strong>
             </div>
             <div>
-              <span>Berat</span>
-              <strong>{product.weight_grams} gram</strong>
+              <span>Kategori</span>
+              <strong>{product.category?.name || product.product_type}</strong>
             </div>
             <div>
               <span>Status stok</span>
@@ -121,7 +126,9 @@ export default async function ProductDetailPage({ params }: { params: Params }) 
               {product.promotions.map((promotion) => (
                 <div key={promotion.code}>
                   <strong>{promotion.name}</strong>
-                  <p>{JSON.stringify(promotion.rule_payload)}</p>
+                  <p>
+                    Harga promo {formatCurrency(String(promotion.rule_payload.promo_price ?? 0))}
+                  </p>
                 </div>
               ))}
             </div>
