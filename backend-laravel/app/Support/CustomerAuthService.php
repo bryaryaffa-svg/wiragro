@@ -5,9 +5,11 @@ namespace App\Support;
 use App\Models\Customer;
 use App\Models\OtpChallenge;
 use App\Models\StoreSetting;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\PersonalAccessToken;
+use Throwable;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
@@ -138,9 +140,21 @@ class CustomerAuthService
 
     private function verifyGoogleToken(string $idToken): array
     {
-        $response = Http::timeout(10)->acceptJson()->get(config('customer.google_tokeninfo_url'), [
-            'id_token' => $idToken,
-        ]);
+        try {
+            $response = Http::timeout(10)->acceptJson()->get(config('customer.google_tokeninfo_url'), [
+                'id_token' => $idToken,
+            ]);
+        } catch (ConnectionException $exception) {
+            throw new UnauthorizedHttpException(
+                'google',
+                'Layanan verifikasi Google sedang tidak dapat dijangkau.'
+            );
+        } catch (Throwable $exception) {
+            throw new UnauthorizedHttpException(
+                'google',
+                'Verifikasi login Google gagal diproses.'
+            );
+        }
 
         if (! $response->ok()) {
             throw new UnauthorizedHttpException('google', 'ID token Google tidak valid.');

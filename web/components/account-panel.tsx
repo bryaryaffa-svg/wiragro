@@ -138,6 +138,10 @@ export function AccountPanel() {
             resmi Google.
           </p>
           <GoogleSignInButton onMessage={setMessage} />
+          <div className="panel-card panel-card--inline">
+            Jika login Google gagal, penyebab paling umum adalah origin domain belum
+            didaftarkan di Google Cloud Console atau popup diblokir browser.
+          </div>
         </div>
 
         <form
