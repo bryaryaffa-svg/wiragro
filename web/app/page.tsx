@@ -27,6 +27,14 @@ export default async function HomePage() {
               Lacak pesanan
             </Link>
           </div>
+          <form action="/produk" className="header-search">
+            <input
+              name="q"
+              placeholder="Cari produk untuk langsung masuk ke katalog"
+              type="search"
+            />
+            <button type="submit">Cari</button>
+          </form>
           <div className="hero-panel__chips">
             {home.category_highlights.map((category) => (
               <Link href={`/produk?kategori=${category.slug}`} key={category.slug}>

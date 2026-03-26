@@ -8,10 +8,16 @@ export function AddToCartButton({
   productId,
   label = "Tambah ke Keranjang",
   qty = 1,
+  buttonClassName,
+  disabled = false,
+  disabledLabel = "Stok habis",
 }: {
   productId: string;
   label?: string;
   qty?: number;
+  buttonClassName?: string;
+  disabled?: boolean;
+  disabledLabel?: string;
 }) {
   const { addItem } = useCart();
   const [message, setMessage] = useState<string | null>(null);
@@ -20,8 +26,8 @@ export function AddToCartButton({
   return (
     <div className="inline-action-stack">
       <button
-        className="btn btn-primary"
-        disabled={isPending}
+        className={buttonClassName ?? "btn btn-primary"}
+        disabled={disabled || isPending}
         onClick={() => {
           startTransition(async () => {
             try {
@@ -34,9 +40,13 @@ export function AddToCartButton({
         }}
         type="button"
       >
-        {isPending ? "Menambah..." : label}
+        {disabled ? disabledLabel : isPending ? "Menambah..." : label}
       </button>
-      {message ? <span className="inline-note">{message}</span> : null}
+      {message ? (
+        <span aria-live="polite" className="inline-note">
+          {message}
+        </span>
+      ) : null}
     </div>
   );
 }

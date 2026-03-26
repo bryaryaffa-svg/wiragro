@@ -42,6 +42,7 @@ export default async function ProductDetailPage({ params }: { params: Params }) 
   }
 
   const primaryImage = product.images.find((image) => image.is_primary) ?? product.images[0];
+  const isOutOfStock = product.availability.state === "out_of_stock";
 
   return (
     <div className="page-stack">
@@ -83,7 +84,7 @@ export default async function ProductDetailPage({ params }: { params: Params }) 
 
         <div className="product-detail__summary">
           <div className="product-card__badges">
-            {product.badges.featured ? <span>Unggulan</span> : null}
+            {product.badges.featured ? <span>Promo</span> : null}
             {product.badges.new_arrival ? <span>Baru</span> : null}
             {product.badges.best_seller ? <span>Terlaris</span> : null}
           </div>
@@ -97,9 +98,8 @@ export default async function ProductDetailPage({ params }: { params: Params }) 
                 {formatCurrency(product.price.compare_at_amount)}
               </small>
             ) : null}
-            <span>
-              {product.price.type || "NORMAL"}
-              {product.price.min_qty ? ` | min ${product.price.min_qty}` : ""}
+            <span className={`status-badge status-badge--${product.availability.state}`}>
+              {product.availability.label}
             </span>
           </div>
           <div className="info-list">
@@ -117,8 +117,16 @@ export default async function ProductDetailPage({ params }: { params: Params }) 
             </div>
           </div>
           <div className="product-detail__actions">
-            <AddToCartButton productId={product.id} qty={1} />
-            <WishlistButton product={product} />
+            <AddToCartButton
+              buttonClassName="btn btn-primary btn-block"
+              disabled={isOutOfStock}
+              productId={product.id}
+              qty={1}
+            />
+            <WishlistButton buttonClassName="btn btn-secondary btn-block" product={product} />
+            <Link className="btn btn-secondary btn-block" href="/keranjang">
+              Buka keranjang
+            </Link>
           </div>
           {product.promotions.length ? (
             <div className="promo-box">

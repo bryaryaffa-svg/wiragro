@@ -1,8 +1,11 @@
 export default function Loading() {
   return (
-    <div className="panel-card">
-      <span className="eyebrow-label">Memuat</span>
-      <h1>Menyiapkan storefront...</h1>
-    </div>
+    <section className="page-stack">
+      <div className="panel-card panel-card--loading">
+        <span className="eyebrow-label">Memuat storefront</span>
+        <h1>Menyiapkan tampilan belanja...</h1>
+        <p>Produk, banner, dan info toko sedang ditarik dari backend pusat.</p>
+      </div>
+    </section>
   );
 }

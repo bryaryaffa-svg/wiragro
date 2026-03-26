@@ -26,7 +26,7 @@ export function MobileBottomNav() {
     { href: "/produk", label: "Produk", badge: null },
     { href: "/wishlist", label: "Wishlist", badge: items.length > 0 ? String(items.length) : null },
     { href: "/keranjang", label: "Keranjang", badge: cartCount > 0 ? String(cartCount) : null },
-    { href: "/akun", label: session ? "Akun" : "Masuk", badge: null },
+    { href: session ? "/akun" : "/login", label: session ? "Akun" : "Masuk", badge: null },
   ];
 
   return (

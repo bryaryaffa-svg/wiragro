@@ -29,27 +29,28 @@ export function SiteHeader() {
   const { items } = useWishlist();
   const cartCount = cart?.items.reduce((total, item) => total + item.qty, 0) ?? 0;
   const firstName = session?.customer.full_name.split(" ")[0] ?? "Masuk";
+  const accountHref = session ? "/akun" : "/login";
 
   return (
     <header className="site-header">
       <div className="site-header__meta">
         <div className="site-header__meta-inner">
-          <span>Storefront resmi Sidomakmur untuk alat tani, benih, herbisida, dan nutrisi.</span>
-          <span>Terhubung ke SiGe Manajer dan siap dipakai desktop maupun mobile.</span>
+          <span>Belanja kebutuhan pertanian, toko, dan rumah tangga dari satu storefront.</span>
+          <span>Checkout guest tersedia, wishlist dan akun customer tetap sinkron.</span>
         </div>
       </div>
       <div className="site-header__bar">
         <Link className="brand-mark" href="/">
-          <span className="brand-mark__eyebrow">Sidomakmur.com</span>
+          <span className="brand-mark__eyebrow">Wiragro / Sidomakmur</span>
           <strong>Kios Sidomakmur</strong>
-          <small>Belanja sarana pertanian yang rapi, cepat, dan sinkron ke pusat.</small>
+          <small>Katalog pusat yang ringan, rapi, dan nyaman dipakai dari layar kecil.</small>
         </Link>
 
         <form action="/produk" className="header-search">
           <input
             aria-label="Cari produk"
             name="q"
-            placeholder="Cari alat pertanian, herbisida, benih, nutrisi..."
+            placeholder="Cari pupuk, benih, herbisida, minyak, gula..."
             type="search"
           />
           <button type="submit">Cari</button>
@@ -61,18 +62,24 @@ export function SiteHeader() {
             href="/wishlist"
           >
             <span>Wishlist</span>
-            <strong>{items.length > 0 ? `${items.length} item` : "Simpan produk"}</strong>
+            <strong>
+              Simpan produk
+              {items.length > 0 ? <em>{items.length}</em> : null}
+            </strong>
           </Link>
           <Link
             className={`header-action-link ${isActivePath(pathname, "/keranjang") ? "is-active" : ""}`}
             href="/keranjang"
           >
             <span>Keranjang</span>
-            <strong>{cartCount > 0 ? `${cartCount} item` : "Cek pesanan"}</strong>
+            <strong>
+              Lihat belanja
+              {cartCount > 0 ? <em>{cartCount}</em> : null}
+            </strong>
           </Link>
           <Link
-            className={`header-action-link ${isActivePath(pathname, "/akun") ? "is-active" : ""}`}
-            href="/akun"
+            className={`header-action-link ${isActivePath(pathname, "/akun") || isActivePath(pathname, "/login") ? "is-active" : ""}`}
+            href={accountHref}
           >
             <span>{session ? "Akun aktif" : "Masuk / daftar"}</span>
             <strong>{session ? `Halo, ${firstName}` : "Login customer"}</strong>

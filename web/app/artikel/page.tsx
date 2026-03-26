@@ -16,7 +16,7 @@ export default async function ArticlesPage({
 
   return (
     <section className="page-stack">
-      <div className="page-intro">
+      <div className="page-intro page-intro--compact">
         <span className="eyebrow-label">Artikel / Blog</span>
         <h1>Konten edukasi pertanian</h1>
         <p>
@@ -39,7 +39,7 @@ export default async function ArticlesPage({
           ))}
         </div>
       ) : (
-        <article className="panel-card">
+        <article className="empty-state">
           <span className="eyebrow-label">Konten belum tersedia</span>
           <h2>Artikel dari SiGe Manager belum dipublikasikan.</h2>
           <p>
