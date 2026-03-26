@@ -23,7 +23,7 @@ export function WishlistPageClient() {
           Wishlist customer tersimpan di backend storefront, jadi perlu auth Google atau
           WhatsApp OTP sebelum dipakai.
         </p>
-        <Link className="btn btn-primary" href="/akun">
+        <Link className="btn btn-primary" href="/login?next=%2Fwishlist">
           Buka auth customer
         </Link>
       </section>

@@ -17,9 +17,11 @@ export function GoogleSignInButton({
   onMessage: (message: string) => void;
 }) {
   const { isBusy, loginGoogle } = useAuth();
+  const wrapperRef = useRef<HTMLDivElement | null>(null);
   const buttonRef = useRef<HTMLDivElement | null>(null);
   const [scriptReady, setScriptReady] = useState(false);
   const [scriptError, setScriptError] = useState<string | null>(null);
+  const [buttonWidth, setButtonWidth] = useState(320);
 
   const handleCredential = useEffectEvent(async (response: GoogleCredentialResponse) => {
     if (!response.credential) {
@@ -36,6 +38,29 @@ export function GoogleSignInButton({
       );
     }
   });
+
+  useEffect(() => {
+    if (!wrapperRef.current) {
+      return;
+    }
+
+    const updateWidth = () => {
+      const nextWidth = Math.max(220, Math.min(360, wrapperRef.current?.clientWidth ?? 320));
+      setButtonWidth(nextWidth);
+    };
+
+    updateWidth();
+
+    if (typeof ResizeObserver === "undefined") {
+      window.addEventListener("resize", updateWidth);
+      return () => window.removeEventListener("resize", updateWidth);
+    }
+
+    const observer = new ResizeObserver(() => updateWidth());
+    observer.observe(wrapperRef.current);
+
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     if (!scriptReady || !googleClientId || !buttonRef.current || !window.google) {
@@ -59,13 +84,13 @@ export function GoogleSignInButton({
       size: "large",
       text: "continue_with",
       shape: "pill",
-      width: 320,
+      width: buttonWidth,
       logo_alignment: "left",
     });
-  }, [handleCredential, scriptReady]);
+  }, [buttonWidth, handleCredential, scriptReady]);
 
   return (
-    <div className="google-auth-block">
+    <div className="google-auth-block" ref={wrapperRef}>
       <Script
         src="https://accounts.google.com/gsi/client"
         strategy="afterInteractive"
