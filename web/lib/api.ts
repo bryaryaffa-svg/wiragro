@@ -246,6 +246,16 @@ export interface DuitkuCreateResponse {
   merchant_code: string;
 }
 
+export class ApiRequestError extends Error {
+  constructor(
+    message: string,
+    public readonly status?: number,
+  ) {
+    super(message);
+    this.name = "ApiRequestError";
+  }
+}
+
 interface LaravelEnvelope<T> {
   success: boolean;
   message?: string;
@@ -351,11 +361,11 @@ async function parseStorefrontResponse<T>(response: Response): Promise<T> {
   const payload = (await response.json().catch(() => null)) as LaravelEnvelope<T> | null;
 
   if (!response.ok) {
-    throw new Error(payload?.message || "Request API publik gagal");
+    throw new ApiRequestError(payload?.message || "Request API publik gagal", response.status);
   }
 
   if (!payload || typeof payload !== "object" || !("data" in payload)) {
-    throw new Error("Response API publik tidak valid");
+    throw new ApiRequestError("Response API publik tidak valid", response.status || 500);
   }
 
   return payload.data;
@@ -365,14 +375,34 @@ async function parseCustomerResponse<T>(response: Response): Promise<T> {
   if (!response.ok) {
     const payload = await response.json().catch(() => null);
     if (payload && typeof payload === "object" && "message" in payload) {
-      throw new Error(String(payload.message));
+      throw new ApiRequestError(String(payload.message), response.status);
     }
 
     const message = await response.text();
-    throw new Error(message || "Request API customer gagal");
+    throw new ApiRequestError(message || "Request API customer gagal", response.status);
   }
 
   return response.json() as Promise<T>;
+}
+
+async function fetchJsonWithTimeout(
+  input: RequestInfo | URL,
+  init: RequestInit & { next?: { revalidate?: number | false } },
+  failureMessage: string,
+) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 15_000);
+
+  try {
+    return await fetch(input, {
+      ...init,
+      signal: controller.signal,
+    });
+  } catch {
+    throw new ApiRequestError(failureMessage, 503);
+  } finally {
+    clearTimeout(timeoutId);
+  }
 }
 
 async function fetchStorefrontServerJson<T>(
@@ -380,9 +410,9 @@ async function fetchStorefrontServerJson<T>(
   query?: Record<string, string | number | undefined | null>,
   revalidate = 120,
 ): Promise<T> {
-  const response = await fetch(buildUrl(storefrontApiBaseUrl, path, query), {
+  const response = await fetchJsonWithTimeout(buildUrl(storefrontApiBaseUrl, path, query), {
     next: { revalidate },
-  });
+  }, "Koneksi ke API publik sedang gagal.");
 
   return parseStorefrontResponse<T>(response);
 }
@@ -397,10 +427,10 @@ async function fetchCustomerClientJson<T>(
     headers.set("Content-Type", "application/json");
   }
 
-  const response = await fetch(buildUrl(customerApiBaseUrl, path, query), {
+  const response = await fetchJsonWithTimeout(buildUrl(customerApiBaseUrl, path, query), {
     ...init,
     headers,
-  });
+  }, "Koneksi ke API customer sedang gagal.");
 
   return parseCustomerResponse<T>(response);
 }
@@ -708,13 +738,77 @@ function buildStaticPageContent(
   return page;
 }
 
+function createFallbackStoreProfile() {
+  return {
+    code: storeCode,
+    name: "Kios Sidomakmur",
+    address: null,
+    whatsapp_number: null,
+    operational_hours: null,
+  };
+}
+
+export function getFallbackHomeData(): HomePayload {
+  const store = createFallbackStoreProfile();
+
+  return {
+    store,
+    banners: [],
+    featured_products: [],
+    new_arrivals: [],
+    best_sellers: [],
+    category_highlights: [],
+    seo: {
+      title: `${store.name} | Katalog Produk`,
+      description: "Katalog sedang dimuat ulang. Silakan coba lagi beberapa saat lagi.",
+    },
+  };
+}
+
+export function getFallbackProductList(
+  query?: Record<string, string | number | undefined | null>,
+): ProductListPayload {
+  const search = typeof query?.q === "string" ? query.q : undefined;
+  const categorySlug =
+    typeof query?.category_slug === "string" ? query.category_slug : undefined;
+  const sort = typeof query?.sort === "string" ? query.sort : "latest";
+
+  return {
+    items: [],
+    pagination: {
+      page: 1,
+      page_size: 20,
+      count: 0,
+    },
+    available_filters: {
+      category_slug: categorySlug ?? null,
+      sort,
+    },
+    seo: {
+      title: categorySlug ? `Kategori ${categorySlug}` : "Katalog Produk",
+      description: search
+        ? `Katalog sedang dimuat ulang untuk pencarian ${search}.`
+        : "Katalog sedang dimuat ulang. Silakan coba lagi beberapa saat lagi.",
+    },
+  };
+}
+
 export async function getHomeData(): Promise<HomePayload> {
-  const [store, banners, categories, products] = await Promise.all([
+  const [storeResult, bannersResult, categoriesResult, productsResult] = await Promise.allSettled([
     fetchStoreProfile(),
     fetchStorefrontServerJson<LaravelBannerDto[]>("/v1/public/banners", undefined, 120),
     getCategories(),
     getProducts({ page_size: 12, sort: "latest" }),
   ]);
+
+  const store =
+    storeResult.status === "fulfilled" ? storeResult.value : createFallbackStoreProfile();
+  const banners = bannersResult.status === "fulfilled" ? bannersResult.value : [];
+  const categories = categoriesResult.status === "fulfilled" ? categoriesResult.value : [];
+  const products =
+    productsResult.status === "fulfilled"
+      ? productsResult.value
+      : getFallbackProductList({ page_size: 12, sort: "latest" });
 
   const promoProducts = products.items.filter((product) => product.price.is_promo);
 
@@ -855,7 +949,7 @@ export async function getProduct(slug: string): Promise<ProductDetailPayload> {
 }
 
 export async function getStaticPage(slug: string) {
-  const store = await fetchStoreProfile();
+  const store = await fetchStoreProfile().catch(() => createFallbackStoreProfile());
   return buildStaticPageContent(slug, store);
 }
 
@@ -890,7 +984,7 @@ export async function getArticle(_slug: string): Promise<ContentPagePayload> {
 }
 
 export async function getSeo(path: string) {
-  const store = await fetchStoreProfile();
+  const store = await fetchStoreProfile().catch(() => createFallbackStoreProfile());
 
   return {
     title: `${store.name} | ${path === "/" ? "Beranda" : path.replace(/\//g, " ").trim()}`,

@@ -6,7 +6,7 @@ import { notFound } from "next/navigation";
 import { AddToCartButton } from "@/components/cart/add-to-cart-button";
 import { ProductCard } from "@/components/product-card";
 import { WishlistButton } from "@/components/wishlist-button";
-import { getProduct } from "@/lib/api";
+import { ApiRequestError, getProduct } from "@/lib/api";
 import { formatCurrency } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
@@ -35,10 +35,39 @@ export async function generateMetadata({
 
 export default async function ProductDetailPage({ params }: { params: Params }) {
   const { slug } = await params;
-  const product = await getProduct(slug).catch(() => null);
+  let product = null;
+  let productUnavailable = false;
+
+  try {
+    product = await getProduct(slug);
+  } catch (error) {
+    if (error instanceof ApiRequestError && error.status !== 404) {
+      productUnavailable = true;
+    }
+  }
+
+  if (!product && !productUnavailable) {
+    notFound();
+  }
 
   if (!product) {
-    notFound();
+    return (
+      <div className="page-stack">
+        <article className="empty-state empty-state--shopping">
+          <span className="eyebrow-label">Produk belum bisa dibuka</span>
+          <h1>Detail produk gagal dimuat dari server.</h1>
+          <p>
+            Halaman produk ini tidak hilang, tetapi data detailnya sedang tidak berhasil
+            diambil. Silakan kembali ke katalog atau coba lagi beberapa saat lagi.
+          </p>
+          <div className="empty-state__actions">
+            <Link className="btn btn-primary" href="/produk">
+              Kembali ke katalog
+            </Link>
+          </div>
+        </article>
+      </div>
+    );
   }
 
   const primaryImage = product.images.find((image) => image.is_primary) ?? product.images[0];

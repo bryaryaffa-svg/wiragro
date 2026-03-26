@@ -1,12 +1,19 @@
 import Link from "next/link";
 
 import { ProductCard } from "@/components/product-card";
-import { getHomeData } from "@/lib/api";
+import { getFallbackHomeData, getHomeData } from "@/lib/api";
 
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
-  const home = await getHomeData();
+  let home = getFallbackHomeData();
+  let storefrontUnavailable = false;
+
+  try {
+    home = await getHomeData();
+  } catch {
+    storefrontUnavailable = true;
+  }
 
   return (
     <div className="page-stack">
@@ -63,6 +70,24 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+
+      {storefrontUnavailable ? (
+        <section className="section-block section-block--contrast">
+          <div className="empty-state empty-state--shopping">
+            <span className="eyebrow-label">Koneksi katalog sedang bermasalah</span>
+            <h2>Homepage tetap aktif, tetapi data produk belum berhasil dimuat.</h2>
+            <p>
+              Coba muat ulang halaman beberapa saat lagi. Jika perlu, buka katalog lagi
+              setelah koneksi server kembali stabil.
+            </p>
+            <div className="empty-state__actions">
+              <Link className="btn btn-primary" href="/produk">
+                Buka katalog
+              </Link>
+            </div>
+          </div>
+        </section>
+      ) : null}
 
       {home.banners.length ? (
         <section className="section-block section-block--contrast">

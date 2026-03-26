@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 import { ProductCard } from "@/components/product-card";
-import { getCategories, getProducts } from "@/lib/api";
+import { getCategories, getFallbackProductList, getProducts } from "@/lib/api";
 
 export const dynamic = "force-dynamic";
 
@@ -17,10 +17,16 @@ export default async function ProductsPage({
   const category = typeof resolved.kategori === "string" ? resolved.kategori : undefined;
   const sort = typeof resolved.sort === "string" ? resolved.sort : "latest";
 
-  const [categories, products] = await Promise.all([
+  const [categoriesResult, productsResult] = await Promise.allSettled([
     getCategories(),
     getProducts({ q: search, category_slug: category, sort }),
   ]);
+  const categories = categoriesResult.status === "fulfilled" ? categoriesResult.value : [];
+  const products =
+    productsResult.status === "fulfilled"
+      ? productsResult.value
+      : getFallbackProductList({ q: search, category_slug: category, sort });
+  const catalogUnavailable = productsResult.status === "rejected";
   const activeCategory = categories.find((item) => item.slug === category);
 
   return (
@@ -99,7 +105,21 @@ export default async function ProductsPage({
           <span>{search ? `Kata kunci: "${search}"` : "Semua produk aktif"}</span>
         </div>
 
-        {products.items.length ? (
+        {catalogUnavailable ? (
+          <article className="empty-state empty-state--shopping">
+            <span className="eyebrow-label">Katalog sedang tidak stabil</span>
+            <h2>Daftar produk belum berhasil dimuat dari server.</h2>
+            <p>
+              Silakan refresh halaman beberapa saat lagi. Filter dan pencarian Anda tetap
+              dipertahankan.
+            </p>
+            <div className="empty-state__actions">
+              <Link className="btn btn-primary" href="/produk">
+                Muat ulang katalog
+              </Link>
+            </div>
+          </article>
+        ) : products.items.length ? (
           <div className="product-grid product-grid--catalog">
             {products.items.map((product) => (
               <ProductCard key={product.id} product={product} />
