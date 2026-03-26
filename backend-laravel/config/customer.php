@@ -7,7 +7,6 @@ return [
         static fn (string $value): string => trim($value),
         explode(',', env('GOOGLE_OIDC_AUDIENCES', ''))
     ))),
-    'google_tokeninfo_url' => env('GOOGLE_TOKENINFO_URL', 'https://oauth2.googleapis.com/tokeninfo'),
     'token_name' => env('CUSTOMER_ACCESS_TOKEN_NAME', 'web-customer'),
     'duitku_merchant_code' => env('DUITKU_MERCHANT_CODE', 'DUMMYMERCHANT'),
     'duitku_payment_mode' => env('DUITKU_PAYMENT_MODE', 'server-stub-until-merchant-credentials-enabled'),

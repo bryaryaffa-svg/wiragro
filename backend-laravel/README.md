@@ -97,6 +97,13 @@ FILESYSTEM_DISK=public
 
 File contoh production lengkap ada di [`.env.production.example`](C:/Users/BRYAN/OneDrive/Dokumen/Playground/kios-sidomakmur/backend-laravel/.env.production.example).
 
+Google login production membutuhkan OAuth client Web di Google Cloud Console dengan Authorized JavaScript origins:
+
+- `https://wiragro.id`
+- `https://www.wiragro.id`
+
+Backend ini memverifikasi ID token memakai Google API Client resmi, bukan endpoint `tokeninfo`.
+
 ## Deploy ke Hostinger
 
 Panduan deploy operasional ada di [deploy-hostinger.md](C:/Users/BRYAN/OneDrive/Dokumen/Playground/kios-sidomakmur/backend-laravel/docs/deploy-hostinger.md).

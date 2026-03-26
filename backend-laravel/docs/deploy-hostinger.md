@@ -36,7 +36,6 @@ CHECKOUT_SHIPPING_METHODS=delivery,pickup
 CHECKOUT_PAYMENT_METHODS=duitku-va,COD
 CHECKOUT_INVOICE_SOURCE=STORE
 GOOGLE_OIDC_AUDIENCES=YOUR_GOOGLE_WEB_CLIENT_ID
-GOOGLE_TOKENINFO_URL=https://oauth2.googleapis.com/tokeninfo
 CUSTOMER_OTP_EXPIRY_SECONDS=300
 CUSTOMER_OTP_DEBUG_CODE=
 CUSTOMER_ACCESS_TOKEN_NAME=web-customer
@@ -106,6 +105,9 @@ php artisan route:cache
 - `https://api.wiragro.id/api/v1/customer/wishlist` bisa diakses dengan Bearer token customer
 - `https://api.wiragro.id/api/v1/customer/payments/duitku/create` bisa membuat link pembayaran stub
 - URL gambar `https://api.wiragro.id/storage/...` bisa diakses
+- Google Cloud Console OAuth client harus mengizinkan:
+  - `https://wiragro.id`
+  - `https://www.wiragro.id`
 
 ## Catatan Hostinger
 

@@ -2,20 +2,22 @@
 
 namespace App\Support;
 
+use App\Contracts\GoogleIdTokenVerifier;
 use App\Models\Customer;
 use App\Models\OtpChallenge;
 use App\Models\StoreSetting;
-use Illuminate\Http\Client\ConnectionException;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\PersonalAccessToken;
-use Throwable;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 class CustomerAuthService
 {
+    public function __construct(
+        private readonly GoogleIdTokenVerifier $googleIdTokenVerifier,
+    ) {
+    }
+
     public function requestOtp(string $storeCode, string $phone): array
     {
         $this->assertStoreIsActive($storeCode);
@@ -88,7 +90,7 @@ class CustomerAuthService
     {
         $this->assertStoreIsActive($storeCode);
 
-        $claims = $this->verifyGoogleToken($idToken);
+        $claims = $this->googleIdTokenVerifier->verify($idToken);
         $email = Str::lower((string) $claims['email']);
 
         /** @var Customer $customer */
@@ -136,61 +138,6 @@ class CustomerAuthService
         if ($token?->tokenable instanceof Customer && $token->tokenable->is($customer)) {
             $token->delete();
         }
-    }
-
-    private function verifyGoogleToken(string $idToken): array
-    {
-        try {
-            $response = Http::timeout(10)->acceptJson()->get(config('customer.google_tokeninfo_url'), [
-                'id_token' => $idToken,
-            ]);
-        } catch (ConnectionException $exception) {
-            throw new UnauthorizedHttpException(
-                'google',
-                'Layanan verifikasi Google sedang tidak dapat dijangkau.'
-            );
-        } catch (Throwable $exception) {
-            throw new UnauthorizedHttpException(
-                'google',
-                'Verifikasi login Google gagal diproses.'
-            );
-        }
-
-        if (! $response->ok()) {
-            throw new UnauthorizedHttpException('google', 'ID token Google tidak valid.');
-        }
-
-        $payload = $response->json();
-        $audiences = config('customer.google_oidc_audiences', []);
-        $audience = (string) ($payload['aud'] ?? '');
-
-        if ($audiences === []) {
-            throw new UnprocessableEntityHttpException('GOOGLE_OIDC_AUDIENCES belum dikonfigurasi.');
-        }
-
-        if ($audience === '' || ! in_array($audience, $audiences, true)) {
-            throw new UnauthorizedHttpException('google', 'Audience Google tidak diizinkan.');
-        }
-
-        if (! filter_var($payload['email'] ?? null, FILTER_VALIDATE_EMAIL)) {
-            throw new UnprocessableEntityHttpException('Email Google tidak tersedia.');
-        }
-
-        $emailVerified = filter_var($payload['email_verified'] ?? false, FILTER_VALIDATE_BOOLEAN);
-
-        if (! $emailVerified) {
-            throw new UnauthorizedHttpException('google', 'Email Google belum terverifikasi.');
-        }
-
-        if (isset($payload['exp']) && (int) $payload['exp'] < now()->timestamp) {
-            throw new UnauthorizedHttpException('google', 'ID token Google sudah kedaluwarsa.');
-        }
-
-        if (empty($payload['sub'])) {
-            throw new UnauthorizedHttpException('google', 'Subject Google tidak tersedia.');
-        }
-
-        return $payload;
     }
 
     private function assertStoreIsActive(string $storeCode): void
