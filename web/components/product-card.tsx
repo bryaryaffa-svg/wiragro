@@ -11,6 +11,12 @@ import { formatCurrency } from "@/lib/format";
 export function ProductCard({ product }: { product: ProductSummary }) {
   const primaryImage = product.images.find((image) => image.is_primary) ?? product.images[0];
   const isOutOfStock = product.availability.state === "out_of_stock";
+  const availabilityText =
+    product.availability.state === "low_stock"
+      ? "Stok menipis"
+      : product.availability.state === "out_of_stock"
+        ? "Stok habis"
+        : "Siap diproses";
 
   return (
     <article className="product-card">
@@ -54,13 +60,14 @@ export function ProductCard({ product }: { product: ProductSummary }) {
         </p>
 
         <div className="product-card__price-block">
+          <small className="price-caption">{availabilityText}</small>
           <strong>{formatCurrency(product.price.amount)}</strong>
           {product.price.compare_at_amount ? (
             <small className="price-strike">
               {formatCurrency(product.price.compare_at_amount)}
             </small>
           ) : null}
-          <small className="price-caption">
+          <small className="price-caption price-caption--secondary">
             {product.price.is_promo ? "Harga promo aktif" : "Harga toko saat ini"}
           </small>
         </div>

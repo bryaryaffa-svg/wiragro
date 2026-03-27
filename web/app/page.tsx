@@ -20,11 +20,11 @@ export default async function HomePage() {
       <section className="hero-panel">
         <div className="hero-panel__copy">
           <span className="eyebrow-label">Storefront terhubung pusat</span>
-          <h1>Belanja kebutuhan pertanian dengan storefront yang modern dan terasa profesional.</h1>
+          <h1>Belanja kebutuhan pertanian dengan tampilan yang lebih rapi, cepat, dan nyaman.</h1>
           <p>
-            Wiragro / Kios Sidomakmur membawa katalog pusat SiGe Manajer ke web yang
-            ramah desktop dan mobile, dengan alur order, promo, dan konten publik yang
-            tampil lebih konsisten.
+            Kios Sidomakmur membawa katalog pusat SiGe Manager ke storefront yang ringan
+            dipakai di desktop maupun mobile, dengan pencarian, katalog, dan checkout yang
+            terasa lebih jelas.
           </p>
           <div className="hero-panel__actions">
             <Link className="btn btn-primary" href="/produk">
@@ -34,10 +34,10 @@ export default async function HomePage() {
               Lacak pesanan
             </Link>
           </div>
-          <form action="/produk" className="header-search">
+          <form action="/produk" className="header-search header-search--hero">
             <input
               name="q"
-              placeholder="Cari produk untuk langsung masuk ke katalog"
+              placeholder="Cari pupuk, benih, pestisida, minyak, gula..."
               type="search"
             />
             <button type="submit">Cari</button>
@@ -54,11 +54,11 @@ export default async function HomePage() {
         <div className="hero-panel__stats">
           <div className="stats-card stats-card--highlight">
             <span>Fokus storefront</span>
-            <strong>Belanja cepat, konten rapi, dan checkout yang mudah dipahami.</strong>
+            <strong>Belanja terasa singkat, jelas, dan siap dipakai dari layar kecil.</strong>
           </div>
           <div className="stats-card">
             <span>Produk aktif</span>
-            <strong>{home.featured_products.length + home.new_arrivals.length} item tampil</strong>
+            <strong>{home.featured_products.length + home.new_arrivals.length} item unggulan</strong>
           </div>
           <div className="stats-card">
             <span>Banner aktif</span>

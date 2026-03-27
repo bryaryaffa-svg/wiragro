@@ -33,24 +33,18 @@ export function SiteHeader() {
 
   return (
     <header className="site-header">
-      <div className="site-header__meta">
-        <div className="site-header__meta-inner">
-          <span>Belanja kebutuhan pertanian, toko, dan rumah tangga dari satu storefront.</span>
-          <span>Checkout guest tersedia, wishlist dan akun customer tetap sinkron.</span>
-        </div>
-      </div>
       <div className="site-header__bar">
         <Link className="brand-mark" href="/">
-          <span className="brand-mark__eyebrow">Wiragro / Sidomakmur</span>
+          <span className="brand-mark__eyebrow">Wiragro Storefront</span>
           <strong>Kios Sidomakmur</strong>
-          <small>Katalog pusat yang ringan, rapi, dan nyaman dipakai dari layar kecil.</small>
+          <small>Kebutuhan pertanian, kios, dan rumah tangga dalam satu katalog rapi.</small>
         </Link>
 
         <form action="/produk" className="header-search">
           <input
             aria-label="Cari produk"
             name="q"
-            placeholder="Cari pupuk, benih, herbisida, minyak, gula..."
+            placeholder="Cari pupuk, benih, minyak, gula..."
             type="search"
           />
           <button type="submit">Cari</button>
@@ -62,27 +56,20 @@ export function SiteHeader() {
             href="/wishlist"
           >
             <span>Wishlist</span>
-            <strong>
-              Simpan produk
-              {items.length > 0 ? <em>{items.length}</em> : null}
-            </strong>
+            {items.length > 0 ? <em>{items.length}</em> : null}
           </Link>
           <Link
             className={`header-action-link ${isActivePath(pathname, "/keranjang") ? "is-active" : ""}`}
             href="/keranjang"
           >
             <span>Keranjang</span>
-            <strong>
-              Lihat belanja
-              {cartCount > 0 ? <em>{cartCount}</em> : null}
-            </strong>
+            {cartCount > 0 ? <em>{cartCount}</em> : null}
           </Link>
           <Link
             className={`header-action-link ${isActivePath(pathname, "/akun") || isActivePath(pathname, "/login") ? "is-active" : ""}`}
             href={accountHref}
           >
-            <span>{session ? "Akun aktif" : "Masuk / daftar"}</span>
-            <strong>{session ? `Halo, ${firstName}` : "Login customer"}</strong>
+            <span>{session ? `Halo, ${firstName}` : "Masuk"}</span>
           </Link>
         </div>
       </div>
