@@ -35,9 +35,8 @@ export function SiteHeader() {
     <header className="site-header">
       <div className="site-header__bar">
         <Link className="brand-mark" href="/">
-          <span className="brand-mark__eyebrow">Wiragro Storefront</span>
+          <span className="brand-mark__eyebrow">WIRAGRO / SIDOMAKMUR</span>
           <strong>Kios Sidomakmur</strong>
-          <small>Kebutuhan pertanian, kios, dan rumah tangga dalam satu katalog rapi.</small>
         </Link>
 
         <form action="/produk" className="header-search">

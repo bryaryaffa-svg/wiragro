@@ -178,12 +178,6 @@ textarea {
   font-weight: 800;
 }
 
-.brand-mark small {
-  font-size: 0.84rem;
-  color: var(--text-soft);
-  line-height: 1.45;
-}
-
 .header-search {
   display: flex;
   gap: 0.55rem;
