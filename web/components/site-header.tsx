@@ -10,7 +10,7 @@ import { useWishlist } from "@/components/wishlist-provider";
 const mainLinks = [
   { href: "/", label: "Beranda" },
   { href: "/produk", label: "Produk" },
-  { href: "/artikel", label: "Artikel" },
+  { href: "/artikel", label: "Edukasi" },
   { href: "/lacak-pesanan", label: "Lacak Pesanan" },
 ];
 

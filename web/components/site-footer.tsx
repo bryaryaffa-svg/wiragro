@@ -22,7 +22,7 @@ export function SiteFooter() {
         <div className="site-footer__links">
           <h3>Jelajahi</h3>
           <Link href="/produk">Produk</Link>
-          <Link href="/artikel">Artikel</Link>
+          <Link href="/artikel">Edukasi</Link>
           <Link href="/lacak-pesanan">Lacak Pesanan</Link>
           <Link href="/akun">Akun</Link>
         </div>

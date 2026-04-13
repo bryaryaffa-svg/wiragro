@@ -40,7 +40,7 @@ export default async function ProductsPage({
         </h1>
         <p>
           Search, kategori, dan urutan katalog disusun lebih bersih agar user bisa cepat
-          menemukan produk lalu langsung masuk ke alur belanja.
+          menemukan produk, memahami konteksnya, lalu langsung masuk ke alur belanja.
         </p>
       </div>
 

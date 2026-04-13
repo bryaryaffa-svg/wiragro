@@ -1,14 +1,24 @@
 import Image from "next/image";
 import Link from "next/link";
 
+import { ArticleCard } from "@/components/article-card";
 import { ProductCard } from "@/components/product-card";
-import { getFallbackHomeData, getHomeData } from "@/lib/api";
+import {
+  type ArticleListPayload,
+  getArticles,
+  getFallbackHomeData,
+  getHomeData,
+} from "@/lib/api";
 
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
   let home = getFallbackHomeData();
   let storefrontUnavailable = false;
+  let articleFeed: ArticleListPayload = {
+    items: [],
+    pagination: { page: 1, page_size: 3, count: 0 },
+  };
 
   try {
     home = await getHomeData();
@@ -16,10 +26,60 @@ export default async function HomePage() {
     storefrontUnavailable = true;
   }
 
+  try {
+    articleFeed = await getArticles({ page_size: 3 });
+  } catch {
+    articleFeed = { items: [], pagination: { page: 1, page_size: 3, count: 0 } };
+  }
+
   const heroFeature =
     home.featured_products[0] ?? home.new_arrivals[0] ?? home.best_sellers[0] ?? null;
   const heroFeatureImage =
     heroFeature?.images.find((image) => image.is_primary) ?? heroFeature?.images[0];
+  const knowledgeTracks = [
+    {
+      title: "Pilih produk berdasarkan kebutuhan lapangan",
+      body: "Mulai dari kategori inti seperti pupuk, benih, nutrisi, dan kebutuhan toko agar keputusan belanja terasa lebih cepat.",
+      href: "/produk",
+      cta: "Buka katalog",
+    },
+    {
+      title: "Pelajari dasar pemakaian sebelum membeli",
+      body: "Gunakan area edukasi untuk memahami konteks penggunaan, perbandingan, dan kebiasaan belanja yang lebih tepat.",
+      href: "/artikel",
+      cta: "Masuk ke edukasi",
+    },
+    {
+      title: "Lanjutkan ke order atau lacak pengiriman",
+      body: "Setelah memilih produk, alur belanja diarahkan ke keranjang, checkout, dan pelacakan pesanan yang lebih jelas.",
+      href: "/lacak-pesanan",
+      cta: "Lacak pesanan",
+    },
+  ];
+  const fallbackEditorial = [
+    {
+      slug: "panduan-memilih-pupuk",
+      title: "Panduan memilih pupuk sesuai kebutuhan tanaman",
+      excerpt:
+        "Mulai dari pemupukan dasar, penguatan akar, sampai kebutuhan nutrisi lanjutan untuk lahan yang berbeda.",
+      published_at: null,
+    },
+    {
+      slug: "dasar-memilih-benih",
+      title: "Cara membaca kualitas benih sebelum membeli",
+      excerpt:
+        "Panduan cepat untuk menilai benih, kesesuaian varietas, dan hal-hal yang perlu diperiksa sebelum checkout.",
+      published_at: null,
+    },
+    {
+      slug: "manajemen-belanja-toko",
+      title: "Belanja kebutuhan kios dan pertanian dengan lebih efisien",
+      excerpt:
+        "Gabungkan kebutuhan toko, stok harian, dan produk inti pertanian dalam ritme belanja yang lebih tertata.",
+      published_at: null,
+    },
+  ];
+  const editorialFeed = articleFeed.items.length ? articleFeed.items : fallbackEditorial;
 
   return (
     <div className="page-stack">
@@ -111,7 +171,26 @@ export default async function HomePage() {
             <span>Jam toko</span>
             <strong>{home.store.operational_hours || "Jam operasional tersedia"}</strong>
           </div>
+          </div>
         </div>
+      </section>
+
+      <section className="section-block">
+        <div className="section-heading">
+          <div>
+            <span className="eyebrow-label">Flow utama</span>
+            <h2>Alur UX yang menghubungkan produk, edukasi, dan aksi belanja.</h2>
+          </div>
+        </div>
+        <div className="feature-grid feature-grid--paths">
+          {knowledgeTracks.map((track) => (
+            <article className="feature-card feature-card--path" key={track.title}>
+              <span className="eyebrow-label">Flow step</span>
+              <strong>{track.title}</strong>
+              <p>{track.body}</p>
+              <Link href={track.href}>{track.cta}</Link>
+            </article>
+          ))}
         </div>
       </section>
 
@@ -198,9 +277,24 @@ export default async function HomePage() {
             <p>Order dan payment flow dirancang agar tetap sejalan dengan SiGe Manajer.</p>
           </article>
           <article className="feature-card">
-            <strong>Siap offline cache</strong>
-            <p>Fondasi web ini sudah menyiapkan konsumsi delta cache dari backend.</p>
+            <strong>Edukasi terintegrasi</strong>
+            <p>Produk dan panduan bisa dibaca dalam flow yang sama agar keputusan beli terasa lebih mantap.</p>
           </article>
+        </div>
+      </section>
+
+      <section className="section-block section-block--contrast">
+        <div className="section-heading">
+          <div>
+            <span className="eyebrow-label">Edukasi & Insight</span>
+            <h2>Konten pendamping yang membuat storefront terasa seperti pusat produk sekaligus pengetahuan.</h2>
+          </div>
+          <Link href="/artikel">Buka edukasi</Link>
+        </div>
+        <div className="article-grid article-grid--editorial">
+          {editorialFeed.map((article) => (
+            <ArticleCard article={article} key={article.slug} />
+          ))}
         </div>
       </section>
 
