@@ -36,11 +36,11 @@ export default async function ProductsPage({
         <h1>
           {activeCategory
             ? `Kategori ${activeCategory.name}`
-            : "Temukan produk yang mudah dicari di layar kecil"}
+            : "Katalog agristore yang lebih mudah dijelajahi"}
         </h1>
         <p>
-          Search, kategori, dan urutan katalog dibuat lebih ringkas agar user bisa cepat
-          menemukan produk lalu langsung menambahkannya ke keranjang.
+          Search, kategori, dan urutan katalog disusun lebih bersih agar user bisa cepat
+          menemukan produk lalu langsung masuk ke alur belanja.
         </p>
       </div>
 
@@ -102,7 +102,7 @@ export default async function ProductsPage({
             <span className="eyebrow-label">Hasil pencarian</span>
             <h2>{products.pagination.count} item ditemukan</h2>
           </div>
-          <span>{search ? `Kata kunci: "${search}"` : "Semua produk aktif"}</span>
+          <span>{search ? `Pencarian: "${search}"` : "Semua produk aktif"}</span>
         </div>
 
         {catalogUnavailable ? (

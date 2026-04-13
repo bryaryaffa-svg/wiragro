@@ -20,8 +20,8 @@ export default async function ArticlesPage({
         <span className="eyebrow-label">Artikel / Blog</span>
         <h1>Konten edukasi pertanian</h1>
         <p>
-          Artikel disusun untuk SEO dan edukasi customer, dengan layout yang lebih rapi dan
-          konsisten dengan storefront produk.
+          Artikel disusun untuk SEO dan edukasi customer, dengan visual yang lebih clean,
+          editorial, dan konsisten dengan storefront produk.
         </p>
       </div>
 

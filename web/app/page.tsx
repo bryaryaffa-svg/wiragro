@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 
 import { ProductCard } from "@/components/product-card";
@@ -15,16 +16,21 @@ export default async function HomePage() {
     storefrontUnavailable = true;
   }
 
+  const heroFeature =
+    home.featured_products[0] ?? home.new_arrivals[0] ?? home.best_sellers[0] ?? null;
+  const heroFeatureImage =
+    heroFeature?.images.find((image) => image.is_primary) ?? heroFeature?.images[0];
+
   return (
     <div className="page-stack">
       <section className="hero-panel">
         <div className="hero-panel__copy">
-          <span className="eyebrow-label">Storefront terhubung pusat</span>
-          <h1>Belanja kebutuhan pertanian dengan tampilan yang lebih rapi, cepat, dan nyaman.</h1>
+          <span className="eyebrow-label">Agricultural storefront</span>
+          <h1>Storefront pertanian yang terasa lebih presisi, modern, dan siap dipakai sehari-hari.</h1>
           <p>
-            Kios Sidomakmur membawa katalog pusat SiGe Manager ke storefront yang ringan
-            dipakai di desktop maupun mobile, dengan pencarian, katalog, dan checkout yang
-            terasa lebih jelas.
+            Kios Sidomakmur menggabungkan katalog pupuk, benih, kebutuhan kios, dan promo
+            toko ke pengalaman belanja yang lebih bersih, cepat, dan terasa premium di
+            desktop maupun mobile.
           </p>
           <div className="hero-panel__actions">
             <Link className="btn btn-primary" href="/produk">
@@ -37,13 +43,13 @@ export default async function HomePage() {
           <form action="/produk" className="header-search header-search--hero">
             <input
               name="q"
-              placeholder="Cari pupuk, benih, pestisida, minyak, gula..."
+              placeholder="Cari pupuk, benih, pestisida, nutrisi, atau kebutuhan toko..."
               type="search"
             />
             <button type="submit">Cari</button>
           </form>
           <div className="hero-panel__chips">
-            {home.category_highlights.map((category) => (
+            {home.category_highlights.slice(0, 4).map((category) => (
               <Link href={`/produk?kategori=${category.slug}`} key={category.slug}>
                 {category.name}
               </Link>
@@ -51,13 +57,50 @@ export default async function HomePage() {
           </div>
         </div>
 
-        <div className="hero-panel__stats">
+        <div className="hero-panel__visual">
+          <article className="hero-showcase hero-showcase--primary">
+            <div className="hero-showcase__media">
+              {heroFeatureImage ? (
+                <Image
+                  alt={heroFeatureImage.alt_text || heroFeature?.name || "Produk unggulan"}
+                  fill
+                  sizes="(max-width: 1024px) 100vw, 34vw"
+                  src={heroFeatureImage.url}
+                />
+              ) : (
+                <div className="product-card__placeholder" />
+              )}
+            </div>
+            <div className="hero-showcase__body">
+              <span className="hero-showcase__kicker">Pilihan unggulan</span>
+              <strong>{heroFeature?.name ?? "Katalog siap dibuka dari storefront pusat"}</strong>
+              <p>
+                {heroFeature?.summary ||
+                  "Mulai dari produk yang paling sering dicari, lalu lanjut ke katalog lengkap dengan pencarian yang lebih cepat."}
+              </p>
+              <div className="hero-showcase__tags">
+                <span>{home.store.name}</span>
+                <span>{home.store.operational_hours || "Jam toko aktif"}</span>
+              </div>
+            </div>
+          </article>
+
+          <article className="hero-showcase hero-showcase--note">
+            <span className="hero-showcase__kicker">Storefront notes</span>
+            <strong>Visual lebih ringan, katalog lebih fokus, dan alur belanja tetap fungsional.</strong>
+            <p>
+              Nuansa agritech yang clean dipakai supaya produk, promo, dan search lebih mudah
+              dibaca sejak layar pertama.
+            </p>
+          </article>
+
+          <div className="hero-panel__stats">
           <div className="stats-card stats-card--highlight">
-            <span>Fokus storefront</span>
+            <span>Store focus</span>
             <strong>Belanja terasa singkat, jelas, dan siap dipakai dari layar kecil.</strong>
           </div>
           <div className="stats-card">
-            <span>Produk aktif</span>
+            <span>Produk tampil</span>
             <strong>{home.featured_products.length + home.new_arrivals.length} item unggulan</strong>
           </div>
           <div className="stats-card">
@@ -65,9 +108,10 @@ export default async function HomePage() {
             <strong>{home.banners.length} slot homepage</strong>
           </div>
           <div className="stats-card">
-            <span>Info toko</span>
+            <span>Jam toko</span>
             <strong>{home.store.operational_hours || "Jam operasional tersedia"}</strong>
           </div>
+        </div>
         </div>
       </section>
 
@@ -93,13 +137,16 @@ export default async function HomePage() {
         <section className="section-block section-block--contrast">
           <div className="section-heading">
             <div>
-              <span className="eyebrow-label">Banner toko</span>
-              <h2>Promo dan pengumuman yang dikelola dari admin.</h2>
+              <span className="eyebrow-label">Store signals</span>
+              <h2>Promo dan pengumuman yang tampil seperti panel informasi agritech modern.</h2>
             </div>
           </div>
           <div className="feature-grid">
             {home.banners.map((banner) => (
-              <article className="feature-card" key={`${banner.title}-${banner.target_url ?? "no-link"}`}>
+              <article
+                className="feature-card feature-card--editorial"
+                key={`${banner.title}-${banner.target_url ?? "no-link"}`}
+              >
                 <strong>{banner.title}</strong>
                 <p>{banner.subtitle || "Banner publik aktif dari backend Laravel SiGe Manager."}</p>
                 {banner.target_url ? <Link href={banner.target_url}>Buka tautan</Link> : null}
@@ -112,13 +159,17 @@ export default async function HomePage() {
       <section className="section-block">
         <div className="section-heading">
           <div>
-            <span className="eyebrow-label">Kategori utama</span>
-            <h2>Pilih alur belanja yang terasa jelas sejak halaman pertama.</h2>
+            <span className="eyebrow-label">Kategori inti</span>
+            <h2>Pilih kategori utama dengan layout yang lebih bersih dan mudah dipindai.</h2>
           </div>
         </div>
         <div className="feature-grid feature-grid--categories">
           {home.category_highlights.map((category) => (
-            <Link className="feature-card feature-card--link" href={`/produk?kategori=${category.slug}`} key={category.slug}>
+            <Link
+              className="feature-card feature-card--link feature-card--category"
+              href={`/produk?kategori=${category.slug}`}
+              key={category.slug}
+            >
               <strong>{category.name}</strong>
               <p>Buka katalog {category.name.toLowerCase()} dengan filter yang lebih fokus.</p>
             </Link>
@@ -129,8 +180,8 @@ export default async function HomePage() {
       <section className="section-block">
         <div className="section-heading">
           <div>
-            <span className="eyebrow-label">Alasan memilih</span>
-            <h2>Rasa marketplace, tapi tetap fokus pada kebutuhan petani dan toko cabang.</h2>
+            <span className="eyebrow-label">Mengapa Sidomakmur</span>
+            <h2>Rasa marketplace yang lebih premium, tetap fokus pada kebutuhan pertanian dan toko cabang.</h2>
           </div>
         </div>
         <div className="feature-grid">
@@ -185,7 +236,7 @@ export default async function HomePage() {
       <section className="section-block section-block--contrast">
         <div className="section-heading">
           <div>
-            <span className="eyebrow-label">Promo pilihan</span>
+            <span className="eyebrow-label">Sorotan agristore</span>
             <h2>Produk yang sedang ditonjolkan dari data backend.</h2>
           </div>
           <Link href="/produk?sort=latest">Lihat katalog</Link>

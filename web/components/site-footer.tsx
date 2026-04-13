@@ -4,15 +4,16 @@ export function SiteFooter() {
   return (
     <footer className="site-footer">
       <div className="site-footer__brand">
-        <span className="brand-mark__eyebrow">Storefront pertanian terhubung pusat</span>
+        <span className="brand-mark__eyebrow">Agri commerce experience</span>
         <h2>Kios Sidomakmur</h2>
         <p>
           Kanal belanja online Sidomakmur untuk kebutuhan pertanian, toko, dan rumah
-          tangga dengan alur order yang terhubung ke SiGe Manager.
+          tangga dengan pengalaman visual yang lebih modern dan alur order yang tetap
+          terhubung ke SiGe Manager.
         </p>
         <div className="site-footer__badges">
-          <span>Katalog pusat</span>
-          <span>Mobile friendly</span>
+          <span>Editorial storefront</span>
+          <span>Mobile refined</span>
           <span>Checkout praktis</span>
         </div>
       </div>
