@@ -5,6 +5,10 @@ import { useDeferredValue, useEffect, useMemo, useState, useTransition } from "r
 
 import { useCart } from "@/components/cart/cart-provider";
 import {
+  GooglePlacesAddressAssist,
+  type GoogleAddressSelection,
+} from "@/components/google-places-address-assist";
+import {
   createDuitkuPayment,
   getShippingRates,
   searchShippingDestinations,
@@ -289,6 +293,24 @@ export function CheckoutForm({ store }: { store?: StoreProfile | null }) {
     }));
   };
 
+  const handleGoogleAddressSelect = (selection: GoogleAddressSelection) => {
+    setSelectedDestination(null);
+    setDestinationResults([]);
+    setShippingRates([]);
+    setSelectedShippingRateId(null);
+    setShippingRatesError(null);
+    setDestinationError(null);
+    setDestinationQuery(selection.destinationQuery);
+    setForm((current) => ({
+      ...current,
+      addressLine: selection.addressLine || current.addressLine,
+      district: selection.district || current.district,
+      city: selection.city || current.city,
+      province: selection.province || current.province,
+      postalCode: selection.postalCode || current.postalCode,
+    }));
+  };
+
   return (
     <section className="page-stack">
       <div className="page-intro page-intro--compact">
@@ -490,6 +512,11 @@ export function CheckoutForm({ store }: { store?: StoreProfile | null }) {
                     placeholder="Nama jalan, nomor, patokan, dan detail alamat"
                   />
                 </label>
+
+                <GooglePlacesAddressAssist
+                  disabled={!isDelivery}
+                  onSelect={handleGoogleAddressSelect}
+                />
 
                 <div className="destination-search">
                   <label className="catalog-search-card__field">

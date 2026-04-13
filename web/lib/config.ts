@@ -44,3 +44,6 @@ export const siteUrl =
 
 export const googleClientId =
   process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ?? "";
+
+export const googleMapsApiKey =
+  process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? "";

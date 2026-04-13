@@ -1275,6 +1275,40 @@ textarea {
   gap: 0.8rem;
 }
 
+.places-assist {
+  display: grid;
+  gap: 0.75rem;
+  padding: 1rem;
+  border: 1px solid rgba(24, 40, 23, 0.08);
+  border-radius: 22px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(245, 247, 239, 0.9)),
+    radial-gradient(circle at top right, rgba(200, 221, 112, 0.14), transparent 28%);
+}
+
+.places-assist__header {
+  display: grid;
+  gap: 0.18rem;
+}
+
+.places-assist__header strong {
+  font-size: 0.98rem;
+}
+
+.places-assist__field {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.places-assist__widget {
+  min-height: 56px;
+}
+
+.places-assist__widget gmp-place-autocomplete {
+  display: block;
+  width: 100%;
+}
+
 .destination-results,
 .shipping-rate-grid {
   grid-template-columns: 1fr;

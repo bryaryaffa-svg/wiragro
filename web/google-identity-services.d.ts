@@ -37,6 +37,11 @@ declare global {
           disableAutoSelect: () => void;
         };
       };
+      maps: {
+        importLibrary: (
+          name: "places",
+        ) => Promise<google.maps.PlacesLibrary>;
+      };
     };
   }
 
@@ -52,5 +57,36 @@ declare global {
     getNotDisplayedReason?: () => string;
     getSkippedReason?: () => string;
     getDismissedReason?: () => string;
+  }
+
+  namespace google.maps {
+    interface PlacesLibrary {
+      PlaceAutocompleteElement: typeof google.maps.places.PlaceAutocompleteElement;
+    }
+  }
+
+  namespace google.maps.places {
+    class PlaceAutocompleteElement extends HTMLElement {}
+
+    interface PlaceAutocompleteSelectEvent extends Event {
+      placePrediction: PlacePrediction;
+    }
+
+    interface PlacePrediction {
+      toPlace(): Place;
+    }
+
+    interface Place {
+      formattedAddress?: string;
+      displayName?: string;
+      addressComponents?: AddressComponent[];
+      fetchFields: (request: { fields: string[] }) => Promise<void>;
+    }
+
+    interface AddressComponent {
+      longText?: string;
+      shortText?: string;
+      types: string[];
+    }
   }
 }
