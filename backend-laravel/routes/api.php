@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\Customer\CustomerWishlistController;
 use App\Http\Controllers\Api\Customer\GuestCartController;
 use App\Http\Controllers\Api\Customer\GuestCheckoutController;
 use App\Http\Controllers\Api\Customer\GuestOrderController;
+use App\Http\Controllers\Api\Customer\ShippingController;
 use App\Http\Controllers\Api\PublicApi\PublicBannerController;
 use App\Http\Controllers\Api\PublicApi\PublicCategoryController;
 use App\Http\Controllers\Api\PublicApi\PublicProductController;
@@ -35,6 +36,8 @@ Route::prefix('v1/customer')->group(function (): void {
     Route::get('/carts/current', [GuestCartController::class, 'current']);
     Route::post('/carts/items', [GuestCartController::class, 'addItem']);
     Route::patch('/carts/items/{item}', [GuestCartController::class, 'updateItem']);
+    Route::get('/shipping/destinations', [ShippingController::class, 'destinations']);
+    Route::post('/shipping/rates', [ShippingController::class, 'rates']);
 
     Route::post('/checkout/guest', [GuestCheckoutController::class, 'store']);
     Route::post('/payments/duitku/create', [CustomerPaymentController::class, 'create']);

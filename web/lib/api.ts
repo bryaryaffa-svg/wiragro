@@ -146,6 +146,7 @@ export interface CartPayload {
   subtotal: string;
   discount_total: string;
   grand_total: string;
+  total_weight_grams?: number;
   items: Array<{
     id: string;
     product_id: string;
@@ -155,6 +156,7 @@ export interface CartPayload {
       amount?: string;
       price_type?: string;
     };
+    weight_grams?: number;
     promotion_snapshot: {
       matched_promotions?: Array<{
         promotion_code: string;
@@ -225,16 +227,45 @@ export interface CheckoutResponse {
     order_number: string;
     status: string;
     payment_status: string;
+    shipping_total?: string;
     grand_total: string;
     auto_cancel_at: string;
     shipping_method?: string;
     payment_method?: string;
+    shipping_service?: string;
   };
   payment_instruction: {
     method: string;
     status: string;
   };
   next_action: string;
+}
+
+export interface ShippingDestination {
+  id: string;
+  label: string;
+  province_name?: string | null;
+  city_name?: string | null;
+  district_name?: string | null;
+  subdistrict_name?: string | null;
+  zip_code?: string | null;
+}
+
+export interface ShippingRateItem {
+  id: string;
+  courier_code: string;
+  courier_name: string;
+  service_code: string;
+  service_name: string;
+  description?: string | null;
+  cost: string;
+  etd?: string | null;
+}
+
+export interface ShippingRatesPayload {
+  destination_id: string;
+  total_weight_grams: number;
+  items: ShippingRateItem[];
 }
 
 export interface DuitkuCreateResponse {
@@ -306,6 +337,7 @@ interface LaravelProductDto {
   slug: string;
   description?: string | null;
   unit: string;
+  weight_grams?: number | string | null;
   price: string | number;
   promo_price?: string | number | null;
   reseller_price?: string | number | null;
@@ -556,7 +588,7 @@ function mapProductSummary(dto: LaravelProductDto): ProductSummary {
     description: description || null,
     product_type: dto.category?.name ?? "Produk",
     unit: dto.unit,
-    weight_grams: "0",
+    weight_grams: String(dto.weight_grams ?? 0),
     badges: {
       featured: isPromo,
       new_arrival: isNewArrival,
@@ -1056,6 +1088,22 @@ export async function submitGuestCheckout(payload: {
   city?: string;
   province?: string;
   postalCode?: string;
+  shippingSelection?: {
+    destinationId: string;
+    destinationLabel: string;
+    provinceName?: string | null;
+    cityName?: string | null;
+    districtName?: string | null;
+    subdistrictName?: string | null;
+    zipCode?: string | null;
+    courierCode: string;
+    courierName: string;
+    serviceCode: string;
+    serviceName: string;
+    description?: string | null;
+    cost: string;
+    etd?: string | null;
+  };
   paymentMethod: string;
   notes?: string;
 }) {
@@ -1083,8 +1131,52 @@ export async function submitGuestCheckout(payload: {
               postal_code: payload.postalCode,
             }
           : null,
+      shipping:
+        payload.shippingMethod === "delivery" && payload.shippingSelection
+          ? {
+              destination_id: payload.shippingSelection.destinationId,
+              destination_label: payload.shippingSelection.destinationLabel,
+              province_name: payload.shippingSelection.provinceName ?? null,
+              city_name: payload.shippingSelection.cityName ?? null,
+              district_name: payload.shippingSelection.districtName ?? null,
+              subdistrict_name: payload.shippingSelection.subdistrictName ?? null,
+              zip_code: payload.shippingSelection.zipCode ?? null,
+              courier_code: payload.shippingSelection.courierCode,
+              courier_name: payload.shippingSelection.courierName,
+              service_code: payload.shippingSelection.serviceCode,
+              service_name: payload.shippingSelection.serviceName,
+              description: payload.shippingSelection.description ?? null,
+              cost: payload.shippingSelection.cost,
+              etd: payload.shippingSelection.etd ?? null,
+            }
+          : null,
       payment_method: payload.paymentMethod,
       notes: payload.notes || null,
+    }),
+  });
+}
+
+export async function searchShippingDestinations(search: string, limit = 8) {
+  return fetchCustomerClientJson<{ items: ShippingDestination[] }>(
+    "/customer/shipping/destinations",
+    undefined,
+    { search, limit },
+  );
+}
+
+export async function getShippingRates(
+  cartId: string,
+  guestToken: string,
+  destinationId: string,
+  courier?: string,
+) {
+  return fetchCustomerClientJson<ShippingRatesPayload>("/customer/shipping/rates", {
+    method: "POST",
+    body: JSON.stringify({
+      cart_id: cartId,
+      guest_token: guestToken,
+      destination_id: destinationId,
+      courier: courier ?? null,
     }),
   });
 }

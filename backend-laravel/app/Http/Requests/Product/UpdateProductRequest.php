@@ -20,6 +20,7 @@ class UpdateProductRequest extends FormRequest
             'name' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
             'unit' => ['required', 'string', 'max:50'],
+            'weight_grams' => ['nullable', 'integer', 'min:1'],
             'price' => ['required', 'numeric', 'min:0'],
             'promo_price' => ['nullable', 'numeric', 'min:0'],
             'reseller_price' => ['nullable', 'numeric', 'min:0'],

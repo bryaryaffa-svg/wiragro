@@ -18,6 +18,7 @@ class Product extends Model
         'slug',
         'description',
         'unit',
+        'weight_grams',
         'price',
         'promo_price',
         'reseller_price',
@@ -36,6 +37,7 @@ class Product extends Model
             'price' => 'decimal:2',
             'promo_price' => 'decimal:2',
             'reseller_price' => 'decimal:2',
+            'weight_grams' => 'integer',
             'is_active' => 'boolean',
         ];
     }

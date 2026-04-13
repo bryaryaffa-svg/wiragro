@@ -14,4 +14,5 @@ return [
         explode(',', env('CHECKOUT_PAYMENT_METHODS', 'duitku-va,COD'))
     ))),
     'invoice_source' => env('CHECKOUT_INVOICE_SOURCE', 'STORE'),
+    'shipping_provider' => env('CHECKOUT_SHIPPING_PROVIDER', 'rajaongkir'),
 ];

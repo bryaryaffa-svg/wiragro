@@ -1248,6 +1248,56 @@ textarea {
   gap: 1.35rem;
 }
 
+.destination-search,
+.destination-results,
+.shipping-rate-grid {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.destination-results,
+.shipping-rate-grid {
+  grid-template-columns: 1fr;
+}
+
+.destination-option,
+.shipping-rate-card {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: center;
+  width: 100%;
+  padding: 0.95rem 1rem;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+
+.destination-option:hover,
+.shipping-rate-card:hover,
+.destination-option.is-selected,
+.shipping-rate-card.is-selected {
+  border-color: rgba(116, 195, 101, 0.42);
+  box-shadow: 0 12px 28px rgba(47, 98, 58, 0.09);
+  transform: translateY(-1px);
+}
+
+.destination-option strong,
+.shipping-rate-card strong {
+  display: block;
+}
+
+.destination-option span,
+.shipping-rate-card span {
+  display: block;
+  color: var(--text-soft);
+  font-size: 0.84rem;
+}
+
 .google-auth-block {
   display: grid;
   gap: 0.9rem;
@@ -1550,6 +1600,12 @@ textarea {
 
   .cart-line {
     flex-direction: column;
+  }
+
+  .destination-option,
+  .shipping-rate-card {
+    flex-direction: column;
+    align-items: flex-start;
   }
 
   .cart-line__summary {

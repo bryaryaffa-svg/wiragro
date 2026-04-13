@@ -1,10 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useTransition } from "react";
+import { useDeferredValue, useEffect, useMemo, useState, useTransition } from "react";
 
 import { useCart } from "@/components/cart/cart-provider";
-import { createDuitkuPayment, submitGuestCheckout } from "@/lib/api";
+import {
+  createDuitkuPayment,
+  getShippingRates,
+  searchShippingDestinations,
+  submitGuestCheckout,
+  type ShippingDestination,
+  type ShippingRateItem,
+} from "@/lib/api";
 import { formatCurrency } from "@/lib/format";
 
 const initialState = {
@@ -21,7 +28,13 @@ const initialState = {
   notes: "",
 };
 
-function buildValidationErrors(form: typeof initialState) {
+function buildValidationErrors(
+  form: typeof initialState,
+  options: {
+    selectedDestination: ShippingDestination | null;
+    selectedRate: ShippingRateItem | null;
+  },
+) {
   const issues: string[] = [];
 
   if (!form.fullName.trim()) {
@@ -37,20 +50,48 @@ function buildValidationErrors(form: typeof initialState) {
     if (!form.addressLine.trim()) {
       issues.push("Alamat lengkap wajib diisi untuk pengiriman.");
     }
+    if (!options.selectedDestination) {
+      issues.push("Pilih tujuan pengiriman dari hasil pencarian ongkir.");
+    }
     if (!form.city.trim()) {
       issues.push("Kota wajib diisi untuk pengiriman.");
     }
     if (!form.province.trim()) {
       issues.push("Provinsi wajib diisi untuk pengiriman.");
     }
+    if (!options.selectedRate) {
+      issues.push("Pilih layanan pengiriman sebelum checkout.");
+    }
   }
 
   return issues;
 }
 
+function buildShippingServiceLabel(rate: ShippingRateItem) {
+  return `${rate.courier_name} ${rate.service_code}`;
+}
+
+function buildShippingEtaLabel(rate: ShippingRateItem) {
+  if (!rate.etd) {
+    return "Estimasi mengikuti kurir";
+  }
+
+  return `Estimasi ${rate.etd}`;
+}
+
 export function CheckoutForm() {
   const { cart, clearCart } = useCart();
   const [form, setForm] = useState(initialState);
+  const [destinationQuery, setDestinationQuery] = useState("");
+  const deferredDestinationQuery = useDeferredValue(destinationQuery.trim());
+  const [destinationResults, setDestinationResults] = useState<ShippingDestination[]>([]);
+  const [selectedDestination, setSelectedDestination] = useState<ShippingDestination | null>(null);
+  const [shippingRates, setShippingRates] = useState<ShippingRateItem[]>([]);
+  const [selectedShippingRateId, setSelectedShippingRateId] = useState<string | null>(null);
+  const [isSearchingDestinations, setIsSearchingDestinations] = useState(false);
+  const [isLoadingRates, setIsLoadingRates] = useState(false);
+  const [destinationError, setDestinationError] = useState<string | null>(null);
+  const [shippingRatesError, setShippingRatesError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<{
     orderNumber: string;
@@ -59,9 +100,157 @@ export function CheckoutForm() {
     nextAction: string;
     total: string;
     customerPhone: string;
+    shippingService?: string | null;
+    shippingTotal?: string | null;
     paymentSetupError?: string | null;
   } | null>(null);
   const [isPending, startTransition] = useTransition();
+
+  const isDelivery = form.shippingMethod === "delivery";
+  const selectedShippingRate = useMemo(
+    () => shippingRates.find((item) => item.id === selectedShippingRateId) ?? null,
+    [shippingRates, selectedShippingRateId],
+  );
+
+  const validationErrors = buildValidationErrors(form, {
+    selectedDestination,
+    selectedRate: selectedShippingRate,
+  });
+  const canSubmit = validationErrors.length === 0 && !isPending && !isLoadingRates;
+  const submitLabel =
+    form.paymentMethod === "COD" ? "Buat order COD" : "Buat order dan lanjut bayar";
+  const shippingTotal = isDelivery ? selectedShippingRate?.cost ?? "0" : "0";
+  const orderGrandTotal =
+    Number.parseFloat(cart?.grand_total ?? "0") + Number.parseFloat(shippingTotal);
+
+  useEffect(() => {
+    if (!isDelivery) {
+      setDestinationResults([]);
+      setDestinationError(null);
+      setShippingRatesError(null);
+      return;
+    }
+
+    if (
+      selectedDestination &&
+      deferredDestinationQuery !== "" &&
+      deferredDestinationQuery === selectedDestination.label
+    ) {
+      setDestinationResults([]);
+      setDestinationError(null);
+      return;
+    }
+
+    if (deferredDestinationQuery.length < 3) {
+      setDestinationResults([]);
+      if (deferredDestinationQuery.length === 0) {
+        setDestinationError(null);
+      }
+      return;
+    }
+
+    let isCancelled = false;
+    const timeoutId = window.setTimeout(async () => {
+      setIsSearchingDestinations(true);
+      setDestinationError(null);
+
+      try {
+        const response = await searchShippingDestinations(deferredDestinationQuery);
+        if (isCancelled) {
+          return;
+        }
+
+        setDestinationResults(response.items);
+        if (response.items.length === 0) {
+          setDestinationError("Tujuan belum ditemukan. Coba kata kunci kecamatan atau kota lain.");
+        }
+      } catch (searchError) {
+        if (isCancelled) {
+          return;
+        }
+
+        setDestinationResults([]);
+        setDestinationError(
+          searchError instanceof Error
+            ? searchError.message
+            : "Pencarian tujuan belum berhasil.",
+        );
+      } finally {
+        if (!isCancelled) {
+          setIsSearchingDestinations(false);
+        }
+      }
+    }, 260);
+
+    return () => {
+      isCancelled = true;
+      window.clearTimeout(timeoutId);
+    };
+  }, [deferredDestinationQuery, isDelivery, selectedDestination]);
+
+  useEffect(() => {
+    if (!isDelivery || !selectedDestination || !cart?.guest_token) {
+      setShippingRates([]);
+      setSelectedShippingRateId(null);
+      setShippingRatesError(null);
+      setIsLoadingRates(false);
+      return;
+    }
+
+    let isCancelled = false;
+
+    const loadRates = async () => {
+      setIsLoadingRates(true);
+      setShippingRatesError(null);
+
+      try {
+        const response = await getShippingRates(
+          cart.id,
+          cart.guest_token ?? "",
+          selectedDestination.id,
+        );
+
+        if (isCancelled) {
+          return;
+        }
+
+        setShippingRates(response.items);
+        setSelectedShippingRateId((current) => {
+          if (current && response.items.some((item) => item.id === current)) {
+            return current;
+          }
+
+          return response.items[0]?.id ?? null;
+        });
+
+        if (response.items.length === 0) {
+          setShippingRatesError("Belum ada layanan kirim yang tersedia untuk tujuan ini.");
+        }
+      } catch (ratesError) {
+        if (isCancelled) {
+          return;
+        }
+
+        setShippingRates([]);
+        setSelectedShippingRateId(null);
+        setShippingRatesError(
+          ratesError instanceof Error
+            ? ratesError.message
+            : "Tarif pengiriman belum bisa dihitung.",
+        );
+      } finally {
+        if (!isCancelled) {
+          setIsLoadingRates(false);
+        }
+      }
+    };
+
+    void loadRates();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [cart?.guest_token, cart?.id, isDelivery, selectedDestination]);
 
   if (!cart || cart.items.length === 0) {
     return (
@@ -81,11 +270,19 @@ export function CheckoutForm() {
     );
   }
 
-  const isDelivery = form.shippingMethod === "delivery";
-  const validationErrors = buildValidationErrors(form);
-  const canSubmit = validationErrors.length === 0 && !isPending;
-  const submitLabel =
-    form.paymentMethod === "COD" ? "Buat order COD" : "Buat order dan lanjut bayar";
+  const handleDestinationSelect = (destination: ShippingDestination) => {
+    setSelectedDestination(destination);
+    setDestinationQuery(destination.label);
+    setDestinationResults([]);
+    setDestinationError(null);
+    setForm((current) => ({
+      ...current,
+      district: destination.district_name ?? current.district,
+      city: destination.city_name ?? current.city,
+      province: destination.province_name ?? current.province,
+      postalCode: destination.zip_code ?? current.postalCode,
+    }));
+  };
 
   return (
     <section className="page-stack">
@@ -93,7 +290,7 @@ export function CheckoutForm() {
         <span className="eyebrow-label">Checkout guest</span>
         <h1>Selesaikan pesanan tanpa alur yang membingungkan</h1>
         <p>
-          Isi data pelanggan, pilih pengiriman dan pembayaran, lalu storefront akan
+          Isi data pelanggan, pilih tujuan dan layanan kirim, lalu storefront akan
           meneruskan order ke backend yang sama dengan katalog publik.
         </p>
       </div>
@@ -105,7 +302,10 @@ export function CheckoutForm() {
             event.preventDefault();
             setError(null);
 
-            const issues = buildValidationErrors(form);
+            const issues = buildValidationErrors(form, {
+              selectedDestination,
+              selectedRate: selectedShippingRate,
+            });
             if (issues.length > 0) {
               setError(issues[0]);
               return;
@@ -125,6 +325,25 @@ export function CheckoutForm() {
                   city: form.city.trim(),
                   province: form.province.trim(),
                   postalCode: form.postalCode.trim(),
+                  shippingSelection:
+                    isDelivery && selectedDestination && selectedShippingRate
+                      ? {
+                          destinationId: selectedDestination.id,
+                          destinationLabel: selectedDestination.label,
+                          provinceName: selectedDestination.province_name ?? null,
+                          cityName: selectedDestination.city_name ?? null,
+                          districtName: selectedDestination.district_name ?? null,
+                          subdistrictName: selectedDestination.subdistrict_name ?? null,
+                          zipCode: selectedDestination.zip_code ?? null,
+                          courierCode: selectedShippingRate.courier_code,
+                          courierName: selectedShippingRate.courier_name,
+                          serviceCode: selectedShippingRate.service_code,
+                          serviceName: selectedShippingRate.service_name,
+                          description: selectedShippingRate.description ?? null,
+                          cost: selectedShippingRate.cost,
+                          etd: selectedShippingRate.etd ?? null,
+                        }
+                      : undefined,
                   paymentMethod: form.paymentMethod,
                   notes: form.notes.trim(),
                 });
@@ -137,6 +356,8 @@ export function CheckoutForm() {
                   customerPhone: form.phone.trim(),
                   paymentUrl: null,
                   paymentSetupError: null,
+                  shippingService: checkout.order.shipping_service ?? null,
+                  shippingTotal: checkout.order.shipping_total ?? null,
                 };
 
                 clearCart();
@@ -231,7 +452,7 @@ export function CheckoutForm() {
                   type="radio"
                 />
                 <strong>Pengiriman</strong>
-                <span>Isi alamat lengkap agar toko bisa memproses order.</span>
+                <span>Isi alamat lengkap, pilih tujuan, lalu cek layanan kurir yang tersedia.</span>
               </label>
               <label className={`choice-card ${!isDelivery ? "is-selected" : ""}`}>
                 <input
@@ -264,6 +485,59 @@ export function CheckoutForm() {
                     placeholder="Nama jalan, nomor, patokan, dan detail alamat"
                   />
                 </label>
+
+                <div className="destination-search">
+                  <label className="catalog-search-card__field">
+                    <span>Cari tujuan pengiriman</span>
+                    <input
+                      value={destinationQuery}
+                      onChange={(event) => {
+                        const nextValue = event.target.value;
+
+                        setDestinationQuery(nextValue);
+                        setSelectedDestination(null);
+                        setShippingRates([]);
+                        setSelectedShippingRateId(null);
+                        setShippingRatesError(null);
+                        if (nextValue.trim().length < 3) {
+                          setDestinationResults([]);
+                        }
+                      }}
+                      placeholder="Cari kecamatan, kota, atau kode pos"
+                    />
+                  </label>
+
+                  {isSearchingDestinations ? (
+                    <p className="inline-note">Mencari tujuan pengiriman...</p>
+                  ) : null}
+
+                  {destinationError ? <p className="form-error">{destinationError}</p> : null}
+
+                  {destinationResults.length > 0 ? (
+                    <div className="destination-results">
+                      {destinationResults.map((destination) => (
+                        <button
+                          className={`destination-option ${
+                            selectedDestination?.id === destination.id ? "is-selected" : ""
+                          }`}
+                          key={destination.id}
+                          onClick={(event) => {
+                            event.preventDefault();
+                            handleDestinationSelect(destination);
+                          }}
+                          type="button"
+                        >
+                          <strong>{destination.label}</strong>
+                          <span>
+                            {destination.district_name ?? "Kecamatan"} •{" "}
+                            {destination.city_name ?? "Kota"}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  ) : null}
+                </div>
+
                 <div className="grid-two">
                   <label>
                     Kecamatan
@@ -316,6 +590,56 @@ export function CheckoutForm() {
                     />
                   </label>
                 </div>
+
+                <div className="form-section">
+                  <div className="form-section__header">
+                    <span className="eyebrow-label">Ongkir</span>
+                    <h2>Pilih layanan kirim</h2>
+                  </div>
+
+                  {selectedDestination ? (
+                    <div className="panel-card panel-card--inline">
+                      Tujuan terpilih: <strong>{selectedDestination.label}</strong>
+                    </div>
+                  ) : (
+                    <div className="panel-card panel-card--inline">
+                      Pilih tujuan pengiriman dulu agar storefront bisa mengambil tarif ongkir.
+                    </div>
+                  )}
+
+                  {isLoadingRates ? (
+                    <p className="inline-note">Menghitung tarif pengiriman...</p>
+                  ) : null}
+
+                  {shippingRatesError ? <p className="form-error">{shippingRatesError}</p> : null}
+
+                  {shippingRates.length > 0 ? (
+                    <div className="shipping-rate-grid">
+                      {shippingRates.map((rate) => (
+                        <button
+                          className={`shipping-rate-card ${
+                            selectedShippingRateId === rate.id ? "is-selected" : ""
+                          }`}
+                          key={rate.id}
+                          onClick={(event) => {
+                            event.preventDefault();
+                            setSelectedShippingRateId(rate.id);
+                          }}
+                          type="button"
+                        >
+                          <div>
+                            <strong>{buildShippingServiceLabel(rate)}</strong>
+                            <span>{rate.service_name}</span>
+                          </div>
+                          <div>
+                            <strong>{formatCurrency(rate.cost)}</strong>
+                            <span>{buildShippingEtaLabel(rate)}</span>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  ) : null}
+                </div>
               </>
             ) : (
               <div className="panel-card panel-card--inline">
@@ -331,7 +655,9 @@ export function CheckoutForm() {
               <h2>Tentukan cara bayar</h2>
             </div>
             <div className="choice-grid">
-              <label className={`choice-card ${form.paymentMethod === "duitku-va" ? "is-selected" : ""}`}>
+              <label
+                className={`choice-card ${form.paymentMethod === "duitku-va" ? "is-selected" : ""}`}
+              >
                 <input
                   checked={form.paymentMethod === "duitku-va"}
                   name="paymentMethod"
@@ -378,6 +704,10 @@ export function CheckoutForm() {
             <div className="success-card">
               <strong>Order {result.orderNumber} berhasil dibuat</strong>
               <p>Total: {formatCurrency(result.total)}</p>
+              {result.shippingService ? <p>Layanan kirim: {result.shippingService}</p> : null}
+              {result.shippingTotal ? (
+                <p>Ongkir: {formatCurrency(result.shippingTotal)}</p>
+              ) : null}
               <p>Status pembayaran: {result.paymentStatus}</p>
               {result.paymentSetupError ? (
                 <p className="form-error">
@@ -431,12 +761,18 @@ export function CheckoutForm() {
             <span>Diskon</span>
             <strong>{formatCurrency(cart.discount_total)}</strong>
           </div>
+          <div className="summary-row">
+            <span>Ongkir</span>
+            <strong>{isDelivery ? formatCurrency(shippingTotal) : "Diambil di toko"}</strong>
+          </div>
           <div className="summary-row summary-row--total">
             <span>Total</span>
-            <strong>{formatCurrency(cart.grand_total)}</strong>
+            <strong>{formatCurrency(orderGrandTotal)}</strong>
           </div>
           <div className="panel-card panel-card--inline">
-            Tombol submit hanya aktif jika data inti pelanggan dan pengiriman sudah lengkap.
+            {isDelivery
+              ? "Tombol submit aktif setelah data penerima, tujuan, dan layanan kirim sudah lengkap."
+              : "Untuk pickup, cukup lengkapi data penerima lalu lanjutkan checkout."}
           </div>
         </aside>
       </div>

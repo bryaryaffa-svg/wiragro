@@ -17,6 +17,10 @@ use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 class CustomerCommerceService
 {
+    public function __construct(
+        private readonly RajaOngkirService $rajaOngkir,
+    ) {}
+
     public function createGuestCart(string $storeCode): Cart
     {
         $this->assertStoreIsActive($storeCode);
@@ -115,6 +119,24 @@ class CustomerCommerceService
         return $this->freshCart($cart);
     }
 
+    public function quoteGuestShippingRates(
+        Cart $cart,
+        string $destinationId,
+        ?string $courier = null,
+    ): array {
+        $this->assertCartEditable($cart);
+        $this->assertCartHasItems($cart);
+
+        $totalWeight = $this->calculateCartWeight($cart);
+        $items = $this->rajaOngkir->calculateDomesticCost($destinationId, $totalWeight, $courier);
+
+        return [
+            'destination_id' => $destinationId,
+            'total_weight_grams' => $totalWeight,
+            'items' => $items,
+        ];
+    }
+
     public function checkoutGuest(Cart $cart, array $payload): array
     {
         $this->assertCartEditable($cart);
@@ -122,14 +144,43 @@ class CustomerCommerceService
 
         $shippingMethod = $payload['shipping_method'];
         $paymentMethod = $payload['payment_method'];
+        $selectedShipping = $shippingMethod === 'delivery'
+            ? $this->resolveSelectedDeliveryRate($cart, $payload['shipping'] ?? [])
+            : null;
+        $shippingTotal = $selectedShipping ? (float) $selectedShipping['cost'] : 0.0;
+        $grandTotal = (float) $cart->grand_total + $shippingTotal;
 
         $this->assertShippingMethodAllowed($shippingMethod);
         $this->assertPaymentMethodAllowed($paymentMethod);
 
-        $order = DB::transaction(function () use ($cart, $payload, $paymentMethod, $shippingMethod): Order {
+        $order = DB::transaction(function () use (
+            $cart,
+            $payload,
+            $paymentMethod,
+            $shippingMethod,
+            $selectedShipping,
+            $shippingTotal,
+            $grandTotal
+        ): Order {
             $customerPayload = $payload['customer'];
             $normalizedPhone = $this->normalizePhone($customerPayload['phone']);
             $normalizedEmail = $this->normalizeEmail($customerPayload['email'] ?? null);
+            $addressSnapshot = null;
+
+            if ($shippingMethod === 'delivery') {
+                $addressSnapshot = array_merge($payload['address'] ?? [], [
+                    'destination' => [
+                        'id' => (string) ($payload['shipping']['destination_id'] ?? ''),
+                        'label' => $payload['shipping']['destination_label'] ?? null,
+                        'province_name' => $payload['shipping']['province_name'] ?? null,
+                        'city_name' => $payload['shipping']['city_name'] ?? null,
+                        'district_name' => $payload['shipping']['district_name'] ?? null,
+                        'subdistrict_name' => $payload['shipping']['subdistrict_name'] ?? null,
+                        'zip_code' => $payload['shipping']['zip_code'] ?? null,
+                    ],
+                    'shipping' => $selectedShipping,
+                ]);
+            }
 
             $customer = Customer::query()->firstOrCreate(
                 ['phone' => $normalizedPhone],
@@ -173,12 +224,12 @@ class CustomerCommerceService
                 'customer_full_name' => $customerPayload['full_name'],
                 'customer_phone' => $normalizedPhone,
                 'customer_email' => $normalizedEmail,
-                'address_snapshot' => $shippingMethod === 'delivery' ? ($payload['address'] ?? null) : null,
+                'address_snapshot' => $addressSnapshot,
                 'notes' => $payload['notes'] ?? null,
                 'subtotal' => $cart->subtotal,
                 'discount_total' => $cart->discount_total,
-                'shipping_total' => 0,
-                'grand_total' => $cart->grand_total,
+                'shipping_total' => $shippingTotal,
+                'grand_total' => $grandTotal,
                 'auto_cancel_at' => now()->addHours(config('storefront.order_auto_cancel_hours', 24)),
             ]);
 
@@ -241,6 +292,11 @@ class CustomerCommerceService
                 'shipment_number' => null,
                 'status' => null,
                 'tracking_number' => null,
+                'courier_code' => data_get($order->address_snapshot, 'shipping.courier_code'),
+                'courier_name' => data_get($order->address_snapshot, 'shipping.courier_name'),
+                'service_code' => data_get($order->address_snapshot, 'shipping.service_code'),
+                'service_name' => data_get($order->address_snapshot, 'shipping.service_name'),
+                'etd' => data_get($order->address_snapshot, 'shipping.etd'),
             ],
             'invoices' => [],
         ];
@@ -281,6 +337,11 @@ class CustomerCommerceService
                 'tracking_number' => null,
                 'delivery_method' => $order->shipping_method,
                 'pickup_store_code' => $order->pickup_store_code,
+                'courier_code' => data_get($order->address_snapshot, 'shipping.courier_code'),
+                'courier_name' => data_get($order->address_snapshot, 'shipping.courier_name'),
+                'service_code' => data_get($order->address_snapshot, 'shipping.service_code'),
+                'service_name' => data_get($order->address_snapshot, 'shipping.service_name'),
+                'etd' => data_get($order->address_snapshot, 'shipping.etd'),
             ],
             'payment' => [
                 'reference' => null,
@@ -324,6 +385,7 @@ class CustomerCommerceService
             'subtotal' => $this->decimalString($cart->subtotal),
             'discount_total' => $this->decimalString($cart->discount_total),
             'grand_total' => $this->decimalString($cart->grand_total),
+            'total_weight_grams' => $this->calculateCartWeight($cart),
             'items' => $cart->items->map(function (CartItem $item): array {
                 $product = $item->product;
 
@@ -336,6 +398,7 @@ class CustomerCommerceService
                         'amount' => $this->decimalString($item->unit_price),
                         'price_type' => $item->price_type,
                     ],
+                    'weight_grams' => (int) ($product?->weight_grams ?? config('rajaongkir.default_weight_grams', 1000)),
                     'promotion_snapshot' => [
                         'matched_promotions' => $item->promotion_snapshot['matched_promotions'] ?? [],
                     ],
@@ -353,10 +416,12 @@ class CustomerCommerceService
             'order_number' => $order->order_number,
             'status' => $order->status,
             'payment_status' => $order->payment_status,
+            'shipping_total' => $this->decimalString($order->shipping_total),
             'grand_total' => $this->decimalString($order->grand_total),
             'auto_cancel_at' => optional($order->auto_cancel_at)?->toIso8601String(),
             'shipping_method' => $order->shipping_method,
             'payment_method' => $order->payment_method,
+            'shipping_service' => data_get($order->address_snapshot, 'shipping.service_name'),
             'invoice_source' => config('storefront.invoice_source', 'STORE'),
             'customer_role' => 'guest',
         ];
@@ -403,9 +468,63 @@ class CustomerCommerceService
         ];
     }
 
+    private function resolveSelectedDeliveryRate(Cart $cart, array $shipping): array
+    {
+        $destinationId = (string) ($shipping['destination_id'] ?? '');
+        $courierCode = Str::lower((string) ($shipping['courier_code'] ?? ''));
+        $serviceCode = Str::upper((string) ($shipping['service_code'] ?? ''));
+        $submittedCost = isset($shipping['cost']) ? (float) $shipping['cost'] : null;
+
+        if ($destinationId === '' || $courierCode === '' || $serviceCode === '') {
+            throw new UnprocessableEntityHttpException('Pilih layanan pengiriman sebelum checkout.');
+        }
+
+        $availableRates = $this->quoteGuestShippingRates($cart, $destinationId, $courierCode);
+        $selectedRate = collect($availableRates['items'])
+            ->first(function (array $item) use ($courierCode, $serviceCode): bool {
+                return Str::lower((string) ($item['courier_code'] ?? '')) === $courierCode
+                    && Str::upper((string) ($item['service_code'] ?? '')) === $serviceCode;
+            });
+
+        if (! $selectedRate) {
+            throw new UnprocessableEntityHttpException('Layanan pengiriman yang dipilih sudah tidak tersedia.');
+        }
+
+        $resolvedCost = (float) ($selectedRate['cost'] ?? 0);
+        if ($submittedCost !== null && abs($resolvedCost - $submittedCost) > 0.01) {
+            throw new UnprocessableEntityHttpException('Biaya pengiriman berubah. Silakan cek ongkir lagi.');
+        }
+
+        return [
+            'destination_id' => $destinationId,
+            'courier_code' => $selectedRate['courier_code'],
+            'courier_name' => $selectedRate['courier_name'],
+            'service_code' => $selectedRate['service_code'],
+            'service_name' => $selectedRate['service_name'],
+            'description' => $selectedRate['description'] ?? null,
+            'cost' => $resolvedCost,
+            'etd' => $selectedRate['etd'] ?? null,
+            'total_weight_grams' => $availableRates['total_weight_grams'],
+        ];
+    }
+
     private function lineTotal(float $unitPrice, int $qty): float
     {
         return round($unitPrice * $qty, 2);
+    }
+
+    private function calculateCartWeight(Cart $cart): int
+    {
+        $cart->loadMissing('items.product');
+        $defaultWeight = max(1, (int) config('rajaongkir.default_weight_grams', 1000));
+
+        $totalWeight = (int) $cart->items->sum(function (CartItem $item) use ($defaultWeight): int {
+            $weight = (int) ($item->product?->weight_grams ?? $defaultWeight);
+
+            return max(1, $weight) * $item->qty;
+        });
+
+        return max($defaultWeight, $totalWeight);
     }
 
     private function assertStoreIsActive(string $storeCode): void
