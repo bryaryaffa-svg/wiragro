@@ -86,6 +86,28 @@ class RajaOngkirService
         return collect($data)
             ->filter(fn (mixed $courierItem): bool => is_array($courierItem))
             ->flatMap(function (array $courierItem): array {
+                if (isset($courierItem['code'], $courierItem['service'])) {
+                    $amount = $courierItem['cost']
+                        ?? $courierItem['value']
+                        ?? $courierItem['shipping_cost']
+                        ?? 0;
+
+                    return [[
+                        'id' => sprintf(
+                            '%s:%s',
+                            Str::lower((string) $courierItem['code']),
+                            Str::upper((string) $courierItem['service'])
+                        ),
+                        'courier_code' => Str::lower((string) $courierItem['code']),
+                        'courier_name' => (string) ($courierItem['name'] ?? Str::upper((string) $courierItem['code'])),
+                        'service_code' => Str::upper((string) $courierItem['service']),
+                        'service_name' => (string) ($courierItem['description'] ?? $courierItem['service']),
+                        'description' => $courierItem['description'] ?? null,
+                        'cost' => number_format((float) $amount, 2, '.', ''),
+                        'etd' => isset($courierItem['etd']) ? trim((string) $courierItem['etd']) : null,
+                    ]];
+                }
+
                 $courierCode = Str::lower((string) ($courierItem['code'] ?? $courierItem['shipping_code'] ?? ''));
                 $courierName = (string) ($courierItem['name'] ?? $courierItem['shipping_name'] ?? Str::upper($courierCode));
                 $services = $courierItem['costs'] ?? $courierItem['cost'] ?? [];
