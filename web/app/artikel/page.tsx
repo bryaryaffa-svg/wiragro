@@ -27,6 +27,30 @@ export default async function ArticlesPage({
       body: "Tips menyusun ritme belanja kebutuhan kios dan pertanian agar pembelian terasa lebih terarah.",
     },
   ];
+  const fallbackArticles = [
+    {
+      slug: "panduan-memilih-pupuk",
+      title: "Panduan memilih pupuk sesuai kebutuhan tanaman",
+      excerpt:
+        "Mulai dari pemupukan dasar, penguatan akar, sampai kebutuhan nutrisi lanjutan untuk lahan yang berbeda.",
+      published_at: null,
+    },
+    {
+      slug: "dasar-memilih-benih",
+      title: "Cara membaca kualitas benih sebelum membeli",
+      excerpt:
+        "Panduan cepat untuk menilai benih, kesesuaian varietas, dan hal-hal yang perlu diperiksa sebelum checkout.",
+      published_at: null,
+    },
+    {
+      slug: "manajemen-belanja-toko",
+      title: "Belanja kebutuhan kios dan pertanian dengan lebih efisien",
+      excerpt:
+        "Gabungkan kebutuhan toko, stok harian, dan produk inti pertanian dalam ritme belanja yang lebih tertata.",
+      published_at: null,
+    },
+  ];
+  const editorialFeed = articles.items.length ? articles.items : fallbackArticles;
 
   return (
     <section className="page-stack">
@@ -60,20 +84,19 @@ export default async function ArticlesPage({
         ))}
       </section>
 
-      {articles.items.length ? (
-        <div className="article-grid article-grid--editorial">
-          {articles.items.map((article) => (
-            <ArticleCard article={article} key={article.slug} />
-          ))}
-        </div>
-      ) : (
+      <div className="article-grid article-grid--editorial">
+        {editorialFeed.map((article) => (
+          <ArticleCard article={article} key={article.slug} />
+        ))}
+      </div>
+
+      {articles.items.length ? null : (
         <article className="empty-state">
-          <span className="eyebrow-label">Konten belum tersedia</span>
-          <h2>Ruang edukasi siap dipakai, tetapi artikel dari SiGe Manager belum dipublikasikan.</h2>
+          <span className="eyebrow-label">Konten backend belum tersedia</span>
+          <h2>Preview editorial tetap ditampilkan agar flow edukasi storefront tidak terasa kosong.</h2>
           <p>
-            Struktur UX-nya sudah disiapkan agar storefront Sidomakmur bisa berjalan seperti
-            pusat produk sekaligus edukasi. Begitu artikel tersedia, konten akan langsung
-            mengisi area ini.
+            Begitu artikel dari SiGe Manager aktif, kartu-kartu ini akan diganti oleh konten
+            live dari backend yang sama tanpa mengubah struktur halamannya.
           </p>
         </article>
       )}
