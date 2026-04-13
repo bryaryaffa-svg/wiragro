@@ -14,7 +14,7 @@ class StoreSettingSeeder extends Seeder
             [
                 'store_name' => 'Kios Sidomakmur',
                 'store_code' => 'SIDO-JATIM-ONLINE',
-                'store_address' => 'Jl. Raya Sidomakmur No. 1, Jawa Timur',
+                'store_address' => 'RT 04 RW 13, Desa Panjerejo, Kecamatan Rejotangan, Kabupaten Tulungagung, Jawa Timur 66293',
                 'whatsapp_number' => '6281234567890',
                 'operational_hours' => 'Senin - Sabtu, 08:00 - 17:00',
                 'is_active' => true,

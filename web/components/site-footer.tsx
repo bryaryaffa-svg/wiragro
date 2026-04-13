@@ -1,6 +1,14 @@
 import Link from "next/link";
 
-export function SiteFooter() {
+import { getFallbackStoreProfile, getStoreProfile } from "@/lib/api";
+import { buildGoogleMapsStoreSearchUrl } from "@/lib/maps";
+
+export async function SiteFooter() {
+  const store = await getStoreProfile().catch(() => getFallbackStoreProfile());
+  const mapsUrl = store
+    ? buildGoogleMapsStoreSearchUrl(store.name, store.address)
+    : null;
+
   return (
     <footer className="site-footer">
       <div className="site-footer__brand">
@@ -16,6 +24,18 @@ export function SiteFooter() {
           <span>Mobile refined</span>
           <span>Checkout praktis</span>
         </div>
+        {store ? (
+          <div className="site-footer__contact">
+            <strong>{store.name}</strong>
+            <span>{store.address || "Alamat toko sedang diperbarui."}</span>
+            {store.whatsapp_number ? <span>WhatsApp: {store.whatsapp_number}</span> : null}
+            {mapsUrl ? (
+              <a href={mapsUrl} rel="noreferrer" target="_blank">
+                Buka Google Maps
+              </a>
+            ) : null}
+          </div>
+        ) : null}
       </div>
 
       <div className="site-footer__columns">

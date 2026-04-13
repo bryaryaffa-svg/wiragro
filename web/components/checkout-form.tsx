@@ -8,11 +8,13 @@ import {
   createDuitkuPayment,
   getShippingRates,
   searchShippingDestinations,
+  type StoreProfile,
   submitGuestCheckout,
   type ShippingDestination,
   type ShippingRateItem,
 } from "@/lib/api";
 import { formatCurrency } from "@/lib/format";
+import { buildGoogleMapsStoreSearchUrl } from "@/lib/maps";
 
 const initialState = {
   fullName: "",
@@ -79,7 +81,7 @@ function buildShippingEtaLabel(rate: ShippingRateItem) {
   return `Estimasi ${rate.etd}`;
 }
 
-export function CheckoutForm() {
+export function CheckoutForm({ store }: { store?: StoreProfile | null }) {
   const { cart, clearCart } = useCart();
   const [form, setForm] = useState(initialState);
   const [destinationQuery, setDestinationQuery] = useState("");
@@ -122,6 +124,9 @@ export function CheckoutForm() {
   const shippingTotal = isDelivery ? selectedShippingRate?.cost ?? "0" : "0";
   const orderGrandTotal =
     Number.parseFloat(cart?.grand_total ?? "0") + Number.parseFloat(shippingTotal);
+  const pickupMapsUrl = store
+    ? buildGoogleMapsStoreSearchUrl(store.name, store.address)
+    : null;
 
   useEffect(() => {
     if (!isDelivery) {
@@ -642,9 +647,20 @@ export function CheckoutForm() {
                 </div>
               </>
             ) : (
-              <div className="panel-card panel-card--inline">
-                Alamat pengiriman tidak diperlukan. Anda akan mengambil pesanan langsung di
-                toko.
+              <div className="panel-card panel-card--inline panel-card--store-pickup">
+                <strong>Ambil pesanan langsung di toko</strong>
+                <span>
+                  {store?.name ?? "Kios Sidomakmur"}
+                  {store?.address ? ` · ${store.address}` : ""}
+                </span>
+                {store?.operational_hours ? (
+                  <span>Jam operasional: {store.operational_hours}</span>
+                ) : null}
+                {pickupMapsUrl ? (
+                  <a href={pickupMapsUrl} rel="noreferrer" target="_blank">
+                    Buka lokasi toko di Google Maps
+                  </a>
+                ) : null}
               </div>
             )}
           </div>

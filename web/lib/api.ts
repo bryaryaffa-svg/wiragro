@@ -4,6 +4,10 @@ import {
   storefrontApiBaseUrl,
   storeCode,
 } from "@/lib/config";
+import {
+  buildGoogleMapsStoreEmbedUrl,
+  buildGoogleMapsStoreSearchUrl,
+} from "@/lib/maps";
 
 export interface StorefrontSeo {
   title?: string | null;
@@ -81,6 +85,14 @@ export interface HomePayload {
     slug: string;
   }>;
   seo: StorefrontSeo;
+}
+
+export interface StoreProfile extends Record<string, unknown> {
+  code: string;
+  name: string;
+  address?: string | null;
+  whatsapp_number?: string | null;
+  operational_hours?: string | null;
 }
 
 export interface CategoryItem {
@@ -658,7 +670,7 @@ function sortProductItems(items: ProductSummary[], sort?: string | null) {
   return sorted;
 }
 
-async function fetchStoreProfile() {
+async function fetchStoreProfile(): Promise<StoreProfile> {
   const dto = await fetchStorefrontServerJson<LaravelStoreDto>("/v1/public/store", undefined, 300);
 
   return {
@@ -681,7 +693,7 @@ async function resolveCategoryId(categorySlug?: string | null) {
 
 function buildStaticPageContent(
   slug: string,
-  store: Awaited<ReturnType<typeof fetchStoreProfile>>,
+  store: StoreProfile,
 ): ContentPagePayload {
   const defaultDescription =
     "Halaman informasi storefront ini ditampilkan dengan struktur baru yang siap dipindahkan sepenuhnya ke SiGe Manager.";
@@ -711,6 +723,19 @@ function buildStaticPageContent(
         <p><strong>Alamat:</strong> ${store.address ?? "-"}</p>
         <p><strong>WhatsApp:</strong> ${store.whatsapp_number ?? "-"}</p>
         <p><strong>Jam operasional:</strong> ${store.operational_hours ?? "-"}</p>
+        ${
+          store.address
+            ? `<p><a href="${buildGoogleMapsStoreSearchUrl(store.name, store.address)}" target="_blank" rel="noreferrer">Buka lokasi di Google Maps</a></p>
+               <div class="map-embed-card">
+                 <iframe
+                   src="${buildGoogleMapsStoreEmbedUrl(store.name, store.address)}"
+                   loading="lazy"
+                   referrerpolicy="no-referrer-when-downgrade"
+                   title="Peta lokasi ${store.name}">
+                 </iframe>
+               </div>`
+            : ""
+        }
       `,
       seo: {
         title: `Kontak | ${store.name}`,
@@ -770,18 +795,22 @@ function buildStaticPageContent(
   return page;
 }
 
-function createFallbackStoreProfile() {
+export function getFallbackStoreProfile() {
   return {
     code: storeCode,
     name: "Kios Sidomakmur",
-    address: null,
-    whatsapp_number: null,
-    operational_hours: null,
-  };
+    address: "RT 04 RW 13, Desa Panjerejo, Kecamatan Rejotangan, Kabupaten Tulungagung, Jawa Timur 66293",
+    whatsapp_number: "6281234567890",
+    operational_hours: "Senin - Sabtu, 08:00 - 17:00",
+  } satisfies StoreProfile;
+}
+
+export async function getStoreProfile() {
+  return fetchStoreProfile();
 }
 
 export function getFallbackHomeData(): HomePayload {
-  const store = createFallbackStoreProfile();
+  const store = getFallbackStoreProfile();
 
   return {
     store,
@@ -834,7 +863,7 @@ export async function getHomeData(): Promise<HomePayload> {
   ]);
 
   const store =
-    storeResult.status === "fulfilled" ? storeResult.value : createFallbackStoreProfile();
+    storeResult.status === "fulfilled" ? storeResult.value : getFallbackStoreProfile();
   const banners = bannersResult.status === "fulfilled" ? bannersResult.value : [];
   const categories = categoriesResult.status === "fulfilled" ? categoriesResult.value : [];
   const products =
@@ -981,7 +1010,7 @@ export async function getProduct(slug: string): Promise<ProductDetailPayload> {
 }
 
 export async function getStaticPage(slug: string) {
-  const store = await fetchStoreProfile().catch(() => createFallbackStoreProfile());
+  const store = await fetchStoreProfile().catch(() => getFallbackStoreProfile());
   return buildStaticPageContent(slug, store);
 }
 
@@ -1016,7 +1045,7 @@ export async function getArticle(_slug: string): Promise<ContentPagePayload> {
 }
 
 export async function getSeo(path: string) {
-  const store = await fetchStoreProfile().catch(() => createFallbackStoreProfile());
+  const store = await fetchStoreProfile().catch(() => getFallbackStoreProfile());
 
   return {
     title: `${store.name} | ${path === "/" ? "Beranda" : path.replace(/\//g, " ").trim()}`,
