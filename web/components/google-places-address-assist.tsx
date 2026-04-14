@@ -3,7 +3,7 @@
 import Script from "next/script";
 import { useEffect, useEffectEvent, useRef, useState } from "react";
 
-import { googleMapsApiKey } from "@/lib/config";
+import { getGoogleMapsApiKey } from "@/lib/config";
 
 export interface GoogleAddressSelection {
   formattedAddress: string;
@@ -89,6 +89,7 @@ export function GooglePlacesAddressAssist({
   disabled?: boolean;
   onSelect: (selection: GoogleAddressSelection) => void;
 }) {
+  const googleMapsApiKey = getGoogleMapsApiKey();
   const hostRef = useRef<HTMLDivElement | null>(null);
   const autocompleteRef = useRef<google.maps.places.PlaceAutocompleteElement | null>(null);
   const selectHandlerRef = useRef<((event: Event) => void) | null>(null);

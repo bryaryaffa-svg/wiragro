@@ -1,8 +1,8 @@
 import {
-  customerApiBaseUrl,
-  siteUrl,
-  storefrontApiBaseUrl,
-  storeCode,
+  getCustomerApiBaseUrl,
+  getSiteUrl,
+  getStoreCode,
+  getStorefrontApiBaseUrl,
 } from "@/lib/config";
 import {
   buildGoogleMapsStoreEmbedUrl,
@@ -457,7 +457,7 @@ async function fetchStorefrontServerJson<T>(
   query?: Record<string, string | number | undefined | null>,
   revalidate = 120,
 ): Promise<T> {
-  const response = await fetchJsonWithTimeout(buildUrl(storefrontApiBaseUrl, path, query), {
+  const response = await fetchJsonWithTimeout(buildUrl(getStorefrontApiBaseUrl(), path, query), {
     next: { revalidate },
   }, "Koneksi ke API publik sedang gagal.");
 
@@ -474,7 +474,7 @@ async function fetchCustomerClientJson<T>(
     headers.set("Content-Type", "application/json");
   }
 
-  const response = await fetchJsonWithTimeout(buildUrl(customerApiBaseUrl, path, query), {
+  const response = await fetchJsonWithTimeout(buildUrl(getCustomerApiBaseUrl(), path, query), {
     ...init,
     headers,
   }, "Koneksi ke API customer sedang gagal.");
@@ -491,7 +491,7 @@ function toStorageUrl(path?: string | null): string | null {
     const parsed = new URL(path);
     return parsed.toString();
   } catch {
-    const origin = new URL(storefrontApiBaseUrl).origin;
+    const origin = new URL(getStorefrontApiBaseUrl()).origin;
     return `${origin}/storage/${String(path).replace(/^\/+/, "")}`;
   }
 }
@@ -629,7 +629,7 @@ function mapProductSummary(dto: LaravelProductDto): ProductSummary {
     videos: [],
     seo: {
       title: dto.name,
-      description: description ? truncate(description, 155) : `${dto.name} - ${storeCode}`,
+      description: description ? truncate(description, 155) : `${dto.name} - ${getStoreCode()}`,
     },
   };
 }
@@ -800,7 +800,7 @@ function buildStaticPageContent(
 
 export function getFallbackStoreProfile() {
   return {
-    code: storeCode,
+    code: getStoreCode(),
     name: "Kios Sidomakmur",
     address: "RT 04 RW 13, Desa Panjerejo, Kecamatan Rejotangan, Kabupaten Tulungagung, Jawa Timur 66293",
     whatsapp_number: "6281234567890",
@@ -1053,7 +1053,7 @@ export async function getSeo(path: string) {
   return {
     title: `${store.name} | ${path === "/" ? "Beranda" : path.replace(/\//g, " ").trim()}`,
     description: `Storefront ${store.name} menampilkan produk aktif, banner, dan informasi toko dari backend SiGe Manager.`,
-    canonical_url: `${siteUrl}${path}`,
+    canonical_url: `${getSiteUrl()}${path}`,
   };
 }
 
@@ -1062,7 +1062,7 @@ export async function createGuestCart() {
     "/customer/carts/guest",
     {
       method: "POST",
-      body: JSON.stringify({ store_code: storeCode }),
+      body: JSON.stringify({ store_code: getStoreCode() }),
     },
   );
 }
@@ -1150,7 +1150,7 @@ export async function submitGuestCheckout(payload: {
         email: payload.email || null,
       },
       shipping_method: payload.shippingMethod,
-      pickup_store_code: payload.shippingMethod === "pickup" ? storeCode : null,
+      pickup_store_code: payload.shippingMethod === "pickup" ? getStoreCode() : null,
       address:
         payload.shippingMethod === "delivery"
           ? {
@@ -1245,8 +1245,8 @@ export async function createDuitkuPayment(
     body: JSON.stringify({
       order_id: orderId,
       customer_phone: options?.customerPhone ?? null,
-      callback_url: `${customerApiBaseUrl}/payments/duitku/callback`,
-      return_url: `${siteUrl}/checkout?payment=return`,
+      callback_url: `${getCustomerApiBaseUrl()}/payments/duitku/callback`,
+      return_url: `${getSiteUrl()}/checkout?payment=return`,
     }),
   });
 }
@@ -1266,7 +1266,7 @@ export async function requestWhatsAppOtp(phone: string) {
     debug_otp_code?: string;
   }>("/customer/auth/whatsapp/request-otp", {
     method: "POST",
-    body: JSON.stringify({ store_code: storeCode, phone }),
+    body: JSON.stringify({ store_code: getStoreCode(), phone }),
   });
 }
 
@@ -1274,7 +1274,7 @@ export async function verifyWhatsAppOtp(challengeId: string, otpCode: string) {
   return fetchCustomerClientJson<CustomerSession>("/customer/auth/whatsapp/verify-otp", {
     method: "POST",
     body: JSON.stringify({
-      store_code: storeCode,
+      store_code: getStoreCode(),
       challenge_id: challengeId,
       otp_code: otpCode,
     }),
@@ -1285,7 +1285,7 @@ export async function loginGoogleIdToken(idToken: string) {
   return fetchCustomerClientJson<CustomerSession>("/customer/auth/google", {
     method: "POST",
     body: JSON.stringify({
-      store_code: storeCode,
+      store_code: getStoreCode(),
       id_token: idToken,
     }),
   });

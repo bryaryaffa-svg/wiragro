@@ -4,11 +4,12 @@ import { Fraunces, Manrope } from "next/font/google";
 import { AuthProvider } from "@/components/auth-provider";
 import { CartProvider } from "@/components/cart/cart-provider";
 import { MobileBottomNav } from "@/components/mobile-bottom-nav";
+import { RuntimeConfigScript } from "@/components/runtime-config-script";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { WishlistProvider } from "@/components/wishlist-provider";
 import "@/app/globals.css";
-import { siteUrl } from "@/lib/config";
+import { getSiteUrl } from "@/lib/config";
 
 const bodyFont = Manrope({
   subsets: ["latin"],
@@ -19,6 +20,8 @@ const accentFont = Fraunces({
   subsets: ["latin"],
   variable: "--font-accent",
 });
+
+const siteUrl = getSiteUrl();
 
 export const metadata: Metadata = {
   title: "Kios Sidomakmur",
@@ -39,6 +42,7 @@ export default function RootLayout({
   return (
     <html lang="id">
       <body className={`${bodyFont.variable} ${accentFont.variable}`}>
+        <RuntimeConfigScript />
         <AuthProvider>
           <CartProvider>
             <WishlistProvider>

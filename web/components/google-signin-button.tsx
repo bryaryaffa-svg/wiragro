@@ -9,7 +9,7 @@ import {
 } from "react";
 
 import { useAuth } from "@/components/auth-provider";
-import { googleClientId } from "@/lib/config";
+import { getGoogleClientId } from "@/lib/config";
 
 function explainPromptReason(reason?: string) {
   switch (reason) {
@@ -33,6 +33,7 @@ export function GoogleSignInButton({
 }: {
   onMessage: (message: string) => void;
 }) {
+  const googleClientId = getGoogleClientId();
   const { isBusy, loginGoogle } = useAuth();
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const buttonRef = useRef<HTMLDivElement | null>(null);
