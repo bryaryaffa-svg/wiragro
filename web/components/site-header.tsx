@@ -35,7 +35,7 @@ export function SiteHeader() {
   const { items } = useWishlist();
   const cartCount = cart?.items.reduce((total, item) => total + item.qty, 0) ?? 0;
   const firstName = session?.customer.full_name.split(" ")[0] ?? "Masuk";
-  const accountHref = session ? "/akun" : "/login";
+  const accountHref = session ? "/akun" : "/masuk";
 
   return (
     <header className="site-header">
@@ -74,7 +74,7 @@ export function SiteHeader() {
             {cartCount > 0 ? <em>{cartCount}</em> : null}
           </Link>
           <Link
-            className={`header-action-link ${isActivePath(pathname, "/akun") || isActivePath(pathname, "/login") ? "is-active" : ""}`}
+            className={`header-action-link ${isActivePath(pathname, "/akun") || isActivePath(pathname, "/login") || isActivePath(pathname, "/masuk") ? "is-active" : ""}`}
             href={accountHref}
           >
             <span>{session ? `Halo, ${firstName}` : "Masuk"}</span>
