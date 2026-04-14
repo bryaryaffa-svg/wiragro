@@ -3741,6 +3741,13 @@ textarea:focus {
   line-height: 1.08;
 }
 
+.home-hero__reel-copy p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 0.85rem;
+  line-height: 1.42;
+}
+
 .home-proof-grid {
   gap: 1.1rem;
 }
@@ -3748,8 +3755,8 @@ textarea:focus {
 .home-proof {
   position: relative;
   overflow: hidden;
-  gap: 0.75rem;
-  padding: 1.3rem 1.15rem 1.15rem;
+  gap: 0;
+  padding: 0 0 1.15rem;
   border: 1px solid rgba(24, 40, 23, 0.1);
   border-radius: 26px;
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(247, 242, 234, 0.94));
@@ -3762,6 +3769,47 @@ textarea:focus {
   inset: auto 1.15rem 0 1.15rem;
   height: 2px;
   background: linear-gradient(90deg, rgba(216, 235, 137, 0.88), transparent);
+}
+
+.home-proof__media {
+  position: relative;
+  min-height: 230px;
+  overflow: hidden;
+}
+
+.home-proof__media img {
+  object-fit: cover;
+}
+
+.home-proof__overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.9rem;
+  padding: 1rem;
+  background: linear-gradient(180deg, rgba(7, 16, 12, 0.14), rgba(7, 16, 12, 0.04) 42%, rgba(7, 16, 12, 0.72) 100%);
+}
+
+.home-proof__label {
+  align-self: flex-end;
+  padding: 0.42rem 0.78rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  color: rgba(255, 255, 255, 0.92);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  backdrop-filter: blur(10px);
+}
+
+.home-proof__content {
+  display: grid;
+  gap: 0.72rem;
+  padding: 1.2rem 1.15rem 0;
 }
 
 .home-proof__glyph {
@@ -3958,6 +4006,12 @@ textarea:focus {
       border-color 220ms ease;
   }
 
+  .home-hero__reel-card img,
+  .home-atmosphere__panel img,
+  .home-proof__media img {
+    transition: transform 220ms ease;
+  }
+
   .hero-signal:hover,
   .home-proof:hover,
   .home-atmosphere__note:hover {
@@ -3967,12 +4021,17 @@ textarea:focus {
 
   .home-hero__reel-card:hover,
   .home-atmosphere__panel:hover {
-    transform: translateY(-6px) scale(1.01);
     box-shadow: 0 30px 46px rgba(12, 24, 18, 0.16);
   }
 
+  .home-hero__reel-card:hover,
+  .home-atmosphere__panel:hover {
+    transform: translateY(-6px) scale(1.01);
+  }
+
   .home-hero__reel-card:hover img,
-  .home-atmosphere__panel:hover img {
+  .home-atmosphere__panel:hover img,
+  .home-proof:hover .home-proof__media img {
     transform: scale(1.09);
   }
 }

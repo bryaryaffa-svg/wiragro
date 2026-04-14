@@ -92,6 +92,42 @@ function getPrimaryImage(product: ProductSummary | null | undefined) {
   return product?.images.find((image) => image.is_primary) ?? product?.images[0] ?? null;
 }
 
+type CuratedScene = {
+  key: string;
+  src: string;
+  alt: string;
+  eyebrow: string;
+  title: string;
+  body: string;
+};
+
+const curatedScenes: CuratedScene[] = [
+  {
+    key: "field-sunrise",
+    src: "/illustrations/agri-field-sunrise.svg",
+    alt: "Ilustrasi hamparan sawah dan lahan hijau saat matahari terbit.",
+    eyebrow: "Hamparan lahan",
+    title: "Musim tanam, pupuk, dan ritme panen terasa dari layar pertama.",
+    body: "Visual lahan dipakai sebagai anchor agar toko langsung terbaca sebagai storefront pertanian.",
+  },
+  {
+    key: "logistics-hub",
+    src: "/illustrations/agri-logistics-hub.svg",
+    alt: "Ilustrasi toko pertanian dengan stok karung dan kendaraan pengiriman.",
+    eyebrow: "Gudang dan distribusi",
+    title: "Belanja kios, pickup, dan delivery tampil sebagai satu ekosistem.",
+    body: "Bukan sekadar katalog, tetapi alur stok, pengambilan, dan kirim yang terasa nyata.",
+  },
+  {
+    key: "seedling-lab",
+    src: "/illustrations/agri-seedling-lab.svg",
+    alt: "Ilustrasi baki semai, bibit muda, dan kebutuhan perawatan tanaman.",
+    eyebrow: "Bibit dan perawatan",
+    title: "Benih, nutrisi, dan edukasi produk diberi konteks visual yang lebih meyakinkan.",
+    body: "Orang langsung menangkap bahwa toko ini hidup di dunia pertanian, bukan marketplace generik.",
+  },
+];
+
 export default async function HomePage() {
   let home = getFallbackHomeData();
   let storefrontUnavailable = false;
@@ -140,21 +176,68 @@ export default async function HomePage() {
     .filter((item) => item.product.id !== heroFeature?.id)
     .slice(0, 2);
   const atmosphereFrames = visualFrames.slice(0, 3);
+  const heroBackdrop = heroFeatureImage
+    ? {
+        src: heroFeatureImage.url,
+        alt: heroFeatureImage.alt_text || heroFeature?.name || "Sidomakmur storefront",
+      }
+    : {
+        src: curatedScenes[0].src,
+        alt: curatedScenes[0].alt,
+      };
+  const heroMedia = heroFeatureImage
+    ? {
+        src: heroFeatureImage.url,
+        alt: heroFeatureImage.alt_text || heroFeature?.name || "Produk unggulan",
+      }
+    : {
+        src: curatedScenes[1].src,
+        alt: curatedScenes[1].alt,
+      };
+  const reelVisuals = [
+    ...heroTrail.map(({ product, image }) => ({
+      key: `product-${product.id}`,
+      src: image.url,
+      alt: image.alt_text || product.name,
+      eyebrow: "Pilihan visual",
+      title: product.name,
+      body:
+        product.summary ||
+        "Produk aktif di etalase Sidomakmur yang siap membantu kebutuhan belanja harian pelanggan.",
+    })),
+    ...curatedScenes.slice(1),
+  ].slice(0, 2);
+  const atmospherePanels = [
+    ...atmosphereFrames.map(({ product, image }) => ({
+      key: `atmosphere-${product.id}`,
+      src: image.url,
+      alt: image.alt_text || product.name,
+      eyebrow: "Etalase hidup",
+      title: product.name,
+      body:
+        product.summary ||
+        "Produk inti dari katalog yang dipadukan dengan nuansa lahan, stok, dan perawatan tanaman.",
+    })),
+    ...curatedScenes,
+  ].slice(0, 3);
   const serviceHighlights = [
     {
       icon: "sprout" as const,
       title: "Pencarian produk yang langsung ke inti kebutuhan",
       body: "Cari pupuk, benih, pestisida, dan kebutuhan kios dari katalog yang ditata untuk dipindai cepat.",
+      scene: curatedScenes[0],
     },
     {
       icon: "route" as const,
       title: "Checkout dan pelacakan pesanan yang lebih jelas",
       body: "Masukkan pesanan dengan alur yang rapi, lalu pantau status order tanpa berpindah-pindah halaman.",
+      scene: curatedScenes[1],
     },
     {
       icon: "spark" as const,
       title: "Edukasi produk sebagai pendamping keputusan beli",
       body: "Baca panduan singkat agar pelanggan bisa memilih produk yang lebih tepat sebelum checkout.",
+      scene: curatedScenes[2],
     },
   ];
   const heroSignals = [
@@ -220,17 +303,9 @@ export default async function HomePage() {
   return (
     <div className="page-stack page-stack--home">
       <section className="home-hero">
-        {heroFeatureImage ? (
-          <div className="home-hero__backdrop">
-            <Image
-              alt={heroFeatureImage.alt_text || heroFeature?.name || "Sidomakmur storefront"}
-              fill
-              priority
-              sizes="100vw"
-              src={heroFeatureImage.url}
-            />
-          </div>
-        ) : null}
+        <div className="home-hero__backdrop">
+          <Image alt={heroBackdrop.alt} fill priority sizes="100vw" src={heroBackdrop.src} />
+        </div>
         <div className="home-hero__veil" aria-hidden="true" />
         <div className="home-hero__ornaments" aria-hidden="true">
           <div className="home-hero__orbit home-hero__orbit--north">
@@ -300,16 +375,7 @@ export default async function HomePage() {
           <div className="home-hero__aside">
             <article className="home-hero__product">
               <div className="home-hero__media">
-                {heroFeatureImage ? (
-                  <Image
-                    alt={heroFeatureImage.alt_text || heroFeature?.name || "Produk unggulan"}
-                    fill
-                    sizes="(max-width: 1024px) 100vw, 36vw"
-                    src={heroFeatureImage.url}
-                  />
-                ) : (
-                  <div className="product-card__placeholder" />
-                )}
+                <Image alt={heroMedia.alt} fill sizes="(max-width: 1024px) 100vw, 36vw" src={heroMedia.src} />
               </div>
               <div className="home-hero__card">
                 <span className="eyebrow-label">Sorotan produk</span>
@@ -333,21 +399,17 @@ export default async function HomePage() {
               </div>
             </article>
 
-            {heroTrail.length ? (
+            {reelVisuals.length ? (
               <div className="home-hero__reel">
-                {heroTrail.map(({ product, image }) => (
-                  <article className="home-hero__reel-card" key={product.id}>
+                {reelVisuals.map((item) => (
+                  <article className="home-hero__reel-card" key={item.key}>
                     <div className="home-hero__reel-media">
-                      <Image
-                        alt={image.alt_text || product.name}
-                        fill
-                        sizes="(max-width: 1024px) 100vw, 18vw"
-                        src={image.url}
-                      />
+                      <Image alt={item.alt} fill sizes="(max-width: 1024px) 100vw, 18vw" src={item.src} />
                     </div>
                     <div className="home-hero__reel-copy">
-                      <span className="eyebrow-label">Pilihan visual</span>
-                      <strong>{product.name}</strong>
+                      <span className="eyebrow-label">{item.eyebrow}</span>
+                      <strong>{item.title}</strong>
+                      <p>{item.body}</p>
                     </div>
                   </article>
                 ))}
@@ -386,75 +448,70 @@ export default async function HomePage() {
         <div className="home-proof-grid">
           {serviceHighlights.map((item, index) => (
             <article className="home-proof" key={item.title}>
-              <span className="home-proof__index">0{index + 1}</span>
-              <span className="home-proof__glyph">
-                <DecorativeGlyph kind={item.icon} />
-              </span>
-              <strong>{item.title}</strong>
-              <p>{item.body}</p>
+              <div className="home-proof__media">
+                <Image alt={item.scene.alt} fill sizes="(max-width: 1080px) 100vw, 28vw" src={item.scene.src} />
+                <div className="home-proof__overlay">
+                  <span className="home-proof__index">0{index + 1}</span>
+                  <span className="home-proof__label">{item.scene.eyebrow}</span>
+                </div>
+              </div>
+              <div className="home-proof__content">
+                <span className="home-proof__glyph">
+                  <DecorativeGlyph kind={item.icon} />
+                </span>
+                <strong>{item.title}</strong>
+                <p>{item.body}</p>
+              </div>
             </article>
           ))}
         </div>
       </section>
 
-      {atmosphereFrames.length ? (
-        <section className="section-shell section-shell--soft">
-          <div className="home-atmosphere">
-            <div className="home-atmosphere__visual">
-              <article className="home-atmosphere__panel home-atmosphere__panel--lead">
-                <Image
-                  alt={atmosphereFrames[0].image.alt_text || atmosphereFrames[0].product.name}
-                  fill
-                  sizes="(max-width: 1024px) 100vw, 32vw"
-                  src={atmosphereFrames[0].image.url}
-                />
-                <div className="home-atmosphere__overlay">
-                  <span className="eyebrow-label">Visual anchor</span>
-                  <strong>{atmosphereFrames[0].product.name}</strong>
-                </div>
-              </article>
-              <div className="home-atmosphere__stack">
-                {atmosphereFrames.slice(1).map(({ product, image }) => (
-                  <article className="home-atmosphere__panel home-atmosphere__panel--stacked" key={product.id}>
-                    <Image
-                      alt={image.alt_text || product.name}
-                      fill
-                      sizes="(max-width: 1024px) 100vw, 16vw"
-                      src={image.url}
-                    />
-                    <div className="home-atmosphere__overlay">
-                      <span className="eyebrow-label">Etalase hidup</span>
-                      <strong>{product.name}</strong>
-                    </div>
-                  </article>
-                ))}
+      <section className="section-shell section-shell--soft">
+        <div className="home-atmosphere">
+          <div className="home-atmosphere__visual">
+            <article className="home-atmosphere__panel home-atmosphere__panel--lead">
+              <Image alt={atmospherePanels[0].alt} fill sizes="(max-width: 1024px) 100vw, 32vw" src={atmospherePanels[0].src} />
+              <div className="home-atmosphere__overlay">
+                <span className="eyebrow-label">{atmospherePanels[0].eyebrow}</span>
+                <strong>{atmospherePanels[0].title}</strong>
               </div>
-            </div>
-            <div className="home-atmosphere__copy">
-              <span className="eyebrow-label">Arah visual baru</span>
-              <h2>Storefront terasa seperti etalase yang benar-benar bergerak, bukan sekadar halaman katalog.</h2>
-              <p>
-                Fokusnya bukan menambah banyak kartu, tetapi membangun satu ritme visual yang
-                terasa lebih editorial: gambar besar, ornamen halus, dan gerak yang memberi
-                depth saat orang menjelajah.
-              </p>
-              <div className="home-atmosphere__notes">
-                {atmosphereNotes.map((note) => (
-                  <article className="home-atmosphere__note" key={note.title}>
-                    <span className="home-atmosphere__note-icon">
-                      <DecorativeGlyph kind={note.icon} />
-                    </span>
-                    <div>
-                      <strong>{note.title}</strong>
-                      <p>{note.body}</p>
-                    </div>
-                  </article>
-                ))}
-              </div>
+            </article>
+            <div className="home-atmosphere__stack">
+              {atmospherePanels.slice(1).map((panel) => (
+                <article className="home-atmosphere__panel home-atmosphere__panel--stacked" key={panel.key}>
+                  <Image alt={panel.alt} fill sizes="(max-width: 1024px) 100vw, 16vw" src={panel.src} />
+                  <div className="home-atmosphere__overlay">
+                    <span className="eyebrow-label">{panel.eyebrow}</span>
+                    <strong>{panel.title}</strong>
+                  </div>
+                </article>
+              ))}
             </div>
           </div>
-        </section>
-      ) : null}
+          <div className="home-atmosphere__copy">
+            <span className="eyebrow-label">Arah visual baru</span>
+            <h2>Storefront sekarang berbicara lewat lahan, bibit, dan distribusi, bukan hanya teks produk.</h2>
+            <p>
+              Bahkan saat foto produk belum lengkap, homepage tetap punya identitas pertanian yang
+              kuat lewat bidang gambar besar, ilustrasi editorial, dan ritme visual yang lebih hidup.
+            </p>
+            <div className="home-atmosphere__notes">
+              {atmosphereNotes.map((note) => (
+                <article className="home-atmosphere__note" key={note.title}>
+                  <span className="home-atmosphere__note-icon">
+                    <DecorativeGlyph kind={note.icon} />
+                  </span>
+                  <div>
+                    <strong>{note.title}</strong>
+                    <p>{note.body}</p>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
 
       {storefrontUnavailable ? (
         <section className="section-shell section-shell--soft">
