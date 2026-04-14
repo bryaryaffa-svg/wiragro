@@ -12,17 +12,17 @@ export async function SiteFooter() {
   return (
     <footer className="site-footer">
       <div className="site-footer__brand">
-        <span className="brand-mark__eyebrow">Agri commerce experience</span>
-        <h2>Kios Sidomakmur</h2>
+        <span className="brand-mark__eyebrow">Kios Sidomakmur</span>
+        <h2>Belanja kebutuhan pertanian dengan alur yang jelas dan profesional.</h2>
         <p>
-          Kanal belanja online Sidomakmur untuk kebutuhan pertanian, toko, dan rumah
-          tangga dengan pengalaman visual yang lebih modern dan alur order yang tetap
-          terhubung ke SiGe Manager.
+          Sidomakmur melayani kebutuhan pupuk, benih, pestisida, dan kebutuhan kios
+          melalui katalog yang rapi, checkout yang jelas, serta pelacakan pesanan yang
+          tetap terhubung ke sistem pusat.
         </p>
         <div className="site-footer__badges">
-          <span>Editorial storefront</span>
-          <span>Mobile refined</span>
-          <span>Checkout praktis</span>
+          <span>Belanja retail & grosir</span>
+          <span>Pickup toko</span>
+          <span>Delivery lokal</span>
         </div>
         {store ? (
           <div className="site-footer__contact">
@@ -40,20 +40,20 @@ export async function SiteFooter() {
 
       <div className="site-footer__columns">
         <div className="site-footer__links">
-          <h3>Jelajahi</h3>
+          <h3>Katalog</h3>
           <Link href="/produk">Produk</Link>
           <Link href="/artikel">Edukasi</Link>
           <Link href="/lacak-pesanan">Lacak Pesanan</Link>
           <Link href="/akun">Akun</Link>
         </div>
         <div className="site-footer__links">
-          <h3>Informasi</h3>
+          <h3>Perusahaan</h3>
           <Link href="/tentang-kami">Tentang Kami</Link>
           <Link href="/kontak">Kontak</Link>
           <Link href="/faq">FAQ</Link>
         </div>
         <div className="site-footer__links">
-          <h3>Kebijakan</h3>
+          <h3>Informasi</h3>
           <Link href="/kebijakan-privasi">Kebijakan Privasi</Link>
           <Link href="/syarat-dan-ketentuan">Syarat dan Ketentuan</Link>
         </div>

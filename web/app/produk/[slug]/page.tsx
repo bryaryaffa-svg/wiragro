@@ -1,13 +1,10 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import { AddToCartButton } from "@/components/cart/add-to-cart-button";
 import { ProductCard } from "@/components/product-card";
-import { WishlistButton } from "@/components/wishlist-button";
+import { ProductDetailView } from "@/components/product-detail-view";
 import { ApiRequestError, getProduct } from "@/lib/api";
-import { formatCurrency } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
 
@@ -70,9 +67,6 @@ export default async function ProductDetailPage({ params }: { params: Params }) 
     );
   }
 
-  const primaryImage = product.images.find((image) => image.is_primary) ?? product.images[0];
-  const isOutOfStock = product.availability.state === "out_of_stock";
-
   return (
     <div className="page-stack">
       <div className="breadcrumbs">
@@ -83,116 +77,48 @@ export default async function ProductDetailPage({ params }: { params: Params }) 
         <span>{product.name}</span>
       </div>
 
-      <section className="product-detail">
-        <div className="product-detail__gallery">
-          <div className="product-detail__main">
-            {primaryImage ? (
-              <Image
-                alt={primaryImage.alt_text || product.name}
-                fill
-                sizes="(max-width: 1024px) 100vw, 50vw"
-                src={primaryImage.url}
-              />
-            ) : (
-              <div className="product-card__placeholder" />
-            )}
-          </div>
-          <div className="gallery-strip">
-            {product.images.map((image) => (
-              <div className="gallery-thumb" key={image.id}>
-                <Image
-                  alt={image.alt_text || product.name}
-                  fill
-                  sizes="100px"
-                  src={image.url}
-                />
-              </div>
-            ))}
+      <ProductDetailView product={product} />
+
+      <section className="content-shell">
+        <div className="section-heading">
+          <div>
+            <span className="eyebrow-label">Spesifikasi</span>
+            <h2>Informasi produk</h2>
           </div>
         </div>
-
-        <div className="product-detail__summary">
-          <div className="product-card__badges">
-            {product.badges.featured ? <span>Promo</span> : null}
-            {product.badges.new_arrival ? <span>Baru</span> : null}
-            {product.badges.best_seller ? <span>Terlaris</span> : null}
-          </div>
-          <span className="eyebrow-label">{product.product_type}</span>
-          <h1>{product.name}</h1>
-          <p>{product.summary}</p>
-          <div className="price-panel">
-            <strong>{formatCurrency(product.price.amount)}</strong>
-            {product.price.compare_at_amount ? (
-              <small className="price-strike">
-                {formatCurrency(product.price.compare_at_amount)}
-              </small>
+        <div className="product-content-grid">
+          <div className="rich-content">
+            <p>{product.description}</p>
+            {product.videos.length ? (
+              <ul className="plain-list">
+                {product.videos.map((video) => (
+                  <li key={video.id}>
+                    <a href={video.url} rel="noreferrer" target="_blank">
+                      Lihat video {video.platform}
+                    </a>
+                  </li>
+                ))}
+              </ul>
             ) : null}
-            <span className={`status-badge status-badge--${product.availability.state}`}>
-              {product.availability.label}
-            </span>
           </div>
-          <div className="info-list">
-            <div>
-              <span>Satuan</span>
-              <strong>{product.unit}</strong>
-            </div>
+          <div className="product-spec-list">
             <div>
               <span>Kategori</span>
               <strong>{product.category?.name || product.product_type}</strong>
             </div>
             <div>
-              <span>Status stok</span>
+              <span>Satuan</span>
+              <strong>{product.unit}</strong>
+            </div>
+            <div>
+              <span>Berat</span>
+              <strong>{Number(product.weight_grams || "0") > 0 ? `${(Number(product.weight_grams) / 1000).toFixed(2)} kg` : "-"}</strong>
+            </div>
+            <div>
+              <span>Status</span>
               <strong>{product.stock_badge.message}</strong>
             </div>
           </div>
-          <div className="product-detail__actions">
-            <AddToCartButton
-              buttonClassName="btn btn-primary btn-block"
-              disabled={isOutOfStock}
-              productId={product.id}
-              qty={1}
-            />
-            <WishlistButton buttonClassName="btn btn-secondary btn-block" product={product} />
-            <Link className="btn btn-secondary btn-block" href="/keranjang">
-              Buka keranjang
-            </Link>
-          </div>
-          {product.promotions.length ? (
-            <div className="promo-box">
-              <span className="eyebrow-label">Promo aktif</span>
-              {product.promotions.map((promotion) => (
-                <div key={promotion.code}>
-                  <strong>{promotion.name}</strong>
-                  <p>
-                    Harga promo {formatCurrency(String(promotion.rule_payload.promo_price ?? 0))}
-                  </p>
-                </div>
-              ))}
-            </div>
-          ) : null}
-        </div>
-      </section>
-
-      <section className="content-shell">
-        <div className="section-heading">
-          <div>
-            <span className="eyebrow-label">Detail produk</span>
-            <h2>Deskripsi dan media</h2>
-          </div>
-        </div>
-        <div className="rich-content">
-          <p>{product.description}</p>
-          {product.videos.length ? (
-            <ul className="plain-list">
-              {product.videos.map((video) => (
-                <li key={video.id}>
-                  <a href={video.url} rel="noreferrer" target="_blank">
-                    Lihat video {video.platform}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          ) : null}
         </div>
       </section>
 

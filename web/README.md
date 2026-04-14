@@ -51,6 +51,7 @@ npm run dev
 
 - katalog publik sekarang dibaca dari backend Laravel melalui `PUBLIC_API_BASE_URL` / `API_BASE_URL`
 - flow customer untuk guest cart, checkout, tracking, auth customer, wishlist, logout, dan create payment juga diarahkan ke backend Laravel yang sama
+- Android juga perlu diarahkan ke backend Laravel pada base URL `/api/v1` karena Laravel sekarang menyediakan endpoint kompatibilitas `storefront/*` dan `customer/*` yang sebelumnya hanya ada di FastAPI
 - endpoint Laravel yang dipakai web:
   - `/api/v1/public/store`
   - `/api/v1/public/categories`

@@ -163,6 +163,9 @@ export interface CartPayload {
     id: string;
     product_id: string;
     product_name?: string | null;
+    product_slug?: string | null;
+    product_unit?: string | null;
+    product_image_url?: string | null;
     qty: number;
     price_snapshot: {
       amount?: string;

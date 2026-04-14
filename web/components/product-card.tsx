@@ -16,7 +16,7 @@ export function ProductCard({ product }: { product: ProductSummary }) {
       ? "Stok menipis"
       : product.availability.state === "out_of_stock"
         ? "Stok habis"
-        : "Siap diproses";
+        : "Stok tersedia";
 
   return (
     <article className="product-card">
@@ -56,7 +56,7 @@ export function ProductCard({ product }: { product: ProductSummary }) {
         </Link>
 
         <p className="product-card__summary">
-          {product.summary || "Produk aktif dari katalog pusat siap diproses dari storefront."}
+          {product.summary || "Produk aktif dari katalog Sidomakmur dan siap diproses."}
         </p>
 
         <div className="product-card__price-block">

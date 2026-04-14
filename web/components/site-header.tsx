@@ -14,6 +14,12 @@ const mainLinks = [
   { href: "/lacak-pesanan", label: "Lacak Pesanan" },
 ];
 
+const supportLinks = [
+  { href: "/tentang-kami", label: "Tentang Kami" },
+  { href: "/kontak", label: "Kontak" },
+  { href: "/faq", label: "FAQ" },
+];
+
 function isActivePath(pathname: string, href: string) {
   if (href === "/") {
     return pathname === "/";
@@ -37,6 +43,9 @@ export function SiteHeader() {
         <Link className="brand-mark" href="/">
           <span className="brand-mark__eyebrow">WIRAGRO / SIDOMAKMUR</span>
           <strong>Kios Sidomakmur</strong>
+          <span className="brand-mark__support">
+            Kebutuhan pertanian, kios, dan belanja rutin dalam satu kanal.
+          </span>
         </Link>
 
         <form action="/produk" className="header-search">
@@ -88,10 +97,15 @@ export function SiteHeader() {
             );
           })}
         </div>
-        <div className="site-nav__group site-nav__group--secondary">
-          <Link href="/tentang-kami">Tentang Kami</Link>
-          <Link href="/kontak">Kontak</Link>
-          <Link href="/faq">FAQ</Link>
+        <div className="site-nav__tail">
+          <div className="site-nav__group site-nav__group--secondary">
+            {supportLinks.map((link) => (
+              <Link href={link.href} key={link.href}>
+                {link.label}
+              </Link>
+            ))}
+          </div>
+          <span className="site-nav__meta">Belanja retail, grosir, pickup, dan delivery.</span>
         </div>
       </nav>
     </header>

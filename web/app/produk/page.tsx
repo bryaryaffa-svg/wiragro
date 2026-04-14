@@ -34,13 +34,11 @@ export default async function ProductsPage({
       <div className="page-intro page-intro--compact">
         <span className="eyebrow-label">Katalog produk</span>
         <h1>
-          {activeCategory
-            ? `Kategori ${activeCategory.name}`
-            : "Katalog agristore yang lebih mudah dijelajahi"}
+          {activeCategory ? `Katalog ${activeCategory.name}` : "Katalog produk Sidomakmur"}
         </h1>
         <p>
-          Search, kategori, dan urutan katalog disusun lebih bersih agar user bisa cepat
-          menemukan produk, memahami konteksnya, lalu langsung masuk ke alur belanja.
+          Gunakan pencarian, kategori, dan urutan untuk menemukan produk yang Anda butuhkan.
+          Harga, status stok, dan kategori utama ditampilkan langsung di katalog.
         </p>
       </div>
 
@@ -100,17 +98,17 @@ export default async function ProductsPage({
         <div className="catalog-results-header">
           <div>
             <span className="eyebrow-label">Hasil pencarian</span>
-            <h2>{products.pagination.count} item ditemukan</h2>
+            <h2>{products.pagination.count} produk tersedia</h2>
           </div>
-          <span>{search ? `Pencarian: "${search}"` : "Semua produk aktif"}</span>
+          <span>{search ? `Kata kunci: "${search}"` : "Menampilkan seluruh produk aktif"}</span>
         </div>
 
         {catalogUnavailable ? (
           <article className="empty-state empty-state--shopping">
-            <span className="eyebrow-label">Katalog sedang tidak stabil</span>
-            <h2>Daftar produk belum berhasil dimuat dari server.</h2>
+            <span className="eyebrow-label">Katalog belum dapat dimuat</span>
+            <h2>Daftar produk sementara tidak tersedia dari server.</h2>
             <p>
-              Silakan refresh halaman beberapa saat lagi. Filter dan pencarian Anda tetap
+              Silakan muat ulang halaman beberapa saat lagi. Pencarian dan filter Anda tetap
               dipertahankan.
             </p>
             <div className="empty-state__actions">
@@ -128,8 +126,8 @@ export default async function ProductsPage({
         ) : (
           <article className="empty-state empty-state--shopping">
             <span className="eyebrow-label">Produk tidak ditemukan</span>
-            <h2>Tidak ada item yang cocok dengan filter saat ini</h2>
-            <p>Coba ganti kata kunci, reset kategori, atau kembali ke semua produk aktif.</p>
+            <h2>Tidak ada produk yang cocok dengan filter saat ini</h2>
+            <p>Coba ubah kata kunci, reset kategori, atau kembali ke seluruh katalog aktif.</p>
             <div className="empty-state__actions">
               <Link className="btn btn-primary" href="/produk">
                 Lihat semua produk

@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -70,16 +71,33 @@ export function CartPageClient() {
   }
 
   const itemCount = cart.items.reduce((total, item) => total + item.qty, 0);
+  const totalWeightKg = Number(cart.total_weight_grams ?? 0) / 1000;
 
   return (
-    <section className="page-stack">
-      <div className="page-intro page-intro--compact">
-        <span className="eyebrow-label">Keranjang</span>
-        <h1>Periksa pesanan sebelum checkout</h1>
-        <p>
-          Keranjang guest tetap tersimpan di browser ini dan disinkronkan ke backend agar
-          jumlah item, subtotal, dan perubahan quantity tetap konsisten.
-        </p>
+    <section className="page-stack cart-page">
+      <div className="cart-overview">
+        <div className="cart-overview__copy">
+          <span className="eyebrow-label">Keranjang</span>
+          <h1>Tinjau produk sebelum masuk ke checkout.</h1>
+          <p>
+            Keranjang Anda disimpan di browser ini dan disinkronkan ke backend, jadi
+            perubahan jumlah item akan langsung memengaruhi total pesanan.
+          </p>
+        </div>
+        <div className="cart-overview__stats">
+          <div>
+            <span>Item</span>
+            <strong>{itemCount}</strong>
+          </div>
+          <div>
+            <span>Berat total</span>
+            <strong>{totalWeightKg > 0 ? `${totalWeightKg.toFixed(2)} kg` : "-"}</strong>
+          </div>
+          <div>
+            <span>Total sementara</span>
+            <strong>{formatCurrency(cart.grand_total)}</strong>
+          </div>
+        </div>
       </div>
 
       {message ? <div className="panel-card panel-card--inline">{message}</div> : null}
@@ -100,24 +118,49 @@ export function CartPageClient() {
       <div className="cart-layout">
         <div className="stack-list">
           {cart.items.map((item) => (
-            <article className="cart-line" key={item.id}>
+            <article className="cart-line cart-line--enhanced" key={item.id}>
+              <div className="cart-line__media">
+                {item.product_image_url ? (
+                  <Image
+                    alt={item.product_name || "Produk"}
+                    fill
+                    sizes="96px"
+                    src={item.product_image_url}
+                  />
+                ) : (
+                  <div className="product-card__placeholder" />
+                )}
+              </div>
+
               <div className="cart-line__details">
                 <div className="cart-line__headline">
-                  <strong>{item.product_name || "Produk"}</strong>
-                  <span className="status-badge status-badge--neutral">
-                    {item.price_snapshot.price_type ?? "Harga toko"}
-                  </span>
+                  <div className="cart-line__title-group">
+                    {item.product_slug ? (
+                      <Link className="cart-line__title" href={`/produk/${item.product_slug}`}>
+                        {item.product_name || "Produk"}
+                      </Link>
+                    ) : (
+                      <strong>{item.product_name || "Produk"}</strong>
+                    )}
+                    <div className="cart-line__meta">
+                      <span>{item.product_unit || "Unit toko"}</span>
+                      <span>{item.price_snapshot.price_type ?? "Harga toko"}</span>
+                      <span>{formatCurrency(item.price_snapshot.amount)}</span>
+                    </div>
+                  </div>
+                  <div className="cart-line__summary">
+                    <span>{isBusy && pendingItemId === item.id ? "Memproses..." : `${item.qty} item`}</span>
+                    <strong>{formatCurrency(item.total)}</strong>
+                  </div>
                 </div>
-                <small>Harga satuan: {formatCurrency(item.price_snapshot.amount)}</small>
+
                 {item.promotion_snapshot.matched_promotions?.length ? (
-                  <small>
+                  <div className="cart-line__note">
                     Promo aktif:{" "}
-                    {item.promotion_snapshot.matched_promotions
-                      .map((promo) => promo.name)
-                      .join(", ")}
-                  </small>
+                    {item.promotion_snapshot.matched_promotions.map((promo) => promo.name).join(", ")}
+                  </div>
                 ) : (
-                  <small>Belum ada promo tambahan pada item ini.</small>
+                  <div className="cart-line__note">Belum ada promo tambahan pada item ini.</div>
                 )}
 
                 <div className="cart-line__actions">
@@ -146,12 +189,12 @@ export function CartPageClient() {
                   >
                     Hapus
                   </button>
+                  {item.product_slug ? (
+                    <Link className="ghost-action" href={`/produk/${item.product_slug}`}>
+                      Detail produk
+                    </Link>
+                  ) : null}
                 </div>
-              </div>
-
-              <div className="cart-line__summary">
-                <span>{isBusy && pendingItemId === item.id ? "Memproses..." : `${item.qty} item`}</span>
-                <strong>{formatCurrency(item.total)}</strong>
               </div>
             </article>
           ))}
@@ -160,6 +203,9 @@ export function CartPageClient() {
         <aside className="summary-card summary-card--cart">
           <span className="eyebrow-label">Ringkasan belanja</span>
           <h2>{itemCount} item siap diproses</h2>
+          <div className="summary-card__lead">
+            Lanjutkan ke checkout untuk memilih metode pengiriman dan pembayaran.
+          </div>
           <div className="summary-row">
             <span>Subtotal</span>
             <strong>{formatCurrency(cart.subtotal)}</strong>
@@ -171,6 +217,10 @@ export function CartPageClient() {
           <div className="summary-row summary-row--total">
             <span>Total</span>
             <strong>{formatCurrency(cart.grand_total)}</strong>
+          </div>
+          <div className="summary-card__snapshot">
+            <span>Berat total</span>
+            <strong>{totalWeightKg > 0 ? `${totalWeightKg.toFixed(2)} kg` : "-"}</strong>
           </div>
           <div className="stack-list stack-list--compact">
             <Link className="btn btn-primary btn-block" href="/checkout">

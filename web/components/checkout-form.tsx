@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useDeferredValue, useEffect, useMemo, useState, useTransition } from "react";
 
@@ -128,6 +129,8 @@ export function CheckoutForm({ store }: { store?: StoreProfile | null }) {
   const shippingTotal = isDelivery ? selectedShippingRate?.cost ?? "0" : "0";
   const orderGrandTotal =
     Number.parseFloat(cart?.grand_total ?? "0") + Number.parseFloat(shippingTotal);
+  const itemCount = cart?.items.reduce((total, item) => total + item.qty, 0) ?? 0;
+  const totalWeightKg = Number(cart?.total_weight_grams ?? 0) / 1000;
   const pickupMapsUrl = store
     ? buildGoogleMapsStoreSearchUrl(store.name, store.address)
     : null;
@@ -312,14 +315,30 @@ export function CheckoutForm({ store }: { store?: StoreProfile | null }) {
   };
 
   return (
-    <section className="page-stack">
-      <div className="page-intro page-intro--compact">
-        <span className="eyebrow-label">Checkout guest</span>
-        <h1>Selesaikan pesanan tanpa alur yang membingungkan</h1>
-        <p>
-          Isi data pelanggan, pilih tujuan dan layanan kirim, lalu storefront akan
-          meneruskan order ke backend yang sama dengan katalog publik.
-        </p>
+    <section className="page-stack checkout-page">
+      <div className="checkout-overview">
+        <div className="checkout-overview__copy">
+          <span className="eyebrow-label">Checkout guest</span>
+          <h1>Selesaikan pesanan dengan alur kirim dan bayar yang lebih jelas.</h1>
+          <p>
+            Isi data penerima, tentukan metode pengiriman, lalu review total order sebelum
+            membuat pesanan ke backend yang sama dengan katalog publik.
+          </p>
+        </div>
+        <div className="checkout-overview__stats">
+          <div>
+            <span>Produk</span>
+            <strong>{itemCount}</strong>
+          </div>
+          <div>
+            <span>Berat total</span>
+            <strong>{totalWeightKg > 0 ? `${totalWeightKg.toFixed(2)} kg` : "-"}</strong>
+          </div>
+          <div>
+            <span>Status checkout</span>
+            <strong>{isDelivery ? "Delivery" : "Pickup toko"}</strong>
+          </div>
+        </div>
       </div>
 
       <div className="checkout-grid">
@@ -423,7 +442,7 @@ export function CheckoutForm({ store }: { store?: StoreProfile | null }) {
           <div className="form-section">
             <div className="form-section__header">
               <span className="eyebrow-label">Data pelanggan</span>
-              <h2>Info penerima</h2>
+              <h2>Informasi penerima</h2>
             </div>
             <label>
               Nama lengkap
@@ -466,7 +485,7 @@ export function CheckoutForm({ store }: { store?: StoreProfile | null }) {
           <div className="form-section">
             <div className="form-section__header">
               <span className="eyebrow-label">Pengiriman</span>
-              <h2>Pilih metode kirim</h2>
+              <h2>Metode pengiriman</h2>
             </div>
             <div className="choice-grid">
               <label className={`choice-card ${isDelivery ? "is-selected" : ""}`}>
@@ -491,7 +510,7 @@ export function CheckoutForm({ store }: { store?: StoreProfile | null }) {
                   type="radio"
                 />
                 <strong>Ambil di toko</strong>
-                <span>Lebih ringkas jika Anda mengambil pesanan sendiri.</span>
+                <span>Lebih ringkas jika Anda mengambil pesanan sendiri di toko.</span>
               </label>
             </div>
 
@@ -635,7 +654,7 @@ export function CheckoutForm({ store }: { store?: StoreProfile | null }) {
                     </div>
                   ) : (
                     <div className="panel-card panel-card--inline">
-                      Pilih tujuan pengiriman dulu agar storefront bisa mengambil tarif ongkir.
+                      Pilih tujuan pengiriman agar storefront bisa menghitung tarif ongkir.
                     </div>
                   )}
 
@@ -695,7 +714,7 @@ export function CheckoutForm({ store }: { store?: StoreProfile | null }) {
           <div className="form-section">
             <div className="form-section__header">
               <span className="eyebrow-label">Pembayaran</span>
-              <h2>Tentukan cara bayar</h2>
+              <h2>Metode pembayaran</h2>
             </div>
             <div className="choice-grid">
               <label
@@ -710,7 +729,7 @@ export function CheckoutForm({ store }: { store?: StoreProfile | null }) {
                   type="radio"
                 />
                 <strong>Duitku VA</strong>
-                <span>Order dibuat dulu, lalu storefront menyiapkan link pembayaran.</span>
+                <span>Pesanan dibuat dulu, lalu storefront menyiapkan link pembayaran.</span>
               </label>
               <label className={`choice-card ${form.paymentMethod === "COD" ? "is-selected" : ""}`}>
                 <input
@@ -722,7 +741,7 @@ export function CheckoutForm({ store }: { store?: StoreProfile | null }) {
                   type="radio"
                 />
                 <strong>COD / nota merah</strong>
-                <span>Pembayaran ditangani saat pesanan diterima atau dikonfirmasi toko.</span>
+                <span>Pembayaran ditangani saat pesanan diterima atau setelah konfirmasi toko.</span>
               </label>
             </div>
             <label>
@@ -745,13 +764,20 @@ export function CheckoutForm({ store }: { store?: StoreProfile | null }) {
 
           {result ? (
             <div className="success-card">
-              <strong>Order {result.orderNumber} berhasil dibuat</strong>
-              <p>Total: {formatCurrency(result.total)}</p>
+              <span className="eyebrow-label">Order berhasil dibuat</span>
+              <strong>Order {result.orderNumber} sudah tercatat</strong>
+              <p>Total order: {formatCurrency(result.total)}</p>
               {result.shippingService ? <p>Layanan kirim: {result.shippingService}</p> : null}
               {result.shippingTotal ? (
                 <p>Ongkir: {formatCurrency(result.shippingTotal)}</p>
               ) : null}
               <p>Status pembayaran: {result.paymentStatus}</p>
+              <p>
+                Langkah berikutnya:{" "}
+                {result.nextAction === "OPEN_PAYMENT"
+                  ? "buka halaman pembayaran"
+                  : "tunggu konfirmasi pembayaran dari toko"}
+              </p>
               {result.paymentSetupError ? (
                 <p className="form-error">
                   Link pembayaran belum siap: {result.paymentSetupError}
@@ -785,13 +811,32 @@ export function CheckoutForm({ store }: { store?: StoreProfile | null }) {
 
         <aside className="summary-card summary-card--checkout">
           <span className="eyebrow-label">Ringkasan</span>
-          <h2>{cart.items.length} produk di order ini</h2>
-          <div className="stack-list stack-list--compact">
+          <h2>{itemCount} item di order ini</h2>
+          <div className="checkout-summary-list">
             {cart.items.map((item) => (
-              <div className="summary-row" key={item.id}>
-                <span>
-                  {item.qty}x {item.product_name || "Produk"}
-                </span>
+              <div className="checkout-summary-item" key={item.id}>
+                <div className="checkout-summary-item__media">
+                  {item.product_image_url ? (
+                    <Image
+                      alt={item.product_name || "Produk"}
+                      fill
+                      sizes="72px"
+                      src={item.product_image_url}
+                    />
+                  ) : (
+                    <div className="product-card__placeholder" />
+                  )}
+                </div>
+                <div className="checkout-summary-item__copy">
+                  {item.product_slug ? (
+                    <Link href={`/produk/${item.product_slug}`}>{item.product_name || "Produk"}</Link>
+                  ) : (
+                    <strong>{item.product_name || "Produk"}</strong>
+                  )}
+                  <span>
+                    {item.qty}x {item.product_unit || "unit"}
+                  </span>
+                </div>
                 <strong>{formatCurrency(item.total)}</strong>
               </div>
             ))}
@@ -812,7 +857,7 @@ export function CheckoutForm({ store }: { store?: StoreProfile | null }) {
             <span>Total</span>
             <strong>{formatCurrency(orderGrandTotal)}</strong>
           </div>
-          <div className="panel-card panel-card--inline">
+          <div className="checkout-status-note">
             {isDelivery
               ? "Tombol submit aktif setelah data penerima, tujuan, dan layanan kirim sudah lengkap."
               : "Untuk pickup, cukup lengkapi data penerima lalu lanjutkan checkout."}
