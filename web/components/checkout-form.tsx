@@ -35,6 +35,18 @@ const initialState = {
   notes: "",
 };
 
+type CheckoutResult = {
+  orderNumber: string;
+  paymentUrl?: string | null;
+  paymentStatus: string;
+  nextAction: string;
+  total: string;
+  customerPhone: string;
+  shippingService?: string | null;
+  shippingTotal?: string | null;
+  paymentSetupError?: string | null;
+};
+
 function buildValidationErrors(
   form: typeof initialState,
   options: {
@@ -100,17 +112,7 @@ export function CheckoutForm({ store }: { store?: StoreProfile | null }) {
   const [destinationError, setDestinationError] = useState<string | null>(null);
   const [shippingRatesError, setShippingRatesError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [result, setResult] = useState<{
-    orderNumber: string;
-    paymentUrl?: string | null;
-    paymentStatus: string;
-    nextAction: string;
-    total: string;
-    customerPhone: string;
-    shippingService?: string | null;
-    shippingTotal?: string | null;
-    paymentSetupError?: string | null;
-  } | null>(null);
+  const [result, setResult] = useState<CheckoutResult | null>(null);
   const [isPending, startTransition] = useTransition();
 
   const isDelivery = form.shippingMethod === "delivery";
@@ -264,6 +266,63 @@ export function CheckoutForm({ store }: { store?: StoreProfile | null }) {
     };
   }, [cart?.guest_token, cart?.id, isDelivery, selectedDestination]);
 
+  if (result) {
+    return (
+      <section className="page-stack checkout-page">
+        <div className="checkout-overview">
+          <div className="checkout-overview__copy">
+            <span className="eyebrow-label">Checkout selesai</span>
+            <h1>Order {result.orderNumber} sudah tercatat.</h1>
+            <p>
+              Checkout berhasil diproses. Lanjutkan ke pembayaran online atau pantau status
+              pesanan dari halaman lacak pesanan.
+            </p>
+          </div>
+        </div>
+
+        <div className="success-card">
+          <span className="eyebrow-label">Ringkasan order</span>
+          <strong>Total order: {formatCurrency(result.total)}</strong>
+          {result.shippingService ? <p>Layanan kirim: {result.shippingService}</p> : null}
+          {result.shippingTotal ? <p>Ongkir: {formatCurrency(result.shippingTotal)}</p> : null}
+          <p>Status pembayaran: {result.paymentStatus}</p>
+          <p>
+            Langkah berikutnya:{" "}
+            {result.nextAction === "OPEN_PAYMENT"
+              ? "buka halaman pembayaran"
+              : "tunggu konfirmasi pembayaran dari toko"}
+          </p>
+          {result.paymentSetupError ? (
+            <p className="form-error">
+              Link pembayaran belum siap: {result.paymentSetupError}
+            </p>
+          ) : null}
+          <div className="success-card__actions">
+            {result.paymentUrl ? (
+              <a
+                className="btn btn-primary"
+                href={result.paymentUrl}
+                rel="noreferrer"
+                target="_blank"
+              >
+                Buka halaman pembayaran
+              </a>
+            ) : null}
+            <Link
+              className="btn btn-secondary"
+              href={`/lacak-pesanan?order=${encodeURIComponent(result.orderNumber)}&phone=${encodeURIComponent(result.customerPhone)}`}
+            >
+              Lacak pesanan
+            </Link>
+            <Link className="btn btn-secondary" href="/produk">
+              Belanja lagi
+            </Link>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   if (!cart || cart.items.length === 0) {
     return (
       <section className="empty-state empty-state--shopping">
@@ -394,7 +453,7 @@ export function CheckoutForm({ store }: { store?: StoreProfile | null }) {
                   notes: form.notes.trim(),
                 });
 
-                const baseResult = {
+                const baseResult: CheckoutResult = {
                   orderNumber: checkout.order.order_number,
                   paymentStatus: checkout.order.payment_status,
                   nextAction: checkout.next_action,
@@ -406,29 +465,30 @@ export function CheckoutForm({ store }: { store?: StoreProfile | null }) {
                   shippingTotal: checkout.order.shipping_total ?? null,
                 };
 
-                clearCart();
+                let nextResult = baseResult;
 
                 if (checkout.next_action === "OPEN_PAYMENT") {
                   try {
                     const payment = await createDuitkuPayment(checkout.order.id, {
                       customerPhone: form.phone.trim(),
                     });
-                    setResult({
+                    nextResult = {
                       ...baseResult,
                       paymentUrl: payment.payment_url,
-                    });
+                    };
                   } catch (paymentError) {
-                    setResult({
+                    nextResult = {
                       ...baseResult,
                       paymentSetupError:
                         paymentError instanceof Error
                           ? paymentError.message
                           : "Link pembayaran belum berhasil dibuat.",
-                    });
+                    };
                   }
-                } else {
-                  setResult(baseResult);
                 }
+
+                setResult(nextResult);
+                clearCart();
               } catch (submitError) {
                 setError(
                   submitError instanceof Error
@@ -760,48 +820,6 @@ export function CheckoutForm({ store }: { store?: StoreProfile | null }) {
           {error ? <p className="form-error">{error}</p> : null}
           {validationErrors.length > 0 && !error ? (
             <p className="inline-note">Lengkapi data wajib sebelum submit order.</p>
-          ) : null}
-
-          {result ? (
-            <div className="success-card">
-              <span className="eyebrow-label">Order berhasil dibuat</span>
-              <strong>Order {result.orderNumber} sudah tercatat</strong>
-              <p>Total order: {formatCurrency(result.total)}</p>
-              {result.shippingService ? <p>Layanan kirim: {result.shippingService}</p> : null}
-              {result.shippingTotal ? (
-                <p>Ongkir: {formatCurrency(result.shippingTotal)}</p>
-              ) : null}
-              <p>Status pembayaran: {result.paymentStatus}</p>
-              <p>
-                Langkah berikutnya:{" "}
-                {result.nextAction === "OPEN_PAYMENT"
-                  ? "buka halaman pembayaran"
-                  : "tunggu konfirmasi pembayaran dari toko"}
-              </p>
-              {result.paymentSetupError ? (
-                <p className="form-error">
-                  Link pembayaran belum siap: {result.paymentSetupError}
-                </p>
-              ) : null}
-              <div className="success-card__actions">
-                {result.paymentUrl ? (
-                  <a
-                    className="btn btn-primary"
-                    href={result.paymentUrl}
-                    rel="noreferrer"
-                    target="_blank"
-                  >
-                    Buka halaman pembayaran
-                  </a>
-                ) : null}
-                <Link
-                  className="btn btn-secondary"
-                  href={`/lacak-pesanan?order=${encodeURIComponent(result.orderNumber)}&phone=${encodeURIComponent(result.customerPhone)}`}
-                >
-                  Lacak pesanan
-                </Link>
-              </div>
-            </div>
           ) : null}
 
           <button className="btn btn-primary btn-block" disabled={!canSubmit} type="submit">
