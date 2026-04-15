@@ -28,6 +28,10 @@ export const metadata: Metadata = {
   description:
     "Platform pertanian digital Wiragro untuk katalog, checkout, dan storefront Sidomakmur.",
   metadataBase: new URL(siteUrl),
+  icons: {
+    icon: "/brand/wiragro-icon.svg",
+    shortcut: "/brand/wiragro-icon.svg",
+  },
 };
 
 export const viewport: Viewport = {
