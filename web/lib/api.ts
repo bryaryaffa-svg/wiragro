@@ -8,6 +8,7 @@ import {
   buildGoogleMapsStoreEmbedUrl,
   buildGoogleMapsStoreSearchUrl,
 } from "@/lib/maps";
+import { getProductImageOverride } from "@/lib/product-image-overrides";
 
 export interface StorefrontSeo {
   title?: string | null;
@@ -546,14 +547,29 @@ function mapProductSummary(dto: LaravelProductDto): ProductSummary {
       dto.promo_price !== undefined &&
       normalizeNumber(dto.promo_price) !== basePrice,
   );
-  const images = (dto.images ?? []).map((image) => ({
+  const imageOverrideUrl = getProductImageOverride(dto.slug);
+  let images = (dto.images ?? []).map((image) => ({
     id: String(image.id),
     url: image.image_url ?? toStorageUrl(image.image_path) ?? "",
     alt_text: image.alt_text ?? dto.name,
     is_primary: Boolean(image.is_primary),
   }));
   const primaryImageUrl =
-    dto.primary_image_url ?? images.find((image) => image.is_primary)?.url ?? null;
+    imageOverrideUrl ??
+    dto.primary_image_url ??
+    images.find((image) => image.is_primary)?.url ??
+    null;
+
+  if (imageOverrideUrl) {
+    images = [
+      {
+        id: `override-${dto.id}`,
+        url: imageOverrideUrl,
+        alt_text: dto.name,
+        is_primary: true,
+      },
+    ];
+  }
 
   if (primaryImageUrl && !images.some((image) => image.url === primaryImageUrl)) {
     images.unshift({
