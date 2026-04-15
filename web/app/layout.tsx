@@ -24,9 +24,9 @@ const accentFont = Fraunces({
 const siteUrl = getSiteUrl();
 
 export const metadata: Metadata = {
-  title: "Kios Sidomakmur",
+  title: "Wiragro",
   description:
-    "Marketplace produk pertanian Sidomakmur yang terhubung dengan SiGe Manajer.",
+    "Platform pertanian digital Wiragro untuk katalog, checkout, dan storefront Sidomakmur.",
   metadataBase: new URL(siteUrl),
 };
 

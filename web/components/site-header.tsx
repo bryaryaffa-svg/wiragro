@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 
 import { useAuth } from "@/components/auth-provider";
 import { useCart } from "@/components/cart/cart-provider";
+import { WiragroLockup } from "@/components/wiragro-lockup";
 import { useWishlist } from "@/components/wishlist-provider";
 
 const mainLinks = [
@@ -41,11 +42,7 @@ export function SiteHeader() {
     <header className="site-header">
       <div className="site-header__bar">
         <Link className="brand-mark" href="/">
-          <span className="brand-mark__eyebrow">WIRAGRO / SIDOMAKMUR</span>
-          <strong>Kios Sidomakmur</strong>
-          <span className="brand-mark__support">
-            Kebutuhan pertanian, kios, dan belanja rutin dalam satu kanal.
-          </span>
+          <WiragroLockup />
         </Link>
 
         <form action="/produk" className="header-search">

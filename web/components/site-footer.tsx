@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { WiragroLockup } from "@/components/wiragro-lockup";
 import { getFallbackStoreProfile, getStoreProfile } from "@/lib/api";
 import { buildGoogleMapsStoreSearchUrl } from "@/lib/maps";
 
@@ -12,12 +13,11 @@ export async function SiteFooter() {
   return (
     <footer className="site-footer">
       <div className="site-footer__brand">
-        <span className="brand-mark__eyebrow">Kios Sidomakmur</span>
-        <h2>Belanja kebutuhan pertanian dengan alur yang jelas dan profesional.</h2>
+        <WiragroLockup contextLabel={store?.name ?? "Sidomakmur storefront"} tone="light" />
+        <h2>Katalog pertanian yang lebih cepat, rapi, dan siap dipakai belanja.</h2>
         <p>
-          Sidomakmur melayani kebutuhan pupuk, benih, pestisida, dan kebutuhan kios
-          melalui katalog yang rapi, checkout yang jelas, serta pelacakan pesanan yang
-          tetap terhubung ke sistem pusat.
+          Wiragro membantu {store?.name ?? "Sidomakmur"} menampilkan produk, harga,
+          checkout, dan pelacakan pesanan dalam satu storefront yang lebih meyakinkan.
         </p>
         <div className="site-footer__badges">
           <span>Belanja retail & grosir</span>
