@@ -128,6 +128,41 @@ const curatedScenes: CuratedScene[] = [
   },
 ];
 
+const photoScenes: CuratedScene[] = [
+  {
+    key: "field-dusk-photo",
+    src: "https://images.unsplash.com/photo-1760635230940-853ec5ce0806?auto=format&fit=crop&fm=jpg&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&ixlib=rb-4.1.0&q=60&w=3000",
+    alt: "Foto hamparan lahan pertanian luas di bawah langit mendung saat senja.",
+    eyebrow: "Hamparan lahan",
+    title: "Lansekap pertanian yang nyata membuat storefront terasa lebih premium sejak layar pertama.",
+    body: "Bidang foto besar membantu identitas toko langsung terbaca sebagai kanal belanja pertanian, bukan katalog generik.",
+  },
+  {
+    key: "produce-market-photo",
+    src: "https://images.unsplash.com/photo-1698909771914-de2863859dcd?auto=format&fit=crop&fm=jpg&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&ixlib=rb-4.1.0&q=60&w=3000",
+    alt: "Foto rak buah dan sayur segar di area jualan hasil panen.",
+    eyebrow: "Etalase hasil panen",
+    title: "Nuansa kios, hasil panen, dan stok dagang terasa lebih hidup dengan fotografi nyata.",
+    body: "Foto retail pertanian memberi konteks visual bahwa toko ini menjual kebutuhan riil, bukan sekadar daftar item.",
+  },
+  {
+    key: "greenhouse-worker-photo",
+    src: "https://images.unsplash.com/photo-1762512216957-04c53ca12643?auto=format&fit=crop&fm=jpg&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&ixlib=rb-4.1.0&q=60&w=3000",
+    alt: "Foto pekerja sedang merawat tanaman di greenhouse.",
+    eyebrow: "Perawatan tanaman",
+    title: "Detail greenhouse dan perawatan tanaman membuat pengalaman belanja terasa lebih dekat ke dunia tani.",
+    body: "Fotografi yang menampilkan aktivitas kerja di lapangan menambah rasa percaya dan kualitas pada homepage.",
+  },
+  {
+    key: "seedling-hands-photo",
+    src: "https://images.unsplash.com/photo-1763856957026-a74ab4f05891?auto=format&fit=crop&fm=jpg&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&ixlib=rb-4.1.0&q=60&w=3000",
+    alt: "Foto tangan menanam bibit kecil di tanah basah.",
+    eyebrow: "Bibit dan tanam",
+    title: "Close-up aktivitas tanam memberi sentuhan editorial yang lebih emosional dan meyakinkan.",
+    body: "Ini memperkuat citra Sidomakmur sebagai storefront yang berakar pada kegiatan pertanian sehari-hari.",
+  },
+];
+
 export default async function HomePage() {
   let home = getFallbackHomeData();
   let storefrontUnavailable = false;
@@ -182,8 +217,8 @@ export default async function HomePage() {
         alt: heroFeatureImage.alt_text || heroFeature?.name || "Sidomakmur storefront",
       }
     : {
-        src: curatedScenes[0].src,
-        alt: curatedScenes[0].alt,
+        src: photoScenes[0].src,
+        alt: photoScenes[0].alt,
       };
   const heroMedia = heroFeatureImage
     ? {
@@ -191,8 +226,8 @@ export default async function HomePage() {
         alt: heroFeatureImage.alt_text || heroFeature?.name || "Produk unggulan",
       }
     : {
-        src: curatedScenes[1].src,
-        alt: curatedScenes[1].alt,
+        src: photoScenes[3].src,
+        alt: photoScenes[3].alt,
       };
   const reelVisuals = [
     ...heroTrail.map(({ product, image }) => ({
@@ -205,7 +240,7 @@ export default async function HomePage() {
         product.summary ||
         "Produk aktif di etalase Sidomakmur yang siap membantu kebutuhan belanja harian pelanggan.",
     })),
-    ...curatedScenes.slice(1),
+    ...photoScenes.slice(1, 3),
   ].slice(0, 2);
   const atmospherePanels = [
     ...atmosphereFrames.map(({ product, image }) => ({
@@ -218,6 +253,7 @@ export default async function HomePage() {
         product.summary ||
         "Produk inti dari katalog yang dipadukan dengan nuansa lahan, stok, dan perawatan tanaman.",
     })),
+    ...photoScenes,
     ...curatedScenes,
   ].slice(0, 3);
   const serviceHighlights = [
@@ -225,19 +261,19 @@ export default async function HomePage() {
       icon: "sprout" as const,
       title: "Pencarian produk yang langsung ke inti kebutuhan",
       body: "Cari pupuk, benih, pestisida, dan kebutuhan kios dari katalog yang ditata untuk dipindai cepat.",
-      scene: curatedScenes[0],
+      scene: photoScenes[0],
     },
     {
       icon: "route" as const,
       title: "Checkout dan pelacakan pesanan yang lebih jelas",
       body: "Masukkan pesanan dengan alur yang rapi, lalu pantau status order tanpa berpindah-pindah halaman.",
-      scene: curatedScenes[1],
+      scene: photoScenes[1],
     },
     {
       icon: "spark" as const,
       title: "Edukasi produk sebagai pendamping keputusan beli",
       body: "Baca panduan singkat agar pelanggan bisa memilih produk yang lebih tepat sebelum checkout.",
-      scene: curatedScenes[2],
+      scene: photoScenes[2],
     },
   ];
   const heroSignals = [
