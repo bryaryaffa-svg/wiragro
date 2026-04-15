@@ -455,10 +455,11 @@ async function fetchJsonWithTimeout(
 async function fetchStorefrontServerJson<T>(
   path: string,
   query?: Record<string, string | number | undefined | null>,
-  revalidate = 120,
+  revalidate: number | false = 120,
 ): Promise<T> {
   const response = await fetchJsonWithTimeout(buildUrl(getStorefrontApiBaseUrl(), path, query), {
-    next: { revalidate },
+    cache: revalidate === false ? "no-store" : undefined,
+    next: revalidate === false ? undefined : { revalidate },
   }, "Koneksi ke API publik sedang gagal.");
 
   return parseStorefrontResponse<T>(response);
@@ -897,7 +898,7 @@ export async function getCategories() {
   const payload = await fetchStorefrontServerJson<LaravelCategoryDto[]>(
     "/v1/public/categories",
     undefined,
-    300,
+    false,
   );
 
   return payload.map(mapCategory);
@@ -933,7 +934,7 @@ export async function getProducts(query?: Record<string, string | number | undef
       page,
       per_page: pageSize,
     },
-    120,
+    false,
   );
 
   const items = sortProductItems(payload.data.map(mapProductSummary), sort);
@@ -962,7 +963,7 @@ export async function getProduct(slug: string): Promise<ProductDetailPayload> {
   const dto = await fetchStorefrontServerJson<LaravelProductDto>(
     `/v1/public/products/${slug}`,
     undefined,
-    120,
+    false,
   );
 
   const product = mapProductSummary(dto);
