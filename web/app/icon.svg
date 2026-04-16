@@ -1,93 +1,11 @@
 <svg width="512" height="512" viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <defs>
-    <linearGradient id="wiragroIconBg" x1="14" x2="82" y1="10" y2="86" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#0E4E18" />
-      <stop offset="0.54" stop-color="#1B7429" />
-      <stop offset="1" stop-color="#275C1D" />
-    </linearGradient>
-    <linearGradient id="wiragroIconEdge" x1="20" x2="75" y1="18" y2="78" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#FFFFFF" stop-opacity="0.28" />
-      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0" />
-    </linearGradient>
-    <linearGradient id="wiragroIconFieldGold" x1="18" x2="78" y1="57" y2="76" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#FFBD2E" />
-      <stop offset="1" stop-color="#C85C00" />
-    </linearGradient>
-    <linearGradient id="wiragroIconFieldGreen" x1="13" x2="75" y1="62" y2="86" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#83C63F" />
-      <stop offset="1" stop-color="#4B8E24" />
-    </linearGradient>
-    <linearGradient id="wiragroIconFieldLime" x1="27" x2="75" y1="66" y2="87" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#D6FF55" />
-      <stop offset="1" stop-color="#8CCB20" />
-    </linearGradient>
-    <linearGradient id="wiragroIconWFill" x1="24" x2="53" y1="26" y2="67" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#FFFDF5" />
-      <stop offset="1" stop-color="#F3E8C6" />
-    </linearGradient>
-    <linearGradient id="wiragroIconLeafMain" x1="49" x2="60" y1="20" y2="44" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#F1FF72" />
-      <stop offset="1" stop-color="#8AC52A" />
-    </linearGradient>
-    <linearGradient id="wiragroIconLeafSide" x1="34" x2="48" y1="32" y2="50" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#8EE247" />
-      <stop offset="1" stop-color="#2E7E20" />
-    </linearGradient>
-    <filter id="wiragroShadow" x="4" y="6" width="88" height="90" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
-      <feFlood flood-opacity="0" result="BackgroundImageFix" />
-      <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha" />
-      <feOffset dy="2" />
-      <feGaussianBlur stdDeviation="2.5" />
-      <feComposite in2="hardAlpha" operator="out" />
-      <feColorMatrix type="matrix" values="0 0 0 0 0.0313725 0 0 0 0 0.164706 0 0 0 0 0.0666667 0 0 0 0.28 0" />
-      <feBlend in2="BackgroundImageFix" result="effect1_dropShadow_0_1" />
-      <feBlend in="SourceGraphic" in2="effect1_dropShadow_0_1" result="shape" />
-    </filter>
-  </defs>
-
-  <g filter="url(#wiragroShadow)">
-    <rect x="10" y="10" width="76" height="76" rx="21" fill="url(#wiragroIconBg)" />
-    <rect x="12" y="12" width="72" height="72" rx="19" fill="url(#wiragroIconEdge)" />
-
-    <path
-      d="M16 60.5C24.4 55.3 35.2 52.6 48.4 52.6C62.8 52.6 73.5 55.5 80.5 61.3L80.5 68.8C70.6 71.9 60 73.4 48.6 73.4C36.8 73.4 25.9 71.7 16 68.2V60.5Z"
-      fill="url(#wiragroIconFieldGold)"
-    />
-    <path
-      d="M16 69.2C24.2 65.8 34.1 64 45.8 64C56.4 64 66.5 65.6 76.2 68.7C68.1 75 56.8 78.2 42.4 78.2C31.7 78.2 22.9 75.2 16 69.2Z"
-      fill="url(#wiragroIconFieldGreen)"
-    />
-    <path
-      d="M31.2 70.2C37.7 67.9 44.3 66.8 51 66.8C61.4 66.8 69.6 69.1 75.7 73.6C69.5 79.5 61.8 82.5 52.6 82.5C42.2 82.5 35.1 78.4 31.2 70.2Z"
-      fill="url(#wiragroIconFieldLime)"
-    />
-
-    <path
-      d="M23.8 29.4H37.7L42.4 49.1L47.5 29.4H56.4L48 61.5H37L23.8 29.4Z"
-      fill="url(#wiragroIconWFill)"
-      stroke="#E5D8AB"
-      stroke-width="0.9"
-    />
-    <path
-      d="M72.2 29.4H58.3L53.6 49.1L48.5 29.4H39.6L48 61.5H59L72.2 29.4Z"
-      fill="url(#wiragroIconWFill)"
-      stroke="#E5D8AB"
-      stroke-width="0.9"
-    />
-
-    <path
-      d="M51.8 18.4C58 22.6 61.1 28.4 61.1 35.9C61.1 40 59.9 43.8 57.5 47.3C53.7 46.4 50.7 44.4 48.6 41.3C48.2 44.8 46.2 47.5 42.6 49.5C39.3 45.6 37.7 41.4 37.7 36.8C37.7 29.5 42.4 23.4 51.8 18.4Z"
-      fill="url(#wiragroIconLeafMain)"
-      stroke="#E7F16A"
-      stroke-width="0.7"
-    />
-    <path
-      d="M36.1 28.7C42.3 29.7 46.8 32.6 49.4 37.6C50.8 40.2 51.3 42.9 51.1 45.7C47.1 45.4 43.8 43.9 41.2 41.1C41.1 43.8 39.9 46 37.4 47.8C34.4 44.7 32.8 41.4 32.8 37.7C32.8 34.1 33.9 31.1 36.1 28.7Z"
-      fill="url(#wiragroIconLeafSide)"
-      stroke="#275C1D"
-      stroke-width="0.7"
-    />
-    <path d="M48.1 30.2V56.2" stroke="#24551A" stroke-linecap="round" stroke-width="1.8" />
-    <path d="M48.1 40C45.3 38.3 43.2 36 41.8 33.1" stroke="#24551A" stroke-linecap="round" stroke-width="1.2" />
-  </g>
+  <rect x="10" y="10" width="76" height="76" rx="22" fill="#1C6C2B" />
+  <path d="M16 62C24.4 56.8 35 54.2 47.9 54.2C61.2 54.2 72 56.8 80 62V66.6C70.6 69.4 60 70.8 48.2 70.8C36.4 70.8 25.7 69.4 16 66.5V62Z" fill="#F39C12" />
+  <path d="M16 67.2C24.1 63.7 34.2 62 46.4 62C58.7 62 69 63.8 77.3 67.2C70.2 73.6 60.8 76.8 49.1 76.8C36.6 76.8 25.6 73.6 16 67.2Z" fill="#7DBA32" />
+  <path d="M30.5 69.4C36.2 67.5 42.2 66.6 48.4 66.6C58 66.6 66 68.6 72.6 72.8C66.7 77.6 59.4 80 50.6 80C41.8 80 35.1 76.4 30.5 69.4Z" fill="#D7EE49" />
+  <path d="M22.6 28H34.6L40.4 47.2L45.2 28H52.2L56.8 47.2L62.8 28H73.4L63.4 60H54L48.6 40.6L43.2 60H33.9L22.6 28Z" fill="#FFF8EE" />
+  <path d="M49.2 22.4C56 25.8 59.4 31.4 59.4 39.2C59.4 45 56.5 49.6 50.8 53C45 49.6 42.1 45 42.1 39.2C42.1 31.4 44.5 25.8 49.2 22.4Z" fill="#D7F24C" />
+  <path d="M39.5 30.4C45 31.4 48.8 35 50.9 41.2C49.9 46.8 46.5 50.5 40.8 52.4C35.9 48.3 33.9 43.7 33.9 38.7C33.9 35 35.8 32.3 39.5 30.4Z" fill="#5CB737" />
+  <path d="M47.8 31.5V56.2" stroke="#1B5A1F" stroke-linecap="round" stroke-width="1.8" />
+  <path d="M47.7 39.4C45.4 37.5 43.6 35.2 42.4 32.4" stroke="#1B5A1F" stroke-linecap="round" stroke-width="1.1" />
 </svg>
