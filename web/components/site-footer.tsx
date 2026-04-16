@@ -13,7 +13,7 @@ export async function SiteFooter() {
   return (
     <footer className="site-footer">
       <div className="site-footer__brand">
-        <WiragroLockup contextLabel={store?.name ?? "Sidomakmur storefront"} tone="light" />
+        <WiragroLockup tone="light" variant="footer" />
         <h2>Katalog pertanian yang lebih cepat, rapi, dan siap dipakai belanja.</h2>
         <p>
           Wiragro membantu {store?.name ?? "Sidomakmur"} menampilkan produk, harga,

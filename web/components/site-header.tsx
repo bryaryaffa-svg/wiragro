@@ -42,7 +42,7 @@ export function SiteHeader() {
     <header className="site-header">
       <div className="site-header__bar">
         <Link className="brand-mark" href="/">
-          <WiragroLockup />
+          <WiragroLockup variant="header" />
         </Link>
 
         <form action="/produk" className="header-search">
