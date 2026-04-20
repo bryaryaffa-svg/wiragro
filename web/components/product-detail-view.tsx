@@ -14,6 +14,24 @@ function clampQty(value: number) {
   return Math.max(1, Math.min(value, 99));
 }
 
+const PRODUCT_SHOWCASE_MAIN_STYLE = {
+  position: "relative",
+  minHeight: "480px",
+  overflow: "hidden",
+} as const;
+
+const PRODUCT_SHOWCASE_IMAGE_STYLE = {
+  objectFit: "contain",
+  padding: "1.2rem",
+} as const;
+
+const PRODUCT_SHOWCASE_WISHLIST_SLOT_STYLE = {
+  position: "absolute",
+  top: "0.9rem",
+  right: "0.9rem",
+  zIndex: 3,
+} as const;
+
 export function ProductDetailView({ product }: { product: ProductDetailPayload }) {
   const defaultImage = product.images.find((image) => image.is_primary) ?? product.images[0] ?? null;
   const [selectedImageId, setSelectedImageId] = useState<string | null>(defaultImage?.id ?? null);
@@ -24,26 +42,31 @@ export function ProductDetailView({ product }: { product: ProductDetailPayload }
   const isOutOfStock = product.availability.state === "out_of_stock";
   const itemWeightKg = Number(product.weight_grams || "0") / 1000;
   const hasPromo = Boolean(product.price.compare_at_amount);
+  const useUnoptimizedSelectedImage = selectedImage?.url.startsWith("/") ?? false;
 
   return (
     <section className="product-showcase">
       <div className="product-showcase__media">
-        <div className="product-showcase__main">
+        <div className="product-showcase__main" style={PRODUCT_SHOWCASE_MAIN_STYLE}>
           {selectedImage ? (
             <Image
               alt={selectedImage.alt_text || product.name}
               fill
               sizes="(max-width: 1024px) 100vw, 54vw"
               src={selectedImage.url}
+              style={PRODUCT_SHOWCASE_IMAGE_STYLE}
+              unoptimized={useUnoptimizedSelectedImage}
             />
           ) : (
             <div className="product-card__placeholder" />
           )}
-          <WishlistButton
-            buttonClassName="wishlist-button wishlist-button--icon product-showcase__wish"
-            product={product}
-            variant="icon"
-          />
+          <div style={PRODUCT_SHOWCASE_WISHLIST_SLOT_STYLE}>
+            <WishlistButton
+              buttonClassName="wishlist-button wishlist-button--icon"
+              product={product}
+              variant="icon"
+            />
+          </div>
         </div>
 
         {product.images.length > 1 ? (
