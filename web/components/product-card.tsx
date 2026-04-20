@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { AddToCartButton } from "@/components/cart/add-to-cart-button";
+import { BuyNowButton } from "@/components/cart/buy-now-button";
 import { WishlistButton } from "@/components/wishlist-button";
 import type { ProductSummary } from "@/lib/api";
 import { formatCurrency } from "@/lib/format";
@@ -21,25 +22,32 @@ export function ProductCard({ product }: { product: ProductSummary }) {
 
   return (
     <article className="product-card">
-      <Link className="product-card__media" href={`/produk/${product.slug}`}>
-        {primaryImage ? (
-          <Image
-            alt={primaryImage.alt_text || product.name}
-            fill
-            sizes="(max-width: 640px) 48vw, (max-width: 1080px) 32vw, 25vw"
-            src={primaryImage.url}
-          />
-        ) : (
-          <div className="product-card__placeholder" />
-        )}
-        {showAvailabilityBadge ? (
-          <div className="product-card__overlay">
-            <span className={`status-badge status-badge--${product.availability.state}`}>
-              {product.availability.label}
-            </span>
-          </div>
-        ) : null}
-      </Link>
+      <div className="product-card__media-shell">
+        <Link className="product-card__media" href={`/produk/${product.slug}`}>
+          {primaryImage ? (
+            <Image
+              alt={primaryImage.alt_text || product.name}
+              fill
+              sizes="(max-width: 640px) 48vw, (max-width: 1080px) 32vw, 25vw"
+              src={primaryImage.url}
+            />
+          ) : (
+            <div className="product-card__placeholder" />
+          )}
+          {showAvailabilityBadge ? (
+            <div className="product-card__overlay">
+              <span className={`status-badge status-badge--${product.availability.state}`}>
+                {product.availability.label}
+              </span>
+            </div>
+          ) : null}
+        </Link>
+        <WishlistButton
+          buttonClassName="wishlist-button wishlist-button--icon product-card__wish"
+          product={product}
+          variant="icon"
+        />
+      </div>
 
       <div className="product-card__body">
         <div className="product-card__header">
@@ -82,7 +90,11 @@ export function ProductCard({ product }: { product: ProductSummary }) {
             label="Tambah ke keranjang"
             productId={product.id}
           />
-          <WishlistButton buttonClassName="btn btn-secondary btn-block" product={product} />
+          <BuyNowButton
+            buttonClassName="btn btn-secondary btn-block"
+            disabled={isOutOfStock}
+            productId={product.id}
+          />
         </div>
       </div>
     </article>

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useState } from "react";
 
 import { AddToCartButton } from "@/components/cart/add-to-cart-button";
+import { BuyNowButton } from "@/components/cart/buy-now-button";
 import { WishlistButton } from "@/components/wishlist-button";
 import type { ProductDetailPayload } from "@/lib/api";
 import { formatCurrency } from "@/lib/format";
@@ -38,6 +39,11 @@ export function ProductDetailView({ product }: { product: ProductDetailPayload }
           ) : (
             <div className="product-card__placeholder" />
           )}
+          <WishlistButton
+            buttonClassName="wishlist-button wishlist-button--icon product-showcase__wish"
+            product={product}
+            variant="icon"
+          />
         </div>
 
         {product.images.length > 1 ? (
@@ -128,7 +134,12 @@ export function ProductDetailView({ product }: { product: ProductDetailPayload }
               productId={product.id}
               qty={qty}
             />
-            <WishlistButton buttonClassName="btn btn-secondary btn-block" product={product} />
+            <BuyNowButton
+              buttonClassName="btn btn-secondary btn-block"
+              disabled={isOutOfStock}
+              productId={product.id}
+              qty={qty}
+            />
             <Link className="btn btn-secondary btn-block" href="/keranjang">
               Buka keranjang
             </Link>
