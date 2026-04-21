@@ -16,7 +16,6 @@ const PRODUCT_CARD_MEDIA_SHELL_STYLE = {
 const PRODUCT_CARD_MEDIA_LINK_STYLE = {
   display: "block",
   width: "100%",
-  minHeight: "250px",
   lineHeight: 0,
   background:
     "radial-gradient(circle at top, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.1) 38%), linear-gradient(145deg, #dcc7aa 0%, #f2ebdf 48%, #e8ddca 100%)",

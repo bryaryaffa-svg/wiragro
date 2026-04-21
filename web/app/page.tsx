@@ -310,6 +310,24 @@ export default async function HomePage() {
       body: "Walau lebih modern, flow inti tetap cepat: cari produk, buka detail, checkout, lalu lacak pesanan.",
     },
   ];
+  const mobileHeroUtilities = [
+    {
+      label: "Jam toko",
+      value: home.store.operational_hours || "Operasional aktif",
+    },
+    {
+      label: "Kategori",
+      value: `${home.category_highlights.length} kategori inti`,
+    },
+    {
+      label: "Layanan",
+      value: "Pickup & delivery",
+    },
+    {
+      label: "Pelacakan",
+      value: "Status order cepat",
+    },
+  ];
   const fallbackEditorial = [
     {
       slug: "panduan-memilih-pupuk",
@@ -338,7 +356,7 @@ export default async function HomePage() {
 
   return (
     <div className="page-stack page-stack--home">
-      <section className="home-hero">
+      <section className="home-hero home-section home-section--hero">
         <div className="home-hero__backdrop">
           <Image alt={heroBackdrop.alt} fill priority sizes="100vw" src={heroBackdrop.src} />
         </div>
@@ -358,10 +376,10 @@ export default async function HomePage() {
           <div className="home-hero__copy">
             <span className="eyebrow-label">Wiragro / Sidomakmur</span>
             <p className="home-hero__kicker">Katalog pertanian dan kebutuhan kios</p>
-            <h1>Belanja kebutuhan pertanian dan toko dalam satu storefront yang rapi.</h1>
+            <h1>Belanja pertanian yang cepat, rapi, dan siap kirim.</h1>
             <p>
-              Sidomakmur membantu pelanggan mencari produk, memeriksa ketersediaan, dan
-              menyelesaikan pesanan lewat pengalaman belanja yang lebih profesional di web.
+              Cari pupuk, benih, pestisida, dan kebutuhan kios dalam satu storefront
+              yang lebih mudah dipindai dari mobile maupun web.
             </p>
             <div className="home-hero__actions">
               <Link className="btn btn-primary" href="/produk">
@@ -370,6 +388,14 @@ export default async function HomePage() {
               <Link className="btn btn-secondary" href="/lacak-pesanan">
                 Lacak pesanan
               </Link>
+            </div>
+            <div className="home-mobile-utilities">
+              {mobileHeroUtilities.map((item) => (
+                <article className="home-mobile-utility" key={item.label}>
+                  <span>{item.label}</span>
+                  <strong>{item.value}</strong>
+                </article>
+              ))}
             </div>
             <form action="/produk" className="header-search header-search--hero home-hero__search">
               <input
@@ -474,11 +500,11 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="section-shell section-shell--tight">
+      <section className="section-shell section-shell--tight home-section home-section--proof">
         <div className="section-heading">
           <div>
             <span className="eyebrow-label">Layanan inti</span>
-            <h2>Halaman depan sekarang difokuskan untuk membantu pelanggan cepat memahami, memilih, dan membeli.</h2>
+            <h2>Belanja cepat lewat katalog, checkout, dan edukasi yang rapi.</h2>
           </div>
         </div>
         <div className="home-proof-grid">
@@ -503,7 +529,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="section-shell section-shell--soft">
+      <section className="section-shell section-shell--soft home-section home-section--atmosphere">
         <div className="home-atmosphere">
           <div className="home-atmosphere__visual">
             <article className="home-atmosphere__panel home-atmosphere__panel--lead">
@@ -527,7 +553,7 @@ export default async function HomePage() {
           </div>
           <div className="home-atmosphere__copy">
             <span className="eyebrow-label">Arah visual baru</span>
-            <h2>Storefront sekarang berbicara lewat lahan, bibit, dan distribusi, bukan hanya teks produk.</h2>
+            <h2>Storefront sekarang berbicara lewat lahan, bibit, dan stok yang nyata.</h2>
             <p>
               Bahkan saat foto produk belum lengkap, homepage tetap punya identitas pertanian yang
               kuat lewat bidang gambar besar, ilustrasi editorial, dan ritme visual yang lebih hidup.
@@ -550,7 +576,7 @@ export default async function HomePage() {
       </section>
 
       {storefrontUnavailable ? (
-        <section className="section-shell section-shell--soft">
+        <section className="section-shell section-shell--soft home-section home-section--system">
           <div className="empty-state empty-state--shopping">
             <span className="eyebrow-label">Koneksi katalog sedang bermasalah</span>
             <h2>Homepage tetap aktif, tetapi data produk belum berhasil dimuat.</h2>
@@ -568,11 +594,11 @@ export default async function HomePage() {
       ) : null}
 
       {home.banners.length ? (
-        <section className="section-shell section-shell--soft">
+        <section className="section-shell section-shell--soft home-section home-section--banner">
           <div className="section-heading">
             <div>
               <span className="eyebrow-label">Informasi toko</span>
-              <h2>Promo dan pengumuman penting ditampilkan sebagai update yang mudah dibaca.</h2>
+              <h2>Promo dan info toko yang perlu terlihat sekarang.</h2>
             </div>
           </div>
           <div className="notice-list">
@@ -594,11 +620,11 @@ export default async function HomePage() {
         </section>
       ) : null}
 
-      <section className="section-shell">
+      <section className="section-shell home-section home-section--categories">
         <div className="section-heading">
           <div>
             <span className="eyebrow-label">Kategori utama</span>
-            <h2>Masuk ke katalog dari kategori yang paling sering dicari pelanggan.</h2>
+            <h2>Mulai dari kategori yang paling sering dicari pelanggan.</h2>
           </div>
           <Link href="/produk">Lihat semua kategori</Link>
         </div>
@@ -613,11 +639,11 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="section-shell">
+      <section className="section-shell home-section home-section--featured">
         <div className="section-heading">
           <div>
             <span className="eyebrow-label">Pilihan unggulan</span>
-            <h2>Produk yang paling relevan untuk pembelian cepat dan pengisian stok.</h2>
+            <h2>Pilihan unggulan untuk isi stok dan belanja cepat.</h2>
           </div>
           <Link href="/produk">Lihat semua</Link>
         </div>
@@ -628,11 +654,11 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="section-shell section-shell--soft">
+      <section className="section-shell section-shell--soft home-section home-section--editorial">
         <div className="split-section">
           <div className="split-section__copy">
             <span className="eyebrow-label">Edukasi & insight</span>
-            <h2>Konten pendamping membantu pelanggan memahami pilihan sebelum membeli.</h2>
+            <h2>Panduan singkat sebelum memilih produk.</h2>
             <p>
               Artikel dipakai sebagai area edukasi singkat untuk produk, penggunaan dasar,
               dan pengambilan keputusan yang lebih percaya diri.
@@ -649,11 +675,11 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="section-shell">
+      <section className="section-shell home-section home-section--new">
         <div className="section-heading">
           <div>
             <span className="eyebrow-label">Produk terbaru</span>
-            <h2>Tambahan katalog yang baru tersedia di Sidomakmur.</h2>
+            <h2>Tambahan katalog terbaru di Sidomakmur.</h2>
           </div>
         </div>
         <div className="product-grid">
@@ -663,11 +689,11 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="section-shell">
+      <section className="section-shell home-section home-section--best">
         <div className="section-heading">
           <div>
             <span className="eyebrow-label">Produk terlaris</span>
-            <h2>Item yang paling sering menjadi acuan pembelian pelanggan.</h2>
+            <h2>Produk yang paling sering dipesan.</h2>
           </div>
           <Link href="/produk?sort=best_seller">Lihat katalog</Link>
         </div>
@@ -678,13 +704,13 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="home-cta">
+      <section className="home-cta home-section home-section--cta">
         <div>
           <span className="eyebrow-label">Mulai belanja</span>
-          <h2>Pilih produk, simpan favorit, lalu lanjutkan ke checkout atau pelacakan pesanan.</h2>
+          <h2>Buka katalog atau langsung lacak pesanan.</h2>
           <p>
-            Jika Anda sudah mengetahui kebutuhan yang dicari, buka katalog. Jika sudah
-            memiliki nomor order, langsung lanjut ke halaman pelacakan.
+            Kalau kebutuhan sudah jelas, buka katalog. Kalau nomor order sudah ada,
+            langsung lanjut ke halaman pelacakan.
           </p>
         </div>
         <div className="home-cta__actions">
