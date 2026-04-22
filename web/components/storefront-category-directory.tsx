@@ -76,7 +76,7 @@ export function StorefrontCategoryDirectory({
                           {item.subcategories.slice(0, 3).map((subItem) => (
                             <Link
                               className="category-directory-chip"
-                              href={buildStorefrontSubcategoryHref(subItem, categories)}
+                              href={buildStorefrontSubcategoryHref(item.key, subItem, categories)}
                               key={`${item.key}-${subItem.label}`}
                             >
                               <span className="category-directory-chip__icon">

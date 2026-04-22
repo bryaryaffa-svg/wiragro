@@ -191,15 +191,12 @@ export function SiteHeader() {
             );
           })}
         </div>
-        <div className="site-nav__tail">
-          <div className="site-nav__group site-nav__group--secondary">
-            {supportLinks.map((link) => (
-              <Link href={link.href} key={link.href}>
-                {link.label}
-              </Link>
-            ))}
-          </div>
-          <span className="site-nav__meta">Belanja retail, grosir, pickup, dan delivery.</span>
+        <div className="site-nav__group site-nav__group--secondary">
+          {supportLinks.map((link) => (
+            <Link href={link.href} key={link.href}>
+              {link.label}
+            </Link>
+          ))}
         </div>
       </nav>
       <div className={`site-header__mobile-panel${isMobileMenuOpen ? " is-open" : ""}`}>

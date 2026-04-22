@@ -403,7 +403,7 @@ function findMatchingCategorySlug(
 }
 
 export function buildStorefrontCategoryHref(
-  item: Pick<StorefrontMainCategory, "href" | "query" | "matchers">,
+  item: Pick<StorefrontMainCategory, "href" | "query" | "matchers" | "key">,
   categories: Array<{ name: string; slug: string }>,
 ) {
   if (item.href) {
@@ -411,10 +411,13 @@ export function buildStorefrontCategoryHref(
   }
 
   const match = findMatchingCategorySlug(categories, item.matchers);
-  return match ? `/produk?kategori=${match}` : `/produk?q=${encodeURIComponent(item.query)}`;
+  return match
+    ? `/produk?kelompok=${item.key}&kategori=${match}`
+    : `/produk?kelompok=${item.key}&q=${encodeURIComponent(item.query)}`;
 }
 
 export function buildStorefrontSubcategoryHref(
+  parentKey: string,
   item: StorefrontSubcategory,
   categories: Array<{ name: string; slug: string }>,
 ) {
@@ -423,5 +426,54 @@ export function buildStorefrontSubcategoryHref(
   }
 
   const match = findMatchingCategorySlug(categories, item.matchers);
-  return match ? `/produk?kategori=${match}` : `/produk?q=${encodeURIComponent(item.query)}`;
+  return match
+    ? `/produk?kelompok=${parentKey}&subkategori=${encodeURIComponent(item.label)}&kategori=${match}`
+    : `/produk?kelompok=${parentKey}&subkategori=${encodeURIComponent(item.label)}&q=${encodeURIComponent(item.query)}`;
+}
+
+type CategorySelectionInput = {
+  mainKey?: string | null;
+  subLabel?: string | null;
+  categorySlug?: string | null;
+  query?: string | null;
+};
+
+function includesMatcher(value: string, matchers: string[]) {
+  return matchers.some((matcher) => value.includes(matcher));
+}
+
+export function resolveStorefrontCategorySelection(input: CategorySelectionInput) {
+  const normalizedQuery = input.query?.toLowerCase().trim() ?? "";
+  const normalizedCategorySlug = input.categorySlug?.toLowerCase().trim() ?? "";
+  const normalizedSubLabel = input.subLabel?.toLowerCase().trim() ?? "";
+
+  const activeMain =
+    (input.mainKey
+      ? STOREFRONT_MAIN_CATEGORIES.find((item) => item.key === input.mainKey)
+      : undefined) ??
+    STOREFRONT_MAIN_CATEGORIES.find((item) => {
+      if (normalizedCategorySlug && includesMatcher(normalizedCategorySlug, item.matchers)) {
+        return true;
+      }
+
+      return normalizedQuery ? includesMatcher(normalizedQuery, item.matchers) : false;
+    }) ??
+    null;
+
+  if (!activeMain) {
+    return { main: null, sub: null };
+  }
+
+  const activeSub =
+    activeMain.subcategories.find(
+      (item) =>
+        item.label.toLowerCase() === normalizedSubLabel ||
+        (normalizedCategorySlug && includesMatcher(normalizedCategorySlug, item.matchers)) ||
+        (normalizedQuery && includesMatcher(normalizedQuery, item.matchers)),
+    ) ?? null;
+
+  return {
+    main: activeMain,
+    sub: activeSub,
+  };
 }

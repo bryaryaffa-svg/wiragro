@@ -1,7 +1,9 @@
 import Link from "next/link";
 
 import { ProductCard } from "@/components/product-card";
+import { StorefrontCategoryNavigator } from "@/components/storefront-category-navigator";
 import { getCategories, getFallbackProductList, getProducts } from "@/lib/api";
+import { resolveStorefrontCategorySelection } from "@/lib/storefront-category-system";
 
 export const dynamic = "force-dynamic";
 
@@ -15,6 +17,8 @@ export default async function ProductsPage({
   const resolved = await searchParams;
   const search = typeof resolved.q === "string" ? resolved.q : undefined;
   const category = typeof resolved.kategori === "string" ? resolved.kategori : undefined;
+  const mainCategoryKey = typeof resolved.kelompok === "string" ? resolved.kelompok : undefined;
+  const subcategory = typeof resolved.subkategori === "string" ? resolved.subkategori : undefined;
   const sort = typeof resolved.sort === "string" ? resolved.sort : "latest";
 
   const [categoriesResult, productsResult] = await Promise.allSettled([
@@ -28,13 +32,24 @@ export default async function ProductsPage({
       : getFallbackProductList({ q: search, category_slug: category, sort });
   const catalogUnavailable = productsResult.status === "rejected";
   const activeCategory = categories.find((item) => item.slug === category);
+  const storefrontSelection = resolveStorefrontCategorySelection({
+    mainKey: mainCategoryKey,
+    subLabel: subcategory,
+    categorySlug: category,
+    query: search,
+  });
+  const activeStorefrontMain = storefrontSelection.main;
 
   return (
     <section className="page-stack">
       <div className="page-intro page-intro--compact">
         <span className="eyebrow-label">Katalog produk</span>
         <h1>
-          {activeCategory ? `Katalog ${activeCategory.name}` : "Katalog produk Sidomakmur"}
+          {activeCategory
+            ? `Katalog ${activeCategory.name}`
+            : activeStorefrontMain
+              ? activeStorefrontMain.label
+              : "Katalog produk Sidomakmur"}
         </h1>
         <p>
           Gunakan pencarian, kategori, dan urutan untuk menemukan produk yang Anda butuhkan.
@@ -43,6 +58,14 @@ export default async function ProductsPage({
       </div>
 
       <section className="catalog-shell">
+        <StorefrontCategoryNavigator
+          activeCategorySlug={category}
+          activeMainKey={mainCategoryKey}
+          activeQuery={search}
+          activeSubcategory={subcategory}
+          categories={categories}
+        />
+
         <form action="/produk" className="catalog-search-card">
           <div className="catalog-search-card__primary">
             <label className="catalog-search-card__field">
@@ -64,6 +87,8 @@ export default async function ProductsPage({
                 <option value="price_desc">Harga tertinggi</option>
               </select>
             </label>
+            {mainCategoryKey ? <input name="kelompok" type="hidden" value={mainCategoryKey} /> : null}
+            {subcategory ? <input name="subkategori" type="hidden" value={subcategory} /> : null}
             {category ? <input name="kategori" type="hidden" value={category} /> : null}
             <button className="btn btn-primary" type="submit">
               Cari
