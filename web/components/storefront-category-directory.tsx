@@ -8,7 +8,8 @@ import {
   STOREFRONT_MAIN_CATEGORIES,
 } from "@/lib/storefront-category-system";
 
-import { CategoryMascot, SubcategoryIcon } from "@/components/storefront-category-visuals";
+import { StorefrontCategoryPhoto } from "@/components/storefront-category-photo";
+import { SubcategoryIcon } from "@/components/storefront-category-visuals";
 
 const clusterOrder = ["budidaya", "peralatan", "operasional"] as const;
 
@@ -24,8 +25,8 @@ export function StorefrontCategoryDirectory({
           <span className="storefront-eyebrow">Kategori storefront</span>
           <h2>Sistem kategori Wiragro</h2>
           <p>
-            Main category tampil sebagai kartu mascot premium, sementara subcategory tetap ringkas
-            sebagai chips yang cepat dipindai di mobile maupun desktop.
+            Main category sekarang tampil dengan foto utama asli agar lebih cepat dikenali, sementara
+            subcategory tetap ringkas sebagai chips yang nyaman dipindai di mobile maupun desktop.
           </p>
         </div>
         <Link href="/produk">Buka katalog</Link>
@@ -58,17 +59,24 @@ export function StorefrontCategoryDirectory({
                   return (
                     <article className="category-directory-card" key={item.key} style={style}>
                       <div className="category-directory-card__art">
-                        <CategoryMascot kind={item.mascot} palette={item} />
+                        <StorefrontCategoryPhoto
+                          alt={item.imageAlt}
+                          sizes="(max-width: 640px) 92vw, (max-width: 980px) 44vw, 28vw"
+                          src={item.imageSrc}
+                        />
                       </div>
 
                       <div className="category-directory-card__body">
                         <div className="category-directory-card__header">
                           <div>
+                            <span className="category-directory-card__cluster">
+                              {cluster.label}
+                            </span>
                             <h4>{item.label}</h4>
                             <p>{item.description}</p>
                           </div>
                           <Link className="category-directory-card__link" href={href}>
-                            Lihat
+                            Jelajahi
                           </Link>
                         </div>
 

@@ -9,7 +9,8 @@ import {
   STOREFRONT_MAIN_CATEGORIES,
 } from "@/lib/storefront-category-system";
 
-import { CategoryMascot, SubcategoryIcon } from "@/components/storefront-category-visuals";
+import { StorefrontCategoryPhoto } from "@/components/storefront-category-photo";
+import { SubcategoryIcon } from "@/components/storefront-category-visuals";
 
 export function StorefrontCategoryNavigator({
   categories,
@@ -40,8 +41,8 @@ export function StorefrontCategoryNavigator({
           <span className="eyebrow-label">Kategori storefront</span>
           <h2>Belanja per kategori utama</h2>
           <p>
-            Pilih main category untuk mempersempit katalog, lalu lanjut ke subcategory dengan chip
-            yang lebih ringkas.
+            Telusuri kategori foto-led untuk masuk ke kelompok belanja yang tepat, lalu lanjut ke
+            subcategory dengan chip yang tetap ringkas.
           </p>
         </div>
         <div className="catalog-category-navigator__clusters" aria-label="Kelompok kategori">
@@ -76,12 +77,16 @@ export function StorefrontCategoryNavigator({
               key={item.key}
               style={style}
             >
-              <span className="catalog-category-card__art">
-                <CategoryMascot kind={item.mascot} palette={item} />
-              </span>
+              <div className="catalog-category-card__art">
+                <StorefrontCategoryPhoto
+                  alt={item.imageAlt}
+                  sizes="(max-width: 640px) 38vw, (max-width: 980px) 24vw, 14vw"
+                  src={item.imageSrc}
+                />
+              </div>
               <span className="catalog-category-card__text">
                 <strong>{item.label}</strong>
-                <small>{item.cluster === "budidaya" ? "Budidaya" : item.cluster === "peralatan" ? "Peralatan" : "Operasional"}</small>
+                <small>{STOREFRONT_CATEGORY_CLUSTERS[item.cluster].label}</small>
               </span>
             </Link>
           );
