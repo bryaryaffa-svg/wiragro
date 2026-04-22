@@ -105,20 +105,7 @@ export default async function HomePage() {
   const heroProduct = selectedProducts[0] ?? null;
   const promoBanner = home.banners[0] ?? null;
   const educationItem = articleFeed.items[0] ?? fallbackArticles[0];
-  const heroUtilities = [
-    {
-      label: "Jam operasional",
-      value: home.store.operational_hours || "Senin - Sabtu",
-    },
-    {
-      label: "Layanan",
-      value: "Pickup & delivery",
-    },
-    {
-      label: "Pelacakan",
-      value: "Status order cepat",
-    },
-  ];
+  const operationalHours = home.store.operational_hours || "Senin - Sabtu, 08:00 - 17:00";
   const heroHighlight = heroProduct
     ? {
         title: heroProduct.name,
@@ -163,6 +150,10 @@ export default async function HomePage() {
               <span>Siap dibeli</span>
               <strong>{heroHighlight.title}</strong>
               <em>{heroHighlight.price}</em>
+              <div className="storefront-hero__spotlight-hours">
+                <small>Jam operasional</small>
+                <b>{operationalHours}</b>
+              </div>
             </div>
           </div>
 
@@ -232,14 +223,6 @@ export default async function HomePage() {
           </div>
         </div>
 
-        <div className="storefront-hero__utility-grid">
-          {heroUtilities.map((item) => (
-            <article className="storefront-utility-card" key={item.label}>
-              <span>{item.label}</span>
-              <strong>{item.value}</strong>
-            </article>
-          ))}
-        </div>
       </section>
 
       <StorefrontCategoryDirectory categories={categoryDirectory} />
