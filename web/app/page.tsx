@@ -2,23 +2,18 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { ProductCard } from "@/components/product-card";
+import { StorefrontCategoryDirectory } from "@/components/storefront-category-directory";
 import {
   type ArticleListPayload,
   type ProductSummary,
   getArticles,
+  getCategories,
   getFallbackHomeData,
   getHomeData,
 } from "@/lib/api";
 import { formatCurrency } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
-
-type CategoryShortcut = {
-  label: string;
-  query: string;
-  icon: string;
-  matchers: string[];
-};
 
 type TrustHighlight = {
   title: string;
@@ -31,39 +26,6 @@ type ArticleFallback = {
   title: string;
   excerpt: string;
 };
-
-const categoryShortcuts: CategoryShortcut[] = [
-  {
-    label: "Pupuk",
-    query: "pupuk",
-    icon: "/wiragro-illustrations/wiragro_icon_pupuk_transparent.png",
-    matchers: ["pupuk", "fertilizer"],
-  },
-  {
-    label: "Pestisida",
-    query: "pestisida",
-    icon: "/wiragro-illustrations/wiragro_icon_pestisida_transparent.png",
-    matchers: ["pestisida", "insektisida", "herbisida", "fungisida"],
-  },
-  {
-    label: "Benih",
-    query: "benih",
-    icon: "/wiragro-illustrations/wiragro_icon_benih_transparent.png",
-    matchers: ["benih", "bibit", "seed"],
-  },
-  {
-    label: "Nutrisi",
-    query: "nutrisi",
-    icon: "/wiragro-illustrations/wiragro_icon_nutrisi_transparent.png",
-    matchers: ["nutrisi", "pupuk cair", "mikro", "makro"],
-  },
-  {
-    label: "Alat Pertanian",
-    query: "alat pertanian",
-    icon: "/wiragro-illustrations/wiragro_icon_alat_pertanian_transparent.png",
-    matchers: ["alat", "perkakas", "tools"],
-  },
-];
 
 const trustHighlights: TrustHighlight[] = [
   {
@@ -107,24 +69,6 @@ function dedupeProducts(products: Array<ProductSummary | null | undefined>) {
     .filter((product, index, list) => list.findIndex((item) => item.id === product.id) === index);
 }
 
-function resolveCategoryHref(
-  categories: Array<{ name: string; slug: string }>,
-  shortcut: CategoryShortcut,
-) {
-  const match = categories.find((category) => {
-    const name = category.name.toLowerCase();
-    const slug = category.slug.toLowerCase();
-
-    return shortcut.matchers.some((matcher) => name.includes(matcher) || slug.includes(matcher));
-  });
-
-  if (match) {
-    return `/produk?kategori=${match.slug}`;
-  }
-
-  return `/produk?q=${encodeURIComponent(shortcut.query)}`;
-}
-
 export default async function HomePage() {
   let home = getFallbackHomeData();
   let storefrontUnavailable = false;
@@ -132,9 +76,11 @@ export default async function HomePage() {
     items: [],
     pagination: { page: 1, page_size: 2, count: 0 },
   };
+  let categoryDirectory = home.category_highlights;
 
   try {
     home = await getHomeData();
+    categoryDirectory = home.category_highlights;
   } catch {
     storefrontUnavailable = true;
   }
@@ -145,6 +91,12 @@ export default async function HomePage() {
     articleFeed = { items: [], pagination: { page: 1, page_size: 2, count: 0 } };
   }
 
+  try {
+    categoryDirectory = await getCategories();
+  } catch {
+    categoryDirectory = home.category_highlights;
+  }
+
   const selectedProducts = dedupeProducts([
     ...home.featured_products,
     ...home.new_arrivals,
@@ -153,10 +105,6 @@ export default async function HomePage() {
   const heroProduct = selectedProducts[0] ?? null;
   const promoBanner = home.banners[0] ?? null;
   const educationItem = articleFeed.items[0] ?? fallbackArticles[0];
-  const popularCategoryCards = categoryShortcuts.map((shortcut) => ({
-    ...shortcut,
-    href: resolveCategoryHref(home.category_highlights, shortcut),
-  }));
   const heroUtilities = [
     {
       label: "Jam operasional",
@@ -294,26 +242,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="storefront-section">
-        <div className="storefront-section__header">
-          <div>
-            <span className="storefront-eyebrow">Kategori populer</span>
-            <h2>Kategori populer</h2>
-          </div>
-          <Link href="/produk">Lihat semua</Link>
-        </div>
-
-        <div className="storefront-category-grid">
-          {popularCategoryCards.map((category) => (
-            <Link className="storefront-category-card" href={category.href} key={category.label}>
-              <span className="storefront-category-card__icon">
-                <Image alt={category.label} height={68} src={category.icon} width={68} />
-              </span>
-              <span className="storefront-category-card__label">{category.label}</span>
-            </Link>
-          ))}
-        </div>
-      </section>
+      <StorefrontCategoryDirectory categories={categoryDirectory} />
 
       <section className="storefront-section">
         <div className="storefront-promo-grid">
