@@ -14,13 +14,13 @@ export async function SiteFooter() {
     <footer className="site-footer">
       <div className="site-footer__brand">
         <WiragroLockup tone="light" variant="footer" />
-        <h2>Katalog pertanian yang lebih cepat, rapi, dan siap dipakai belanja.</h2>
+        <h2>Belanja kebutuhan tani yang lebih rapi dan lebih nyaman dari mobile.</h2>
         <p>
-          Wiragro membantu {store?.name ?? "Sidomakmur"} menampilkan produk, harga,
-          checkout, dan pelacakan pesanan dalam satu storefront yang lebih meyakinkan.
+          Wiragro membantu {store?.name ?? "Sidomakmur"} menampilkan produk, promo,
+          checkout, dan pelacakan pesanan dalam satu storefront yang lebih profesional.
         </p>
         <div className="site-footer__badges">
-          <span>Belanja retail & grosir</span>
+          <span>Katalog mobile-first</span>
           <span>Pickup toko</span>
           <span>Delivery lokal</span>
         </div>

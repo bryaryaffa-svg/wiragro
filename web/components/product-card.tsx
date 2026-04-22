@@ -121,7 +121,7 @@ export function ProductCard({ product }: { product: ProductSummary }) {
           <AddToCartButton
             buttonClassName="btn btn-primary btn-block"
             disabled={isOutOfStock}
-            label="Tambah ke keranjang"
+            label="Tambah"
             productId={product.id}
           />
           <BuyNowButton
