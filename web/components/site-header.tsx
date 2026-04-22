@@ -128,6 +128,16 @@ export function SiteHeader() {
           </button>
         </form>
 
+        <button
+          aria-expanded={isMobileMenuOpen}
+          aria-label={isMobileMenuOpen ? "Tutup menu navigasi" : "Buka menu navigasi"}
+          className="site-header__bar-toggle"
+          onClick={() => setIsMobileMenuOpen((current) => !current)}
+          type="button"
+        >
+          <HeaderIcon kind={isMobileMenuOpen ? "close" : "menu"} />
+        </button>
+
         <div className="header-actions">
           <Link
             className={`header-action-link ${isActivePath(pathname, "/wishlist") ? "is-active" : ""}`}
@@ -181,15 +191,6 @@ export function SiteHeader() {
             );
           })}
         </div>
-        <button
-          aria-expanded={isMobileMenuOpen}
-          aria-label={isMobileMenuOpen ? "Tutup menu navigasi" : "Buka menu navigasi"}
-          className="site-nav__mobile-toggle"
-          onClick={() => setIsMobileMenuOpen((current) => !current)}
-          type="button"
-        >
-          <HeaderIcon kind={isMobileMenuOpen ? "close" : "menu"} />
-        </button>
         <div className="site-nav__tail">
           <div className="site-nav__group site-nav__group--secondary">
             {supportLinks.map((link) => (
@@ -200,21 +201,21 @@ export function SiteHeader() {
           </div>
           <span className="site-nav__meta">Belanja retail, grosir, pickup, dan delivery.</span>
         </div>
-        <div className={`site-nav__mobile-panel${isMobileMenuOpen ? " is-open" : ""}`}>
-          {mobileMenuLinks.map((link) => {
-            const isActive = isActivePath(pathname, link.href);
-            return (
-              <Link
-                className={isActive ? "is-active" : undefined}
-                href={link.href}
-                key={`panel-${link.href}`}
-              >
-                {link.label}
-              </Link>
-            );
-          })}
-        </div>
       </nav>
+      <div className={`site-header__mobile-panel${isMobileMenuOpen ? " is-open" : ""}`}>
+        {mobileMenuLinks.map((link) => {
+          const isActive = isActivePath(pathname, link.href);
+          return (
+            <Link
+              className={isActive ? "is-active" : undefined}
+              href={link.href}
+              key={`panel-${link.href}`}
+            >
+              {link.label}
+            </Link>
+          );
+        })}
+      </div>
     </header>
   );
 }
