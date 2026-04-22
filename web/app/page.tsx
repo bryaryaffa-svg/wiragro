@@ -196,81 +196,92 @@ export default async function HomePage() {
       ) : null}
 
       <section className="storefront-hero">
-        <div className="storefront-hero__copy">
-          <span className="storefront-eyebrow">{home.store.name || "Kios Sidomakmur"}</span>
-          <h1>Solusi lengkap untuk kebutuhan pertanian Anda.</h1>
-          <p>
-            Produk pertanian yang lebih mudah dicari, lebih nyaman dibeli, dan lebih
-            rapi dipantau langsung dari storefront Wiragro.
-          </p>
+        <div className="storefront-hero__main">
+          <div className="storefront-hero__copy">
+            <span className="storefront-eyebrow">{home.store.name || "Kios Sidomakmur"}</span>
+            <h1>Solusi lengkap untuk kebutuhan pertanian Anda</h1>
+            <p>Produk berkualitas, harga bersaing, pelayanan cepat dan terpercaya.</p>
 
-          <div className="storefront-hero__actions">
-            <Link className="btn btn-primary" href="/produk">
-              Jelajahi katalog
-            </Link>
-            <Link className="btn btn-secondary" href="/lacak-pesanan">
-              Lacak pesanan
-            </Link>
+            <div className="storefront-hero__actions">
+              <Link className="btn btn-primary" href="/produk">
+                Jelajahi katalog
+              </Link>
+              <Link className="btn btn-secondary" href="/lacak-pesanan">
+                Lacak pesanan
+              </Link>
+            </div>
+
+            <div className="storefront-hero__spotlight">
+              <span>Siap dibeli</span>
+              <strong>{heroHighlight.title}</strong>
+              <em>{heroHighlight.price}</em>
+            </div>
           </div>
 
-          <div className="storefront-hero__highlight">
-            <span>Produk unggulan</span>
-            <strong>{heroHighlight.title}</strong>
-            <em>{heroHighlight.price}</em>
+          <div className="storefront-hero__visual" aria-hidden="true">
+            <Image
+              alt=""
+              className="storefront-hero__art storefront-hero__art--hill"
+              height={112}
+              src="/wiragro-illustrations/wiragro_dekor_bukit_transparent.png"
+              width={280}
+            />
+            <Image
+              alt=""
+              className="storefront-hero__art storefront-hero__art--soil"
+              height={80}
+              src="/wiragro-illustrations/wiragro_dekor_tanah_transparent.png"
+              width={160}
+            />
+            <Image
+              alt=""
+              className="storefront-hero__art storefront-hero__art--leaf-left"
+              height={129}
+              src="/wiragro-illustrations/wiragro_dekor_daun_kiri_transparent.png"
+              width={137}
+            />
+            <Image
+              alt=""
+              className="storefront-hero__art storefront-hero__art--leaf-right"
+              height={87}
+              src="/wiragro-illustrations/wiragro_dekor_ranting_transparent.png"
+              width={112}
+            />
+            <Image
+              alt=""
+              className="storefront-hero__art storefront-hero__art--sprout"
+              height={72}
+              src="/wiragro-illustrations/wiragro_dekor_tunas_kecil_transparent.png"
+              width={72}
+            />
+            <Image
+              alt=""
+              className="storefront-hero__art storefront-hero__art--tall"
+              height={137}
+              src="/wiragro-illustrations/wiragro_dekor_tanaman_tinggi_transparent.png"
+              width={138}
+            />
+            <Image
+              alt="Kemasan pupuk organik untuk hero Wiragro."
+              className="storefront-hero__product storefront-hero__product--main"
+              height={220}
+              priority
+              src="/wiragro-illustrations/wiragro_produk_pupuk_transparent.png"
+              width={220}
+            />
+            <Image
+              alt="Botol herbisida untuk hero Wiragro."
+              className="storefront-hero__product storefront-hero__product--accent"
+              height={164}
+              src="/wiragro-illustrations/wiragro_produk_herbisida_transparent.png"
+              width={104}
+            />
+            <div className="storefront-hero__dots">
+              <span className="is-active" />
+              <span />
+              <span />
+            </div>
           </div>
-        </div>
-
-        <div className="storefront-hero__visual" aria-hidden="true">
-          <Image
-            alt=""
-            className="storefront-hero__art storefront-hero__art--hill"
-            height={112}
-            src="/wiragro-illustrations/wiragro_dekor_bukit_transparent.png"
-            width={280}
-          />
-          <Image
-            alt=""
-            className="storefront-hero__art storefront-hero__art--soil"
-            height={80}
-            src="/wiragro-illustrations/wiragro_dekor_tanah_transparent.png"
-            width={160}
-          />
-          <Image
-            alt=""
-            className="storefront-hero__art storefront-hero__art--leaf-left"
-            height={129}
-            src="/wiragro-illustrations/wiragro_dekor_daun_kiri_transparent.png"
-            width={137}
-          />
-          <Image
-            alt=""
-            className="storefront-hero__art storefront-hero__art--leaf-right"
-            height={87}
-            src="/wiragro-illustrations/wiragro_dekor_ranting_transparent.png"
-            width={112}
-          />
-          <Image
-            alt=""
-            className="storefront-hero__art storefront-hero__art--sprout"
-            height={72}
-            src="/wiragro-illustrations/wiragro_dekor_tunas_kecil_transparent.png"
-            width={72}
-          />
-          <Image
-            alt="Kemasan pupuk organik untuk hero Wiragro."
-            className="storefront-hero__product storefront-hero__product--main"
-            height={220}
-            priority
-            src="/wiragro-illustrations/wiragro_produk_pupuk_transparent.png"
-            width={220}
-          />
-          <Image
-            alt="Botol nutrisi tanaman untuk hero Wiragro."
-            className="storefront-hero__product storefront-hero__product--accent"
-            height={148}
-            src="/wiragro-illustrations/wiragro_produk_nutrisi_transparent.png"
-            width={108}
-          />
         </div>
 
         <div className="storefront-hero__utility-grid">

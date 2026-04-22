@@ -39,6 +39,13 @@ export function ProductCard({ product }: { product: ProductSummary }) {
   const isOutOfStock = product.availability.state === "out_of_stock";
   const showAvailabilityBadge = product.availability.state !== "in_stock";
   const useUnoptimizedImage = primaryImage?.url.startsWith("/") ?? false;
+  const primaryBadge = product.badges.featured
+    ? "Promo"
+    : product.badges.new_arrival
+      ? "Baru"
+      : product.badges.best_seller
+        ? "Terlaris"
+        : null;
   const availabilityText =
     product.availability.state === "low_stock"
       ? "Stok menipis"
@@ -49,6 +56,11 @@ export function ProductCard({ product }: { product: ProductSummary }) {
   return (
     <article className="product-card">
       <div className="product-card__media-shell" style={PRODUCT_CARD_MEDIA_SHELL_STYLE}>
+        {primaryBadge ? (
+          <div className="product-card__floating-badges">
+            <span>{primaryBadge}</span>
+          </div>
+        ) : null}
         <Link
           className="product-card__media"
           href={`/produk/${product.slug}`}
@@ -84,16 +96,9 @@ export function ProductCard({ product }: { product: ProductSummary }) {
       </div>
 
       <div className="product-card__body">
-        <div className="product-card__header">
-          <div className="product-card__badges">
-            {product.badges.featured ? <span>Promo</span> : null}
-            {product.badges.new_arrival ? <span>Baru</span> : null}
-            {product.badges.best_seller ? <span>Terlaris</span> : null}
-          </div>
-          <div className="product-card__meta">
-            <span>{product.category?.name ?? product.product_type}</span>
-            <span>{product.unit}</span>
-          </div>
+        <div className="product-card__meta">
+          <span>{product.category?.name ?? product.product_type}</span>
+          <span>{product.unit}</span>
         </div>
 
         <Link className="product-card__title" href={`/produk/${product.slug}`}>
@@ -105,12 +110,14 @@ export function ProductCard({ product }: { product: ProductSummary }) {
         </p>
 
         <div className="product-card__price-block">
-          <strong>{formatCurrency(product.price.amount)}</strong>
-          {product.price.compare_at_amount ? (
-            <small className="price-strike">
-              {formatCurrency(product.price.compare_at_amount)}
-            </small>
-          ) : null}
+          <div className="product-card__price-row">
+            <strong>{formatCurrency(product.price.amount)}</strong>
+            {product.price.compare_at_amount ? (
+              <small className="price-strike">
+                {formatCurrency(product.price.compare_at_amount)}
+              </small>
+            ) : null}
+          </div>
           {availabilityText ? <small className="price-caption">{availabilityText}</small> : null}
           <small className="price-caption price-caption--secondary">
             {product.price.is_promo ? "Harga promo aktif" : "Harga toko saat ini"}
