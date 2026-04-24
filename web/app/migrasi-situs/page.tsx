@@ -1,6 +1,14 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 
+import { buildUtilityMetadata } from "@/lib/seo";
+
 export const dynamic = "force-static";
+export const metadata: Metadata = buildUtilityMetadata(
+  "Migrasi situs lama",
+  "Informasi migrasi dari URL lama ke storefront Wiragro yang baru.",
+  "/migrasi-situs",
+);
 
 export default function SiteMigrationPage() {
   return (

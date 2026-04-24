@@ -35,6 +35,8 @@ class Settings(BaseSettings):
     google_oidc_audiences: str = Field(default="", alias="GOOGLE_OIDC_AUDIENCES")
     sige_sync_base_url: str = Field(default="", alias="SIGE_SYNC_BASE_URL")
     sige_sync_token: str = Field(default="", alias="SIGE_SYNC_TOKEN")
+    sige_sync_target_code: str = Field(default="SIDOMAKMUR_KIOS", alias="SIGE_SYNC_TARGET_CODE")
+    sige_sync_timeout_seconds: int = Field(default=30, alias="SIGE_SYNC_TIMEOUT_SECONDS")
 
     @computed_field
     @property

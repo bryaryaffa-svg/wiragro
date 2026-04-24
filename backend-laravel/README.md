@@ -59,6 +59,8 @@ php artisan serve
 - `GET /api/v1/customer/carts/current`
 - `POST /api/v1/customer/carts/items`
 - `PATCH /api/v1/customer/carts/items/{item}`
+- `GET /api/v1/customer/shipping/destinations?search=...`
+- `POST /api/v1/customer/shipping/rates`
 - `POST /api/v1/customer/checkout/guest`
 - `GET /api/v1/customer/orders/track`
 - `GET /api/v1/customer/orders/{orderNumber}?phone=...`
@@ -79,8 +81,13 @@ DEFAULT_STORE_CODE=SIDO-JATIM-ONLINE
 DEFAULT_CURRENCY=IDR
 ORDER_AUTO_CANCEL_HOURS=24
 CHECKOUT_SHIPPING_METHODS=delivery,pickup
+CHECKOUT_SHIPPING_PROVIDER=rajaongkir
 CHECKOUT_PAYMENT_METHODS=duitku-va,COD
 CHECKOUT_INVOICE_SOURCE=STORE
+RAJAONGKIR_BASE_URL=https://rajaongkir.komerce.id/api/v1
+RAJAONGKIR_API_KEY=YOUR_RAJAONGKIR_API_KEY
+RAJAONGKIR_ORIGIN_ID=YOUR_RAJAONGKIR_ORIGIN_ID
+RAJAONGKIR_COURIERS=jne:jnt:sicepat:pos
 GOOGLE_OIDC_AUDIENCES=YOUR_GOOGLE_WEB_CLIENT_ID
 DUITKU_MERCHANT_CODE=YOUR_DUITKU_MERCHANT_CODE
 ADMIN_URL=https://api.wiragro.id/admin
@@ -94,6 +101,8 @@ SESSION_DOMAIN=.wiragro.id
 CORS_ALLOWED_ORIGINS=https://wiragro.id,https://www.wiragro.id
 FILESYSTEM_DISK=public
 ```
+
+Jika `delivery` tetap diaktifkan, endpoint ongkir akan gagal dipakai checkout bila `RAJAONGKIR_API_KEY` atau `RAJAONGKIR_ORIGIN_ID` belum diisi.
 
 File contoh production lengkap ada di [`.env.production.example`](C:/Users/BRYAN/OneDrive/Dokumen/Playground/kios-sidomakmur/backend-laravel/.env.production.example).
 

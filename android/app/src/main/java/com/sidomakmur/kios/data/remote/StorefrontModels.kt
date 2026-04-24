@@ -571,8 +571,12 @@ data class CheckoutOrder(
     val paymentStatus: String = "",
     @Json(name = "grand_total")
     val grandTotal: String = "0",
+    @Json(name = "shipping_total")
+    val shippingTotal: String = "0",
     @Json(name = "auto_cancel_at")
     val autoCancelAt: String? = null,
+    @Json(name = "payment_due_at")
+    val paymentDueAt: String? = null,
     @Json(name = "shipping_method")
     val shippingMethod: String? = null,
     @Json(name = "payment_method")
@@ -586,6 +590,13 @@ data class CheckoutOrder(
 data class CheckoutPaymentInstruction(
     val method: String = "",
     val status: String = "",
+    val reference: String? = null,
+    @Json(name = "payment_url")
+    val paymentUrl: String? = null,
+    val expiry: String? = null,
+    val mode: String? = null,
+    @Json(name = "merchant_code")
+    val merchantCode: String? = null,
 )
 
 data class OrderInvoice(
@@ -668,6 +679,15 @@ data class OrderShipment(
     val deliveryMethod: String? = null,
     @Json(name = "pickup_store_code")
     val pickupStoreCode: String? = null,
+    @Json(name = "courier_code")
+    val courierCode: String? = null,
+    @Json(name = "courier_name")
+    val courierName: String? = null,
+    @Json(name = "service_code")
+    val serviceCode: String? = null,
+    @Json(name = "service_name")
+    val serviceName: String? = null,
+    val etd: String? = null,
 )
 
 data class OrderPayment(

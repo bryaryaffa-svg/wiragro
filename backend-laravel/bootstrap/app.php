@@ -35,6 +35,7 @@ return Application::configure(basePath: dirname(__DIR__))
             return response()->json([
                 'success' => false,
                 'message' => 'Validasi request gagal.',
+                'detail' => 'Validasi request gagal.',
                 'errors' => $exception->errors(),
             ], Response::HTTP_UNPROCESSABLE_ENTITY);
         });
@@ -47,6 +48,7 @@ return Application::configure(basePath: dirname(__DIR__))
             return response()->json([
                 'success' => false,
                 'message' => 'Unauthenticated.',
+                'detail' => 'Unauthenticated.',
             ], Response::HTTP_UNAUTHORIZED);
         });
 
@@ -58,6 +60,7 @@ return Application::configure(basePath: dirname(__DIR__))
             return response()->json([
                 'success' => false,
                 'message' => 'Akses ditolak.',
+                'detail' => 'Akses ditolak.',
             ], Response::HTTP_FORBIDDEN);
         });
 
@@ -66,11 +69,14 @@ return Application::configure(basePath: dirname(__DIR__))
                 return null;
             }
 
+            $message = $exception->getMessage() !== ''
+                ? $exception->getMessage()
+                : 'Resource tidak ditemukan.';
+
             return response()->json([
                 'success' => false,
-                'message' => $exception->getMessage() !== ''
-                    ? $exception->getMessage()
-                    : 'Resource tidak ditemukan.',
+                'message' => $message,
+                'detail' => $message,
             ], Response::HTTP_NOT_FOUND);
         });
 
@@ -79,11 +85,14 @@ return Application::configure(basePath: dirname(__DIR__))
                 return null;
             }
 
+            $message = $exception->getMessage() !== ''
+                ? $exception->getMessage()
+                : (Response::$statusTexts[$exception->getStatusCode()] ?? 'Request gagal diproses.');
+
             return response()->json([
                 'success' => false,
-                'message' => $exception->getMessage() !== ''
-                    ? $exception->getMessage()
-                    : (Response::$statusTexts[$exception->getStatusCode()] ?? 'Request gagal diproses.'),
+                'message' => $message,
+                'detail' => $message,
             ], $exception->getStatusCode(), $exception->getHeaders());
         });
 
@@ -92,11 +101,14 @@ return Application::configure(basePath: dirname(__DIR__))
                 return null;
             }
 
+            $message = config('app.debug')
+                ? $exception->getMessage()
+                : 'Terjadi kesalahan pada server.';
+
             return response()->json([
                 'success' => false,
-                'message' => config('app.debug')
-                    ? $exception->getMessage()
-                    : 'Terjadi kesalahan pada server.',
+                'message' => $message,
+                'detail' => $message,
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         });
     })

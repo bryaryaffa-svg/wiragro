@@ -8,19 +8,11 @@ import { useAuth } from "@/components/auth-provider";
 import { useCart } from "@/components/cart/cart-provider";
 import { WiragroLockup } from "@/components/wiragro-lockup";
 import { useWishlist } from "@/components/wishlist-provider";
-
-const mainLinks = [
-  { href: "/", label: "Beranda" },
-  { href: "/produk", label: "Produk" },
-  { href: "/artikel", label: "Edukasi" },
-  { href: "/lacak-pesanan", label: "Lacak Pesanan" },
-];
-
-const supportLinks = [
-  { href: "/tentang-kami", label: "Tentang Kami" },
-  { href: "/kontak", label: "Kontak" },
-  { href: "/faq", label: "FAQ" },
-];
+import {
+  PRIMARY_PILLAR_LINKS,
+  UTILITY_NAV_LINKS,
+  isHybridNavActive,
+} from "@/lib/hybrid-navigation";
 
 type HeaderIconKind = "search" | "menu" | "close";
 
@@ -71,12 +63,25 @@ export function SiteHeader() {
   const accountHref = session ? "/akun" : "/masuk";
   const [isMobileNavCollapsed, setIsMobileNavCollapsed] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const mobilePrimaryLinks = mainLinks.filter((link) => link.href !== "/lacak-pesanan");
-  const mobileMenuLinks = [
-    ...mainLinks,
-    { href: accountHref, label: session ? "Akun" : "Masuk" },
-    ...supportLinks,
-  ].filter((link, index, list) => list.findIndex((item) => item.href === link.href) === index);
+  const mobilePrimaryLinks = PRIMARY_PILLAR_LINKS;
+  const mobileMenuGroups = [
+    {
+      title: "Pilar utama",
+      links: PRIMARY_PILLAR_LINKS,
+    },
+    {
+      title: "Belanja & akun",
+      links: [
+        { href: "/wishlist", label: "Wishlist" },
+        { href: "/keranjang", label: "Keranjang" },
+        { href: accountHref, label: session ? "Akun" : "Masuk" },
+      ],
+    },
+    {
+      title: "Utility",
+      links: UTILITY_NAV_LINKS,
+    },
+  ];
 
   useEffect(() => {
     const onScroll = () => {
@@ -113,14 +118,14 @@ export function SiteHeader() {
     >
       <div className="site-header__bar">
         <Link className="brand-mark" href="/">
-          <WiragroLockup variant="header" />
+          <WiragroLockup contextLabel="Belajar • Solusi • Belanja" variant="header" />
         </Link>
 
         <form action="/produk" className="header-search">
           <input
             aria-label="Cari produk"
             name="q"
-            placeholder="Cari pupuk, benih, minyak, gula..."
+            placeholder="Cari pupuk, benih, pestisida, atau kebutuhan toko..."
             type="search"
           />
           <button aria-label="Cari produk" type="submit">
@@ -164,8 +169,8 @@ export function SiteHeader() {
 
       <nav className="site-nav" aria-label="Navigasi utama">
         <div className="site-nav__group site-nav__group--desktop">
-          {mainLinks.map((link) => {
-            const isActive = isActivePath(pathname, link.href);
+          {PRIMARY_PILLAR_LINKS.map((link) => {
+            const isActive = isHybridNavActive(pathname, link.href);
             return (
               <Link
                 className={isActive ? "is-active" : undefined}
@@ -179,7 +184,7 @@ export function SiteHeader() {
         </div>
         <div className="site-nav__group site-nav__group--mobile-primary">
           {mobilePrimaryLinks.map((link) => {
-            const isActive = isActivePath(pathname, link.href);
+            const isActive = isHybridNavActive(pathname, link.href);
             return (
               <Link
                 className={isActive ? "is-active" : undefined}
@@ -192,26 +197,38 @@ export function SiteHeader() {
           })}
         </div>
         <div className="site-nav__group site-nav__group--secondary">
-          {supportLinks.map((link) => (
-            <Link href={link.href} key={link.href}>
+          {UTILITY_NAV_LINKS.map((link) => (
+            <Link
+              className={isActivePath(pathname, link.href) ? "is-active" : undefined}
+              href={link.href}
+              key={link.href}
+            >
               {link.label}
             </Link>
           ))}
         </div>
       </nav>
       <div className={`site-header__mobile-panel${isMobileMenuOpen ? " is-open" : ""}`}>
-        {mobileMenuLinks.map((link) => {
-          const isActive = isActivePath(pathname, link.href);
-          return (
-            <Link
-              className={isActive ? "is-active" : undefined}
-              href={link.href}
-              key={`panel-${link.href}`}
-            >
-              {link.label}
-            </Link>
-          );
-        })}
+        {mobileMenuGroups.map((group) => (
+          <div className="site-header__mobile-panel-group" key={group.title}>
+            <span className="site-header__mobile-panel-label">{group.title}</span>
+            {group.links.map((link) => {
+              const isActive =
+                group.title === "Pilar utama"
+                  ? isHybridNavActive(pathname, link.href)
+                  : isActivePath(pathname, link.href);
+              return (
+                <Link
+                  className={isActive ? "is-active" : undefined}
+                  href={link.href}
+                  key={`panel-${group.title}-${link.href}`}
+                >
+                  {link.label}
+                </Link>
+              );
+            })}
+          </div>
+        ))}
       </div>
     </header>
   );

@@ -7,6 +7,7 @@ use App\Models\OtpChallenge;
 use App\Models\StoreSetting;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\PersonalAccessToken;
 use Throwable;
@@ -109,6 +110,72 @@ class CustomerAuthService
         return $this->issueSession($customer, 'google-oidc');
     }
 
+    public function checkResellerActivation(string $storeCode, string $username): array
+    {
+        $this->assertStoreIsActive($storeCode);
+        $customer = $this->findResellerCustomer($username);
+
+        $canSetPassword = blank($customer->password);
+
+        return [
+            'username' => (string) $customer->username,
+            'status' => $canSetPassword ? 'activation_required' : 'ready_for_login',
+            'can_set_password' => $canSetPassword,
+            'message' => $canSetPassword
+                ? 'Username reseller valid dan siap aktivasi password.'
+                : 'Username reseller sudah aktif. Silakan login dengan password reseller.',
+        ];
+    }
+
+    public function setResellerPassword(string $storeCode, string $username, string $password): array
+    {
+        $this->assertStoreIsActive($storeCode);
+        $customer = $this->findResellerCustomer($username);
+
+        if (filled($customer->password)) {
+            throw new UnprocessableEntityHttpException(
+                'Password reseller sudah aktif. Silakan login dengan username dan password reseller.'
+            );
+        }
+
+        $customer->forceFill([
+            'password' => Hash::make($password),
+            'auth_provider' => 'reseller',
+            'is_guest' => false,
+            'member_tier' => $customer->member_tier ?: 'reseller',
+        ])->save();
+
+        return [
+            'status' => 'password_set',
+            'username' => (string) $customer->username,
+            'message' => 'Password reseller berhasil disimpan. Silakan login sebagai reseller.',
+        ];
+    }
+
+    public function loginReseller(string $storeCode, string $username, string $password): array
+    {
+        $this->assertStoreIsActive($storeCode);
+        $customer = $this->findResellerCustomer($username);
+
+        if (blank($customer->password)) {
+            throw new UnprocessableEntityHttpException(
+                'Password reseller belum diatur. Aktivasi akun reseller terlebih dahulu.'
+            );
+        }
+
+        if (! Hash::check($password, (string) $customer->password)) {
+            throw new UnauthorizedHttpException('reseller', 'Username atau password reseller tidak valid');
+        }
+
+        $customer->forceFill([
+            'auth_provider' => 'reseller',
+            'is_guest' => false,
+            'member_tier' => $customer->member_tier ?: 'reseller',
+        ])->save();
+
+        return $this->issueSession($customer, 'reseller-password');
+    }
+
     public function issueSession(Customer $customer, string $mode): array
     {
         $token = $customer->createToken(config('customer.token_name', 'web-customer'), ['customer'])->plainTextToken;
@@ -121,6 +188,7 @@ class CustomerAuthService
                 'phone' => $customer->phone,
                 'email' => $customer->email,
                 'member_tier' => $customer->member_tier,
+                'username' => $customer->username,
             ],
             'mode' => $mode,
             'role' => $customer->member_tier ? 'reseller' : 'customer',
@@ -203,6 +271,22 @@ class CustomerAuthService
         if (! $exists) {
             throw new NotFoundHttpException('Store tidak ditemukan atau tidak aktif.');
         }
+    }
+
+    private function findResellerCustomer(string $username): Customer
+    {
+        $normalizedUsername = Str::lower(trim($username));
+
+        /** @var Customer|null $customer */
+        $customer = Customer::query()
+            ->whereRaw('LOWER(username) = ?', [$normalizedUsername])
+            ->first();
+
+        if (! $customer) {
+            throw new NotFoundHttpException('Username reseller tidak ditemukan.');
+        }
+
+        return $customer;
     }
 
     private function normalizePhone(string $phone): string

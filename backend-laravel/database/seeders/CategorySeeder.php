@@ -12,6 +12,9 @@ class CategorySeeder extends Seeder
         $categories = [
             ['name' => 'Pupuk', 'slug' => 'pupuk'],
             ['name' => 'Pestisida', 'slug' => 'pestisida'],
+            ['name' => 'Benih', 'slug' => 'benih'],
+            ['name' => 'Nutrisi', 'slug' => 'nutrisi'],
+            ['name' => 'Alat Pertanian', 'slug' => 'alat-pertanian'],
             ['name' => 'Sembako', 'slug' => 'sembako'],
         ];
 

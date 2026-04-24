@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from contextlib import asynccontextmanager
+import logging
 
 from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -14,15 +15,25 @@ from app.core.database import SessionLocal, engine, get_db
 from app.core.logging import configure_logging
 from app.models import Base, Invoice, Order
 from app.services.commerce import seed_demo_data
+from app.services.sige_sync import is_sige_sync_configured, sync_storefront_from_sige
+
+logger = logging.getLogger(__name__)
 
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     configure_logging()
     Base.metadata.create_all(bind=engine)
-    if settings.app_auto_seed_demo:
-        with SessionLocal() as db:
+    with SessionLocal() as db:
+        if settings.app_auto_seed_demo:
             seed_demo_data(db)
+        if is_sige_sync_configured():
+            try:
+                sync_storefront_from_sige(db, store_code=settings.default_store_code, force_full=False)
+                db.commit()
+            except Exception as exc:  # pragma: no cover - startup safety
+                db.rollback()
+                logger.exception("Sync awal SiGe gagal: %s", exc)
     yield
 
 

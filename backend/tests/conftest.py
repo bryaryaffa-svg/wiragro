@@ -7,6 +7,8 @@ os.environ.setdefault("DATABASE_URL", "sqlite:///./tests-kios-bootstrap.db")
 os.environ.setdefault("JWT_SECRET_KEY", "test-secret-key-kios-0123456789abcdef")
 os.environ.setdefault("APP_AUTO_SEED_DEMO", "false")
 os.environ.setdefault("APP_DEBUG", "true")
+os.environ.setdefault("SIGE_SYNC_BASE_URL", "")
+os.environ.setdefault("SIGE_SYNC_TOKEN", "")
 
 import pytest
 from fastapi.testclient import TestClient

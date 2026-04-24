@@ -14,6 +14,8 @@ class PublicProductController extends ApiController
         $products = Product::query()
             ->with(['category', 'images'])
             ->where('is_active', true)
+            ->latest('created_at')
+            ->latest('id')
             ->when(
                 $request->filled('search'),
                 fn ($query) => $query->where('name', 'like', '%'.$request->string('search').'%')

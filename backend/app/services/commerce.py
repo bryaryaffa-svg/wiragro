@@ -26,6 +26,7 @@ from app.models import (
     OrderItem,
     OtpChallenge,
     Payment,
+    PaymentMethod,
     Product,
     ProductImage,
     ProductPrice,
@@ -42,6 +43,7 @@ from app.models.enums import (
     FulfillmentStatus,
     InvoiceType,
     OrderStatus,
+    PaymentMethodType,
     PaymentStatus,
     PriceType,
     ProductType,
@@ -138,15 +140,38 @@ def serialize_checkout_rules(db: Session, store_id: str, role: str) -> dict:
     if bool(policy.get("allow_pickup", True)):
         shipping_methods.append({"code": "pickup", "label": "Ambil di toko"})
 
-    payment_methods = [{"code": "duitku-va", "label": "Pembayaran online Duitku"}]
-    if bool(policy.get("allow_cod", True)):
-        payment_methods.append({"code": "COD", "label": "Bayar di tempat (COD)"})
+    synced_methods = list(
+        db.scalars(
+            select(PaymentMethod)
+            .where(PaymentMethod.store_id == store_id)
+            .where(PaymentMethod.is_active.is_(True))
+            .order_by(PaymentMethod.sort_order.asc(), PaymentMethod.name.asc())
+        ).all()
+    )
+    payment_methods = [
+        {
+            "code": method.code,
+            "label": method.name,
+            "description": method.description,
+            "type": method.payment_type.value,
+            "provider_code": method.provider_code,
+            "instructions_html": method.instructions_html,
+            "icon_url": method.icon_url,
+        }
+        for method in synced_methods
+        if bool(policy.get("allow_cod", True)) or method.payment_type != PaymentMethodType.COD
+    ]
+    if not payment_methods:
+        payment_methods = [{"code": "duitku-va", "label": "Pembayaran online Duitku"}]
+        if bool(policy.get("allow_cod", True)):
+            payment_methods.append({"code": "COD", "label": "Bayar di tempat (COD)"})
+    allow_cod = any(item["code"].upper() == "COD" or item.get("type") == "COD" for item in payment_methods)
     return {
         "role": role,
         "pricing_mode": determine_pricing_mode(role),
         "minimum_order_amount": minimum_order_amount if role == ROLE_RESELLER else None,
         "apply_minimum_order": role == ROLE_RESELLER,
-        "allow_cod": bool(policy.get("allow_cod", True)),
+        "allow_cod": allow_cod,
         "allow_store_delivery": bool(policy.get("allow_store_delivery", True)),
         "allow_pickup": bool(policy.get("allow_pickup", True)),
         "invoice_source": str(policy.get("invoice_source", "STORE")),
@@ -1425,6 +1450,13 @@ def build_sync_manifest(db: Session, store: Store, since_version: int) -> dict:
     )
     banners = list(db.scalars(select(Banner).where(Banner.store_id == store.id).where(Banner.source_version > since_version)).all())
     pages = list(db.scalars(select(ContentPage).where(ContentPage.store_id == store.id).where(ContentPage.source_version > since_version)).all())
+    payment_methods = list(
+        db.scalars(
+            select(PaymentMethod)
+            .where(PaymentMethod.store_id == store.id)
+            .where(PaymentMethod.source_version > since_version)
+        ).all()
+    )
     settings_rows = list(
         db.scalars(select(AppSetting).where(AppSetting.store_id == store.id).where(AppSetting.source_version > since_version)).all()
     )
@@ -1435,6 +1467,7 @@ def build_sync_manifest(db: Session, store: Store, since_version: int) -> dict:
         + [row.source_version for row in prices]
         + [row.source_version for row in banners]
         + [row.source_version for row in pages]
+        + [row.source_version for row in payment_methods]
         + [row.source_version for row in settings_rows]
     )
     payload = {
@@ -1445,6 +1478,10 @@ def build_sync_manifest(db: Session, store: Store, since_version: int) -> dict:
         "prices": [{"id": row.id, "product_id": row.product_id, "amount": str(row.amount), "version": row.source_version} for row in prices],
         "banners": [{"id": row.id, "title": row.title, "version": row.source_version} for row in banners],
         "content_pages": [{"id": row.id, "slug": row.slug, "title": row.title, "version": row.source_version} for row in pages],
+        "payment_methods": [
+            {"id": row.id, "code": row.code, "name": row.name, "type": row.payment_type.value, "version": row.source_version}
+            for row in payment_methods
+        ],
         "settings": [
             {"id": row.id, "group": row.setting_group, "key": row.setting_key, "value": row.setting_value, "version": row.source_version}
             for row in settings_rows

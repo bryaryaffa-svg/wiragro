@@ -71,4 +71,9 @@ class Order extends Model
     {
         return $this->hasMany(Payment::class);
     }
+
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(ProductReview::class);
+    }
 }

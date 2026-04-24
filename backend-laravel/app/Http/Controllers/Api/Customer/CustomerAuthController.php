@@ -50,6 +50,55 @@ class CustomerAuthController extends Controller
         );
     }
 
+    public function checkResellerActivation(Request $request, CustomerAuthService $auth): JsonResponse
+    {
+        $data = $request->validate([
+            'store_code' => ['nullable', 'string', 'max:50'],
+            'username' => ['required', 'string', 'max:80'],
+        ]);
+
+        return response()->json(
+            $auth->checkResellerActivation(
+                $data['store_code'] ?? config('storefront.default_store_code', 'SIDO-JATIM-ONLINE'),
+                (string) $data['username'],
+            )
+        );
+    }
+
+    public function setResellerPassword(Request $request, CustomerAuthService $auth): JsonResponse
+    {
+        $data = $request->validate([
+            'store_code' => ['nullable', 'string', 'max:50'],
+            'username' => ['required', 'string', 'max:80'],
+            'password' => ['required', 'string', 'min:6', 'max:255'],
+        ]);
+
+        return response()->json(
+            $auth->setResellerPassword(
+                $data['store_code'] ?? config('storefront.default_store_code', 'SIDO-JATIM-ONLINE'),
+                (string) $data['username'],
+                (string) $data['password'],
+            )
+        );
+    }
+
+    public function loginReseller(Request $request, CustomerAuthService $auth): JsonResponse
+    {
+        $data = $request->validate([
+            'store_code' => ['nullable', 'string', 'max:50'],
+            'username' => ['required', 'string', 'max:80'],
+            'password' => ['required', 'string', 'min:6', 'max:255'],
+        ]);
+
+        return response()->json(
+            $auth->loginReseller(
+                $data['store_code'] ?? config('storefront.default_store_code', 'SIDO-JATIM-ONLINE'),
+                (string) $data['username'],
+                (string) $data['password'],
+            )
+        );
+    }
+
     public function logout(Request $request, CustomerAuthService $auth): JsonResponse
     {
         /** @var Customer $customer */

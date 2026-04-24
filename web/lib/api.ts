@@ -4,10 +4,17 @@ import {
   getStoreCode,
   getStorefrontApiBaseUrl,
 } from "@/lib/config";
+import type { ArticleEnrichmentFields } from "@/lib/article-content";
 import {
   buildGoogleMapsStoreEmbedUrl,
   buildGoogleMapsStoreSearchUrl,
 } from "@/lib/maps";
+import {
+  enrichArticleDetail,
+  mergeArticleSummaries,
+  getFallbackArticleBySlug,
+  getFallbackArticleSummaries,
+} from "@/lib/article-content";
 import { getProductImageOverride } from "@/lib/product-image-overrides";
 
 export interface StorefrontSeo {
@@ -61,6 +68,8 @@ export interface ProductSummary {
     platform: string;
     thumbnail_url?: string | null;
   }>;
+  created_at?: string | null;
+  updated_at?: string | null;
   seo?: StorefrontSeo;
 }
 
@@ -130,21 +139,26 @@ export interface ProductDetailPayload extends ProductSummary {
   };
 }
 
-export interface ContentPagePayload {
+export interface ArticleSummaryPayload extends ArticleEnrichmentFields {
+  slug: string;
+  title: string;
+  excerpt?: string | null;
+  published_at?: string | null;
+  updated_at?: string | null;
+}
+
+export interface ContentPagePayload extends ArticleSummaryPayload {
   slug: string;
   title: string;
   excerpt?: string | null;
   body_html: string;
+  published_at?: string | null;
+  updated_at?: string | null;
   seo?: StorefrontSeo;
 }
 
 export interface ArticleListPayload {
-  items: Array<{
-    slug: string;
-    title: string;
-    excerpt?: string | null;
-    published_at?: string | null;
-  }>;
+  items: ArticleSummaryPayload[];
   pagination: {
     page: number;
     page_size: number;
@@ -200,6 +214,113 @@ export interface CustomerSession {
   auth_provider?: string;
 }
 
+export interface CustomerAddressPayload {
+  id: string;
+  label: string;
+  recipient_name: string;
+  recipient_phone: string;
+  address_line: string;
+  district?: string | null;
+  city: string;
+  province: string;
+  postal_code?: string | null;
+  notes?: string | null;
+  is_default: boolean;
+}
+
+export interface CustomerAddressInput {
+  label: string;
+  recipient_name: string;
+  recipient_phone: string;
+  address_line: string;
+  district?: string;
+  city: string;
+  province: string;
+  postal_code?: string;
+  notes?: string;
+  is_default: boolean;
+}
+
+export interface CustomerAccountPayload {
+  customer: CustomerSession["customer"];
+  role?: string | null;
+  pricing_mode?: string | null;
+  addresses: CustomerAddressPayload[];
+}
+
+export interface CustomerOrderSummaryPayload {
+  id: string;
+  order_number: string;
+  status: string;
+  payment_status: string;
+  fulfillment_status: string;
+  grand_total: string;
+  created_at?: string | null;
+  shipping_method?: string | null;
+  payment_method?: string | null;
+  invoice_source?: string | null;
+  customer_role?: string | null;
+}
+
+export interface CustomerOrderItemPayload {
+  id: string;
+  product_id: string;
+  product_name?: string | null;
+  product_slug?: string | null;
+  qty: number;
+  unit_price: string;
+  discount_total: string;
+  line_total: string;
+  price_snapshot?: Record<string, unknown>;
+}
+
+export interface CustomerOrderDetailPayload extends CustomerOrderSummaryPayload {
+  payment_due_at?: string | null;
+  auto_cancel_at?: string | null;
+  notes?: string | null;
+  customer: {
+    full_name?: string | null;
+    phone?: string | null;
+    email?: string | null;
+  };
+  address: Record<string, unknown>;
+  pricing: {
+    subtotal: string;
+    discount_total: string;
+    shipping_total: string;
+    grand_total: string;
+    payment_method?: string | null;
+    shipping_method?: string | null;
+    invoice_source?: string | null;
+  };
+  shipment: {
+    shipment_number?: string | null;
+    status?: string | null;
+    tracking_number?: string | null;
+    delivery_method?: string | null;
+    pickup_store_code?: string | null;
+    courier_code?: string | null;
+    courier_name?: string | null;
+    service_code?: string | null;
+    service_name?: string | null;
+    etd?: string | null;
+  };
+  payment: {
+    reference?: string | null;
+    status?: string | null;
+    gateway_code?: string | null;
+    method_code?: string | null;
+    amount: string;
+    paid_at?: string | null;
+  };
+  can_pay_online: boolean;
+  items: CustomerOrderItemPayload[];
+  invoices: Array<{
+    type: string;
+    document_url?: string | null;
+  }>;
+}
+
 export interface WishlistPayload {
   items: Array<{
     product_id: string;
@@ -224,6 +345,80 @@ export interface TrackOrderPayload {
     type: string;
     document_url?: string | null;
   }>;
+}
+
+export interface PublicProductReviewSummaryPayload {
+  average_rating: number | null;
+  total_reviews: number;
+  rating_breakdown: Array<{
+    rating: number;
+    count: number;
+  }>;
+}
+
+export interface PublicProductReviewItemPayload {
+  id: string;
+  rating: number;
+  title?: string | null;
+  body?: string | null;
+  usage_context?: string | null;
+  reviewer_name: string;
+  verified_purchase: boolean;
+  submitted_at?: string | null;
+  approved_at?: string | null;
+}
+
+export interface ProductReviewFeedPayload {
+  product_id: string;
+  product_slug: string;
+  summary: PublicProductReviewSummaryPayload;
+  items: PublicProductReviewItemPayload[];
+}
+
+export interface CustomerProductReviewPayload {
+  id: string;
+  rating: number;
+  title?: string | null;
+  body?: string | null;
+  usage_context?: string | null;
+  moderation_status: string;
+  moderation_note?: string | null;
+  submitted_at?: string | null;
+  approved_at?: string | null;
+  verified_purchase: boolean;
+}
+
+export interface CustomerProductReviewStatusPayload {
+  eligible: boolean;
+  product_id: string;
+  order_id?: string | null;
+  purchased_at?: string | null;
+  existing_review?: CustomerProductReviewPayload | null;
+}
+
+export interface B2BInquiryInput {
+  buyerType: "kebun" | "reseller" | "proyek" | "rutin";
+  businessName?: string;
+  contactName: string;
+  phone: string;
+  email?: string;
+  commodityFocus?: string;
+  bundleSlug?: string;
+  campaignSlug?: string;
+  monthlyVolume?: string;
+  fulfillmentType?: "pickup" | "delivery" | "mixed";
+  preferredFollowUp: "whatsapp" | "phone" | "email";
+  budgetHint?: string;
+  needSummary: string;
+  notes?: string;
+  sourcePage?: string;
+  storeCode?: string;
+}
+
+export interface B2BInquiryResponsePayload {
+  id: string;
+  status: string;
+  preferred_follow_up: string;
 }
 
 export interface SyncManifestPayload {
@@ -379,6 +574,19 @@ interface LaravelBannerDto {
   is_active?: boolean;
 }
 
+interface LaravelArticleSummaryDto {
+  slug: string;
+  title: string;
+  excerpt?: string | null;
+  published_at?: string | null;
+  updated_at?: string | null;
+  seo?: StorefrontSeo;
+}
+
+interface LaravelArticleDetailDto extends LaravelArticleSummaryDto {
+  body_html: string;
+}
+
 interface LaravelWishlistPayload {
   items: Array<{
     product_id: string | number;
@@ -484,6 +692,12 @@ async function fetchCustomerClientJson<T>(
   return parseCustomerResponse<T>(response);
 }
 
+function buildCustomerAuthHeaders(accessToken: string) {
+  return {
+    Authorization: `Bearer ${accessToken}`,
+  };
+}
+
 function toStorageUrl(path?: string | null): string | null {
   if (!path) {
     return null;
@@ -507,7 +721,7 @@ function truncate(input: string, length = 120): string {
     return input;
   }
 
-  return `${input.slice(0, length - 1).trimEnd()}…`;
+  return `${input.slice(0, length - 3).trimEnd()}...`;
 }
 
 function normalizeNumber(value: string | number | null | undefined): string | null {
@@ -644,6 +858,8 @@ function mapProductSummary(dto: LaravelProductDto): ProductSummary {
       : undefined,
     images,
     videos: [],
+    created_at: dto.created_at ?? null,
+    updated_at: dto.updated_at ?? dto.created_at ?? null,
     seo: {
       title: dto.name,
       description: description ? truncate(description, 155) : `${dto.name} - ${getStoreCode()}`,
@@ -657,6 +873,28 @@ function mapBanner(dto: LaravelBannerDto) {
     subtitle: dto.subtitle ?? null,
     image_url: dto.image_url ?? toStorageUrl(dto.image_path),
     target_url: dto.link_url ?? null,
+  };
+}
+
+function mapArticleSummary(dto: LaravelArticleSummaryDto): ArticleSummaryPayload {
+  return {
+    slug: dto.slug,
+    title: dto.title,
+    excerpt: dto.excerpt ?? null,
+    published_at: dto.published_at ?? null,
+    updated_at: dto.updated_at ?? dto.published_at ?? null,
+  };
+}
+
+function mapArticleDetail(dto: LaravelArticleDetailDto): ContentPagePayload {
+  return {
+    slug: dto.slug,
+    title: dto.title,
+    excerpt: dto.excerpt ?? null,
+    body_html: dto.body_html,
+    published_at: dto.published_at ?? null,
+    updated_at: dto.updated_at ?? dto.published_at ?? null,
+    seo: dto.seo,
   };
 }
 
@@ -777,6 +1015,48 @@ function buildStaticPageContent(
       seo: {
         title: `FAQ | ${store.name}`,
         description: defaultDescription,
+      },
+    },
+    "pengiriman-pembayaran": {
+      slug,
+      title: "Pengiriman dan Pembayaran",
+      excerpt:
+        "Ringkasan pengiriman, pickup, pembayaran, dan langkah checkout yang berlaku di storefront Wiragro.",
+      body_html: `
+        <h2>Metode pengiriman</h2>
+        <p>Website saat ini mendukung <strong>delivery</strong> dan <strong>pickup toko</strong>. Untuk delivery, biaya ongkir mengikuti layanan kurir yang tersedia saat checkout.</p>
+        <h2>Pickup toko</h2>
+        <p>Pickup dapat dilakukan di <strong>${store.name}</strong> pada jam operasional: ${store.operational_hours ?? "-"}. Alamat toko: ${store.address ?? "-"}</p>
+        <h2>Metode pembayaran</h2>
+        <p>Pembayaran yang didukung di fase ini adalah <strong>Duitku VA</strong> dan <strong>COD / nota merah</strong> sesuai pilihan yang muncul saat checkout.</p>
+        <h2>Catatan penting</h2>
+        <p>Pastikan data penerima, alamat, dan nomor WhatsApp aktif sudah benar sebelum menyelesaikan order agar proses konfirmasi dan pengiriman tidak tertunda.</p>
+      `,
+      seo: {
+        title: `Pengiriman dan Pembayaran | ${store.name}`,
+        description:
+          "Informasi pengiriman, pickup toko, dan metode pembayaran yang berlaku di storefront Wiragro.",
+      },
+    },
+    "garansi-retur": {
+      slug,
+      title: "Garansi dan Retur",
+      excerpt:
+        "Penjelasan ringkas tentang validasi order, penanganan kendala, dan jalur bantuan jika produk atau pengiriman bermasalah.",
+      body_html: `
+        <h2>Validasi sebelum retur</h2>
+        <p>Jika ada kendala pada pesanan, customer dianjurkan mengecek nomor order, kondisi barang, dan bukti penerimaan lebih dulu sebelum mengajukan komplain.</p>
+        <h2>Jalur bantuan</h2>
+        <p>Hubungi WhatsApp resmi toko di <strong>${store.whatsapp_number ?? "-"}</strong> dengan menyertakan nomor order, foto produk, dan ringkasan masalah agar tim toko bisa memberi arahan yang tepat.</p>
+        <h2>Garansi operasional</h2>
+        <p>Toko akan membantu meninjau masalah yang terkait pesanan aktif, kesalahan item, atau kebutuhan verifikasi pengiriman sesuai data order yang tersimpan di sistem.</p>
+        <h2>Batasan</h2>
+        <p>Retur atau penukaran tidak diproses otomatis tanpa verifikasi. Keputusan tindak lanjut mengikuti hasil pengecekan toko terhadap kondisi produk, status pengiriman, dan bukti transaksi.</p>
+      `,
+      seo: {
+        title: `Garansi dan Retur | ${store.name}`,
+        description:
+          "Informasi garansi operasional, bantuan komplain, dan alur retur yang berlaku di storefront Wiragro.",
       },
     },
     "kebijakan-privasi": {
@@ -1049,19 +1329,97 @@ export async function getArticles(
       : typeof query?.page_size === "string"
         ? Number.parseInt(query.page_size, 10)
         : 9;
+  const search = typeof query?.q === "string" ? query.q.trim().toLowerCase() : "";
 
-  return {
-    items: [],
-    pagination: {
-      page,
-      page_size: pageSize,
-      count: 0,
-    },
-  };
+  try {
+    const payload = await fetchStorefrontServerJson<{
+      items: LaravelArticleSummaryDto[];
+      pagination?: {
+        page?: number;
+        page_size?: number;
+        count?: number;
+      };
+    }>("/v1/public/articles", { page, page_size: Math.max(pageSize, 24), q: search || undefined }, 60);
+
+    const merged = mergeArticleSummaries((payload.items ?? []).map(mapArticleSummary));
+    const filtered = search
+      ? merged.filter((article) =>
+          `${article.title} ${article.excerpt ?? ""} ${(article.taxonomy_labels ?? []).join(" ")}`
+            .toLowerCase()
+            .includes(search),
+        )
+      : merged;
+    const startIndex = Math.max(0, (page - 1) * pageSize);
+    const items = filtered.slice(startIndex, startIndex + pageSize);
+
+    return {
+      items,
+      pagination: {
+        page,
+        page_size: pageSize,
+        count: filtered.length,
+      },
+    };
+  } catch {
+    const fallback = getFallbackArticleSummaries();
+    const filtered = search
+      ? fallback.filter((article) =>
+          `${article.title} ${article.excerpt ?? ""} ${(article.taxonomy_labels ?? []).join(" ")}`
+            .toLowerCase()
+            .includes(search),
+        )
+      : fallback;
+    const startIndex = Math.max(0, (page - 1) * pageSize);
+
+    return {
+      items: filtered.slice(startIndex, startIndex + pageSize),
+      pagination: {
+        page,
+        page_size: pageSize,
+        count: filtered.length,
+      },
+    };
+  }
 }
 
-export async function getArticle(_slug: string): Promise<ContentPagePayload> {
-  throw new Error("Artikel belum dipublikasikan dari backend Laravel MVP.");
+export async function getArticle(slug: string): Promise<ContentPagePayload> {
+  try {
+    const dto = await fetchStorefrontServerJson<LaravelArticleDetailDto>(
+      `/v1/public/articles/${slug}`,
+      undefined,
+      60,
+    );
+
+    return enrichArticleDetail(mapArticleDetail(dto));
+  } catch (error) {
+    const fallback = getFallbackArticleBySlug(slug);
+
+    if (fallback) {
+      return {
+        slug: fallback.slug,
+        title: fallback.title,
+        excerpt: fallback.excerpt ?? null,
+        body_html: fallback.body_html ?? "<p>Konten artikel sedang diperbarui.</p>",
+        published_at: fallback.published_at ?? null,
+        updated_at: fallback.updated_at ?? null,
+        seo: {
+          title: fallback.title,
+          description: fallback.excerpt ?? null,
+          keywords: fallback.taxonomy_labels ?? [],
+        },
+        reading_time_minutes: fallback.reading_time_minutes,
+        taxonomy: fallback.taxonomy,
+        taxonomy_labels: fallback.taxonomy_labels,
+        key_takeaways: fallback.key_takeaways,
+        related_product_queries: fallback.related_product_queries,
+        related_solution: fallback.related_solution,
+        related_commodity: fallback.related_commodity,
+        user_goal_summary: fallback.user_goal_summary,
+      };
+    }
+
+    throw error;
+  }
 }
 
 export async function getSeo(path: string) {
@@ -1072,6 +1430,14 @@ export async function getSeo(path: string) {
     description: `Storefront ${store.name} menampilkan produk aktif, banner, dan informasi toko dari backend SiGe Manager.`,
     canonical_url: `${getSiteUrl()}${path}`,
   };
+}
+
+export async function getProductReviews(slug: string): Promise<ProductReviewFeedPayload> {
+  return fetchStorefrontServerJson<ProductReviewFeedPayload>(
+    `/v1/public/products/${slug}/reviews`,
+    undefined,
+    60,
+  );
 }
 
 export async function createGuestCart() {
@@ -1273,6 +1639,140 @@ export async function trackOrder(orderNumber: string, phone: string) {
     "/customer/orders/track",
     undefined,
     { order_number: orderNumber, phone },
+  );
+}
+
+export async function getCustomerProductReviewStatus(
+  accessToken: string,
+  productId: string,
+) {
+  return fetchCustomerClientJson<CustomerProductReviewStatusPayload>(
+    `/customer/products/${productId}/review-status`,
+    {
+      headers: buildCustomerAuthHeaders(accessToken),
+    },
+  );
+}
+
+export async function submitProductReview(
+  accessToken: string,
+  productId: string,
+  payload: {
+    rating: number;
+    title?: string;
+    body: string;
+    usageContext?: string;
+  },
+) {
+  return fetchCustomerClientJson<{
+    status: string;
+    review: CustomerProductReviewPayload;
+  }>(`/customer/products/${productId}/reviews`, {
+    method: "POST",
+    headers: buildCustomerAuthHeaders(accessToken),
+    body: JSON.stringify({
+      rating: payload.rating,
+      title: payload.title?.trim() || null,
+      body: payload.body,
+      usage_context: payload.usageContext?.trim() || null,
+    }),
+  });
+}
+
+export async function submitB2BInquiry(payload: B2BInquiryInput) {
+  return fetchCustomerClientJson<B2BInquiryResponsePayload>("/customer/b2b-inquiries", {
+    method: "POST",
+    body: JSON.stringify({
+      store_code: payload.storeCode ?? getStoreCode(),
+      buyer_type: payload.buyerType,
+      business_name: payload.businessName?.trim() || null,
+      contact_name: payload.contactName.trim(),
+      phone: payload.phone.trim(),
+      email: payload.email?.trim() || null,
+      commodity_focus: payload.commodityFocus?.trim() || null,
+      bundle_slug: payload.bundleSlug?.trim() || null,
+      campaign_slug: payload.campaignSlug?.trim() || null,
+      monthly_volume: payload.monthlyVolume?.trim() || null,
+      fulfillment_type: payload.fulfillmentType ?? null,
+      preferred_follow_up: payload.preferredFollowUp,
+      budget_hint: payload.budgetHint?.trim() || null,
+      need_summary: payload.needSummary.trim(),
+      notes: payload.notes?.trim() || null,
+      source_page: payload.sourcePage?.trim() || null,
+    }),
+  });
+}
+
+export async function getCustomerAccount(accessToken: string) {
+  return fetchCustomerClientJson<CustomerAccountPayload>("/customer/me", {
+    headers: buildCustomerAuthHeaders(accessToken),
+  });
+}
+
+export async function getCustomerAddresses(accessToken: string) {
+  return fetchCustomerClientJson<{ items: CustomerAddressPayload[] }>(
+    "/customer/me/addresses",
+    {
+      headers: buildCustomerAuthHeaders(accessToken),
+    },
+  );
+}
+
+export async function createCustomerAddress(
+  accessToken: string,
+  payload: CustomerAddressInput,
+) {
+  return fetchCustomerClientJson<{
+    status: string;
+    address: CustomerAddressPayload;
+  }>("/customer/me/addresses", {
+    method: "POST",
+    headers: buildCustomerAuthHeaders(accessToken),
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function updateCustomerAddress(
+  accessToken: string,
+  addressId: string,
+  payload: CustomerAddressInput,
+) {
+  return fetchCustomerClientJson<{
+    status: string;
+    address: CustomerAddressPayload;
+  }>(`/customer/me/addresses/${addressId}`, {
+    method: "PATCH",
+    headers: buildCustomerAuthHeaders(accessToken),
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function deleteCustomerAddress(accessToken: string, addressId: string) {
+  return fetchCustomerClientJson<{
+    status: string;
+    address_id: string;
+  }>(`/customer/me/addresses/${addressId}`, {
+    method: "DELETE",
+    headers: buildCustomerAuthHeaders(accessToken),
+  });
+}
+
+export async function getCustomerOrders(accessToken: string, limit = 12) {
+  return fetchCustomerClientJson<{ items: CustomerOrderSummaryPayload[] }>(
+    "/customer/orders/me",
+    {
+      headers: buildCustomerAuthHeaders(accessToken),
+    },
+    { limit },
+  );
+}
+
+export async function getCustomerOrderDetail(accessToken: string, orderId: string) {
+  return fetchCustomerClientJson<CustomerOrderDetailPayload>(
+    `/customer/orders/me/${orderId}`,
+    {
+      headers: buildCustomerAuthHeaders(accessToken),
+    },
   );
 }
 

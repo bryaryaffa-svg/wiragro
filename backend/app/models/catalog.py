@@ -7,7 +7,7 @@ from sqlalchemy import JSON, Boolean, DateTime, Enum, ForeignKey, Integer, Numer
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base, TimestampMixin, UUIDPrimaryKeyMixin
-from app.models.enums import ContentPageType, PriceType, ProductType, PromotionStatus, PromotionType
+from app.models.enums import ContentPageType, PaymentMethodType, PriceType, ProductType, PromotionStatus, PromotionType
 
 
 class Brand(UUIDPrimaryKeyMixin, TimestampMixin, Base):
@@ -178,6 +178,26 @@ class ContentPage(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     seo_title: Mapped[str | None] = mapped_column(String(160), nullable=True)
     seo_description: Mapped[str | None] = mapped_column(String(255), nullable=True)
     seo_keywords: Mapped[str | None] = mapped_column(String(255), nullable=True)
+
+
+class PaymentMethod(UUIDPrimaryKeyMixin, TimestampMixin, Base):
+    __tablename__ = "payment_methods"
+    __table_args__ = (UniqueConstraint("store_id", "code", name="uq_payment_methods_store_code"),)
+
+    brand_id: Mapped[str] = mapped_column(ForeignKey("brands.id"), index=True)
+    store_id: Mapped[str] = mapped_column(ForeignKey("stores.id"), index=True)
+    source_id: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    source_version: Mapped[int] = mapped_column(Integer, default=1)
+    code: Mapped[str] = mapped_column(String(60))
+    name: Mapped[str] = mapped_column(String(120))
+    description: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    payment_type: Mapped[PaymentMethodType] = mapped_column(Enum(PaymentMethodType))
+    provider_code: Mapped[str | None] = mapped_column(String(80), nullable=True)
+    instructions_html: Mapped[str | None] = mapped_column(Text, nullable=True)
+    icon_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    sort_order: Mapped[int] = mapped_column(Integer, default=0)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True, index=True)
+    config_json: Mapped[dict] = mapped_column(JSON, default=dict)
 
 
 class AppSetting(UUIDPrimaryKeyMixin, TimestampMixin, Base):

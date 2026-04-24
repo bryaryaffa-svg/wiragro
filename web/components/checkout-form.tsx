@@ -2,15 +2,19 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useDeferredValue, useEffect, useMemo, useState, useTransition } from "react";
+import { useDeferredValue, useEffect, useMemo, useRef, useState, useTransition } from "react";
 
+import { useAuth } from "@/components/auth-provider";
 import { useCart } from "@/components/cart/cart-provider";
+import { TrustStrip } from "@/components/trust-strip";
 import {
   GooglePlacesAddressAssist,
   type GoogleAddressSelection,
 } from "@/components/google-places-address-assist";
 import {
+  type CustomerAddressPayload,
   createDuitkuPayment,
+  getCustomerAccount,
   getShippingRates,
   searchShippingDestinations,
   type StoreProfile,
@@ -99,6 +103,7 @@ function buildShippingEtaLabel(rate: ShippingRateItem) {
 }
 
 export function CheckoutForm({ store }: { store?: StoreProfile | null }) {
+  const { session } = useAuth();
   const { cart, clearCart } = useCart();
   const [form, setForm] = useState(initialState);
   const [destinationQuery, setDestinationQuery] = useState("");
@@ -111,9 +116,14 @@ export function CheckoutForm({ store }: { store?: StoreProfile | null }) {
   const [isLoadingRates, setIsLoadingRates] = useState(false);
   const [destinationError, setDestinationError] = useState<string | null>(null);
   const [shippingRatesError, setShippingRatesError] = useState<string | null>(null);
+  const [savedAddresses, setSavedAddresses] = useState<CustomerAddressPayload[]>([]);
+  const [savedAddressError, setSavedAddressError] = useState<string | null>(null);
+  const [isLoadingSavedAddresses, setIsLoadingSavedAddresses] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<CheckoutResult | null>(null);
   const [isPending, startTransition] = useTransition();
+  const hasPrefilledCustomerRef = useRef(false);
+  const hasAppliedDefaultAddressRef = useRef(false);
 
   const isDelivery = form.shippingMethod === "delivery";
   const selectedShippingRate = useMemo(
@@ -136,6 +146,102 @@ export function CheckoutForm({ store }: { store?: StoreProfile | null }) {
   const pickupMapsUrl = store
     ? buildGoogleMapsStoreSearchUrl(store.name, store.address)
     : null;
+
+  function applySavedAddress(address: CustomerAddressPayload) {
+    setForm((current) => ({
+      ...current,
+      fullName: current.fullName || address.recipient_name,
+      phone: current.phone || address.recipient_phone,
+      addressLine: address.address_line || current.addressLine,
+      district: address.district || current.district,
+      city: address.city || current.city,
+      province: address.province || current.province,
+      postalCode: address.postal_code || current.postalCode,
+    }));
+    setDestinationQuery(
+      [address.district, address.city, address.province].filter(Boolean).join(", "),
+    );
+    setSelectedDestination(null);
+    setDestinationResults([]);
+    setShippingRates([]);
+    setSelectedShippingRateId(null);
+    setDestinationError(null);
+    setShippingRatesError(null);
+  }
+
+  useEffect(() => {
+    if (!session) {
+      setSavedAddresses([]);
+      setSavedAddressError(null);
+      hasPrefilledCustomerRef.current = false;
+      hasAppliedDefaultAddressRef.current = false;
+      return;
+    }
+
+    if (hasPrefilledCustomerRef.current) {
+      return;
+    }
+
+    hasPrefilledCustomerRef.current = true;
+    setForm((current) => ({
+      ...current,
+      fullName: current.fullName || session.customer.full_name || "",
+      phone: current.phone || session.customer.phone || "",
+      email: current.email || session.customer.email || "",
+    }));
+  }, [session]);
+
+  useEffect(() => {
+    if (!session?.access_token) {
+      return;
+    }
+
+    let isCancelled = false;
+
+    const loadSavedAddresses = async () => {
+      setIsLoadingSavedAddresses(true);
+      setSavedAddressError(null);
+
+      try {
+        const account = await getCustomerAccount(session.access_token);
+
+        if (isCancelled) {
+          return;
+        }
+
+        setSavedAddresses(account.addresses);
+
+        const defaultAddress =
+          account.addresses.find((item) => item.is_default) ?? account.addresses[0] ?? null;
+
+        if (defaultAddress && !hasAppliedDefaultAddressRef.current) {
+          hasAppliedDefaultAddressRef.current = true;
+          applySavedAddress(defaultAddress);
+        }
+      } catch (accountError) {
+        if (isCancelled) {
+          return;
+        }
+
+        setSavedAddresses([]);
+        setSavedAddressError(
+          accountError instanceof Error
+            ? accountError.message
+            : "Alamat tersimpan belum berhasil dimuat.",
+        );
+      } finally {
+        if (!isCancelled) {
+          setIsLoadingSavedAddresses(false);
+        }
+      }
+    };
+
+    void loadSavedAddresses();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [session?.access_token]);
 
   useEffect(() => {
     if (!isDelivery) {
@@ -377,7 +483,7 @@ export function CheckoutForm({ store }: { store?: StoreProfile | null }) {
     <section className="page-stack checkout-page">
       <div className="checkout-overview">
         <div className="checkout-overview__copy">
-          <span className="eyebrow-label">Checkout guest</span>
+          <span className="eyebrow-label">{session ? "Checkout customer" : "Checkout guest"}</span>
           <h1>Selesaikan pesanan dengan alur kirim dan bayar yang lebih jelas.</h1>
           <p>
             Isi data penerima, tentukan metode pengiriman, lalu review total order sebelum
@@ -399,6 +505,16 @@ export function CheckoutForm({ store }: { store?: StoreProfile | null }) {
           </div>
         </div>
       </div>
+
+      {session ? (
+        <div className="panel-card checkout-account-note">
+          <strong>Akun customer aktif di browser ini.</strong>
+          <span>
+            Data profil dan alamat tersimpan bisa dipakai untuk mempercepat order berikutnya,
+            meski fase ini masih menjaga flow checkout tetap sederhana.
+          </span>
+        </div>
+      ) : null}
 
       <div className="checkout-grid">
         <form
@@ -573,6 +689,57 @@ export function CheckoutForm({ store }: { store?: StoreProfile | null }) {
                 <span>Lebih ringkas jika Anda mengambil pesanan sendiri di toko.</span>
               </label>
             </div>
+
+            {session ? (
+              <div className="panel-card checkout-address-book">
+                <div className="checkout-address-book__header">
+                  <div>
+                    <span className="eyebrow-label">Saved address</span>
+                    <strong>Gunakan alamat tersimpan agar form lebih cepat terisi.</strong>
+                  </div>
+                  <Link className="btn btn-secondary" href="/akun">
+                    Kelola alamat
+                  </Link>
+                </div>
+
+                {isLoadingSavedAddresses ? (
+                  <p className="inline-note">Memuat alamat customer...</p>
+                ) : null}
+                {savedAddressError ? <p className="inline-note">{savedAddressError}</p> : null}
+
+                {savedAddresses.length ? (
+                  <div className="checkout-address-book__grid">
+                    {savedAddresses.map((address) => (
+                      <article className="checkout-address-card" key={address.id}>
+                        <div className="checkout-address-card__head">
+                          <strong>{address.label}</strong>
+                          {address.is_default ? <span>Default</span> : null}
+                        </div>
+                        <p>{address.recipient_name}</p>
+                        <p>{address.recipient_phone}</p>
+                        <p>
+                          {[address.address_line, address.district, address.city, address.province]
+                            .filter(Boolean)
+                            .join(", ")}
+                        </p>
+                        <button
+                          className="btn btn-secondary"
+                          onClick={() => applySavedAddress(address)}
+                          type="button"
+                        >
+                          Gunakan alamat ini
+                        </button>
+                      </article>
+                    ))}
+                  </div>
+                ) : !isLoadingSavedAddresses ? (
+                  <p className="inline-note">
+                    Belum ada alamat tersimpan. Simpan alamat dari halaman akun untuk mempercepat
+                    repeat order berikutnya.
+                  </p>
+                ) : null}
+              </div>
+            ) : null}
 
             {isDelivery ? (
               <>
@@ -882,6 +1049,12 @@ export function CheckoutForm({ store }: { store?: StoreProfile | null }) {
           </div>
         </aside>
       </div>
+
+      <TrustStrip
+        description="Sebelum order dibuat, user tetap bisa mengecek opsi pengiriman, pickup, metode bayar, dan jalur bantuan toko dari satu tempat."
+        heading="Checkout tidak harus terasa berisiko karena lapisan trust dasarnya selalu terlihat."
+        store={store}
+      />
     </section>
   );
 }

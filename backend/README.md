@@ -34,3 +34,17 @@ uvicorn app.main:app --reload
 ```powershell
 pytest
 ```
+
+## Sync katalog dari SiGe Manajer
+
+Isi env berikut agar backend `Kios Sidomakmur` menarik delta katalog dari `SiGe Manajer`:
+
+- `SIGE_SYNC_BASE_URL`
+- `SIGE_SYNC_TOKEN`
+- `SIGE_SYNC_TARGET_CODE=SIDOMAKMUR_KIOS`
+
+Setelah env aktif, backend akan mencoba pull delta saat startup. Untuk trigger manual:
+
+```powershell
+curl -X POST "http://localhost:8000/api/v1/sync/pull-from-sige?store_code=SIDO-JATIM-ONLINE&force_full=true"
+```

@@ -1,17 +1,41 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import { getStaticPage } from "@/lib/api";
+import { JsonLd } from "@/components/json-ld";
+import { PathwaySection } from "@/components/pathway-section";
+import { getStaticRelationCards } from "@/lib/hybrid-navigation";
+import { buildBreadcrumbJsonLd, buildWebPageJsonLd } from "@/lib/seo";
+import { getStaticPageCached } from "@/lib/static-page-metadata";
+
+function resolveStaticPagePath(slug: string) {
+  return slug === "home" ? "/" : `/${slug}`;
+}
 
 export async function StaticPageView({ slug }: { slug: string }) {
-  const page = await getStaticPage(slug).catch(() => null);
+  const page = await getStaticPageCached(slug).catch(() => null);
 
   if (!page) {
     notFound();
   }
 
+  const path = resolveStaticPagePath(slug);
+
   return (
     <article className="content-shell">
+      <JsonLd
+        data={[
+          buildWebPageJsonLd({
+            title: page.title,
+            description: page.excerpt,
+            path,
+          }),
+          buildBreadcrumbJsonLd([
+            { name: "Beranda", path: "/" },
+            { name: page.title, path },
+          ]),
+        ]}
+        id={`static-page-jsonld-${slug}`}
+      />
       <div className="page-intro">
         <span className="eyebrow-label">Informasi</span>
         <h1>{page.title}</h1>
@@ -24,12 +48,22 @@ export async function StaticPageView({ slug }: { slug: string }) {
         className="rich-content"
         dangerouslySetInnerHTML={{ __html: page.body_html }}
       />
+      <PathwaySection
+        cards={getStaticRelationCards(page.title)}
+        className="pathway-section--content"
+        description="Halaman statis tetap perlu memberi jalan ke tiga mode utama agar discoverability tidak berhenti di informasi umum."
+        eyebrow="Jalur lanjut"
+        title="Bantu user pindah ke mode yang tepat setelah membaca halaman ini."
+      />
       <div className="content-shell__cta">
         <Link className="btn btn-secondary" href="/">
           Kembali ke beranda
         </Link>
-        <Link className="btn btn-primary" href="/produk">
-          Lihat katalog
+        <Link className="btn btn-primary" href="/belanja">
+          Masuk ke Belanja
+        </Link>
+        <Link className="btn btn-secondary" href="/belajar">
+          Masuk ke Belajar
         </Link>
       </div>
     </article>

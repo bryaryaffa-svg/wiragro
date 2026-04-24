@@ -151,6 +151,7 @@ fun OrderDetailRoute(
                             Text("Fulfillment ${order.fulfillmentStatus}")
                             Text("Metode bayar ${order.paymentMethod ?: "-"}")
                             Text("Pengiriman ${order.shippingMethod ?: "-"}")
+                            Text("Batas bayar ${order.paymentDueAt ?: "-"}")
                             Text("Sumber nota ${order.invoiceSource ?: "-"}")
                             Text(
                                 text = formatCurrency(order.grandTotal),
@@ -193,8 +194,16 @@ fun OrderDetailRoute(
                             Text("Shipment ${order.shipment.shipmentNumber ?: "-"}")
                             Text("Status shipment ${order.shipment.status ?: "-"}")
                             Text("Resi ${order.shipment.trackingNumber ?: "-"}")
+                            Text("Kurir ${order.shipment.courierName ?: order.shipment.courierCode ?: "-"}")
+                            Text("Layanan ${order.shipment.serviceName ?: order.shipment.serviceCode ?: "-"}")
+                            Text("Estimasi ${order.shipment.etd ?: "-"}")
                             Text("Referensi bayar ${order.payment.reference ?: "-"}")
                             Text("Status gateway ${order.payment.status ?: "-"}")
+                            Text("Gateway ${order.payment.gatewayCode ?: "-"}")
+                            Text("Metode gateway ${order.payment.methodCode ?: "-"}")
+                            order.payment.amount?.takeIf { it.isNotBlank() }?.let { amount ->
+                                Text("Nominal gateway ${formatCurrency(amount)}")
+                            }
                         }
                     }
                 }

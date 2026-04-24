@@ -9,6 +9,7 @@ import { BuyNowButton } from "@/components/cart/buy-now-button";
 import { WishlistButton } from "@/components/wishlist-button";
 import type { ProductDetailPayload } from "@/lib/api";
 import { formatCurrency } from "@/lib/format";
+import type { ProductPageEnrichment } from "@/lib/product-content";
 
 function clampQty(value: number) {
   return Math.max(1, Math.min(value, 99));
@@ -32,7 +33,15 @@ const PRODUCT_SHOWCASE_WISHLIST_SLOT_STYLE = {
   zIndex: 3,
 } as const;
 
-export function ProductDetailView({ product }: { product: ProductDetailPayload }) {
+export function ProductDetailView({
+  product,
+  enrichment,
+  consultationUrl,
+}: {
+  product: ProductDetailPayload;
+  enrichment: ProductPageEnrichment;
+  consultationUrl?: string | null;
+}) {
   const defaultImage = product.images.find((image) => image.is_primary) ?? product.images[0] ?? null;
   const [selectedImageId, setSelectedImageId] = useState<string | null>(defaultImage?.id ?? null);
   const [qty, setQty] = useState(1);
@@ -45,7 +54,7 @@ export function ProductDetailView({ product }: { product: ProductDetailPayload }
   const useUnoptimizedSelectedImage = selectedImage?.url.startsWith("/") ?? false;
 
   return (
-    <section className="product-showcase">
+    <section className="product-showcase product-showcase--editorial">
       <div className="product-showcase__media">
         <div className="product-showcase__main" style={PRODUCT_SHOWCASE_MAIN_STYLE}>
           {selectedImage ? (
@@ -101,12 +110,33 @@ export function ProductDetailView({ product }: { product: ProductDetailPayload }
             {product.badges.new_arrival ? <span>Baru</span> : null}
             {product.badges.best_seller ? <span>Terlaris</span> : null}
           </div>
-          <span className="eyebrow-label">{product.category?.name || product.product_type}</span>
+          <span className="eyebrow-label">
+            {enrichment.useCaseLabel} · {product.category?.name || product.product_type}
+          </span>
           <h1>{product.name}</h1>
           <p>{product.description || product.summary}</p>
+          <p className="product-showcase__purpose">{enrichment.purpose}</p>
+
+          <div className="product-pill-row">
+            {enrichment.quickMeta.map((item) => (
+              <span key={`${product.slug}-${item}`}>{item}</span>
+            ))}
+          </div>
         </div>
 
-        <div className="product-purchase-panel">
+        <div className="product-detail-benefits">
+          {enrichment.primaryBenefits.map((item) => (
+            <article className="product-detail-benefits__card" key={`${product.slug}-${item}`}>
+              <strong>{item}</strong>
+            </article>
+          ))}
+        </div>
+
+        <div className="product-purchase-panel product-purchase-panel--editorial">
+          <div className="product-purchase-panel__heading">
+            <span className="eyebrow-label">CTA beli</span>
+            <strong>Beli saat konteksnya sudah tepat, bukan karena produknya terlihat familiar.</strong>
+          </div>
           <div className="product-purchase-panel__price">
             <strong>{formatCurrency(product.price.amount)}</strong>
             {hasPromo ? (
@@ -154,53 +184,78 @@ export function ProductDetailView({ product }: { product: ProductDetailPayload }
             <AddToCartButton
               buttonClassName="btn btn-primary btn-block"
               disabled={isOutOfStock}
+              label={enrichment.primaryCtaLabel}
               productId={product.id}
               qty={qty}
             />
             <BuyNowButton
               buttonClassName="btn btn-secondary btn-block"
               disabled={isOutOfStock}
+              label={enrichment.secondaryCtaLabel}
               productId={product.id}
               qty={qty}
             />
+            {consultationUrl ? (
+              <a className="btn btn-secondary btn-block" href={consultationUrl} rel="noreferrer" target="_blank">
+                Konsultasi sebelum beli
+              </a>
+            ) : (
+              <Link className="btn btn-secondary btn-block" href="/kontak">
+                Tanya ke toko
+              </Link>
+            )}
             <Link className="btn btn-secondary btn-block" href="/keranjang">
               Buka keranjang
             </Link>
           </div>
+
+          <div className="product-purchase-panel__support">
+            <p>{enrichment.consultationPrompt}</p>
+          </div>
         </div>
 
-        <div className="product-info-grid">
-          <article className="product-info-card">
-            <span className="eyebrow-label">Pembelian</span>
-            <strong>Siap untuk wishlist, cart, dan checkout</strong>
-            <p>Gunakan produk ini untuk mencoba alur belanja baru sampai selesai.</p>
+        <div className="product-showcase__context">
+          <article className="product-context-card">
+            <span className="eyebrow-label">Cocok untuk komoditas</span>
+            <div className="product-chip-links">
+              {enrichment.commodityLinks.map((item) => (
+                <Link href={item.href} key={`${product.slug}-${item.slug}`}>
+                  {item.label}
+                </Link>
+              ))}
+            </div>
           </article>
-          <article className="product-info-card">
-            <span className="eyebrow-label">Kategori</span>
-            <strong>{product.category?.name || product.product_type}</strong>
-            <p>
-              Lihat produk lain yang sejenis di{" "}
-              <Link href={product.category ? `/produk?kategori=${product.category.slug}` : "/produk"}>
-                katalog terkait
-              </Link>
-              .
-            </p>
+
+          <article className="product-context-card">
+            <span className="eyebrow-label">Dipakai pada fase</span>
+            <div className="product-chip-links">
+              {enrichment.stageLinks.map((item) => (
+                <Link href={item.href} key={`${product.slug}-${item.slug}`}>
+                  {item.label}
+                </Link>
+              ))}
+            </div>
           </article>
-          {product.promotions.length ? (
-            <article className="product-info-card">
-              <span className="eyebrow-label">Promo aktif</span>
-              <strong>{product.promotions[0]?.name}</strong>
-              <p>
-                Harga promo saat ini {formatCurrency(String(product.promotions[0]?.rule_payload.promo_price ?? 0))}
-              </p>
-            </article>
-          ) : (
-            <article className="product-info-card">
-              <span className="eyebrow-label">Informasi</span>
-              <strong>Tidak ada promo tambahan</strong>
-              <p>Harga yang tampil adalah harga aktif yang dipakai saat checkout.</p>
-            </article>
-          )}
+
+          <article className="product-context-card">
+            <span className="eyebrow-label">Masalah yang bisa dibantu</span>
+            <div className="product-chip-links">
+              {enrichment.problemLinks.map((item) => (
+                <Link href={item.href} key={`${product.slug}-${item.slug}`}>
+                  {item.label}
+                </Link>
+              ))}
+            </div>
+          </article>
+        </div>
+
+        <div className="product-trust-strip">
+          <strong>{enrichment.guidanceNote}</strong>
+          <span>
+            {product.promotions.length
+              ? `Promo aktif: ${product.promotions[0]?.name}.`
+              : "Harga aktif akan mengikuti katalog saat checkout."}
+          </span>
         </div>
       </div>
     </section>

@@ -16,6 +16,8 @@ class Customer extends Authenticatable
         'full_name',
         'phone',
         'email',
+        'username',
+        'password',
         'auth_provider',
         'google_sub',
         'member_tier',
@@ -24,7 +26,9 @@ class Customer extends Authenticatable
         'last_order_at',
     ];
 
-    protected $hidden = [];
+    protected $hidden = [
+        'password',
+    ];
 
     protected function casts(): array
     {
@@ -50,8 +54,23 @@ class Customer extends Authenticatable
         return $this->hasMany(WishlistItem::class);
     }
 
+    public function addresses(): HasMany
+    {
+        return $this->hasMany(CustomerAddress::class);
+    }
+
     public function payments(): HasMany
     {
         return $this->hasMany(Payment::class);
+    }
+
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(ProductReview::class);
+    }
+
+    public function b2bInquiries(): HasMany
+    {
+        return $this->hasMany(B2BInquiry::class);
     }
 }

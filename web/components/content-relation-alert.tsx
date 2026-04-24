@@ -1,0 +1,58 @@
+import Link from "next/link";
+
+import type { ContentRelationIssue } from "@/lib/content-reference-catalog";
+
+function getKindLabel(kind: ContentRelationIssue["kind"]) {
+  switch (kind) {
+    case "article":
+      return "artikel";
+    case "solution":
+      return "solusi";
+    case "bundle":
+      return "bundle";
+    case "product":
+      return "produk";
+    case "campaign":
+      return "campaign";
+    case "commodity":
+      return "komoditas";
+    case "stage":
+      return "fase";
+    default:
+      return "konten";
+  }
+}
+
+export function ContentRelationAlert({
+  items,
+  title = "Relasi konten sedang dilengkapi",
+  href,
+  actionLabel,
+}: {
+  items: ContentRelationIssue[];
+  title?: string;
+  href?: string;
+  actionLabel?: string;
+}) {
+  if (!items.length) {
+    return null;
+  }
+
+  const summary = items.map((item) => `${getKindLabel(item.kind)}: ${item.slug}`).join(", ");
+
+  return (
+    <article className="content-relation-alert">
+      <span className="eyebrow-label">Fallback relasi</span>
+      <strong>{title}</strong>
+      <p>
+        Referensi berikut belum tersambung ke registry aktif: {summary}. Halaman ini tetap
+        tampil, tetapi tim konten perlu melengkapi mapping tersebut.
+      </p>
+      {href && actionLabel ? (
+        <Link className="content-relation-alert__action" href={href}>
+          {actionLabel}
+        </Link>
+      ) : null}
+    </article>
+  );
+}

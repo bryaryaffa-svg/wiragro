@@ -1,5 +1,7 @@
 package com.sidomakmur.kios.feature.checkout
 
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -36,6 +38,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -57,6 +60,7 @@ fun CheckoutRoute(
 ) {
     val state = viewModel.uiState.collectAsStateWithLifecycle().value
     val cart = state.cart
+    val context = LocalContext.current
 
     if (state.session == null || cart == null || cart.items.isEmpty()) {
         EmptyCheckoutState(
@@ -153,13 +157,33 @@ fun CheckoutRoute(
                                 )
                             }
                             Text("Grand total ${formatCurrency(result.order.grandTotal)}")
+                            Text("Status pembayaran ${result.paymentInstruction.status.ifBlank { result.order.paymentStatus }}")
                             Text("Metode bayar ${result.order.paymentMethod ?: "-"}")
+                            result.paymentInstruction.reference?.takeIf { it.isNotBlank() }?.let { reference ->
+                                Text("Referensi bayar $reference")
+                            }
+                            result.paymentInstruction.expiry?.takeIf { it.isNotBlank() }?.let { expiry ->
+                                Text("Batas bayar $expiry")
+                            }
                             Text("Sumber nota ${result.order.invoiceSource ?: "-"}")
                             if (result.invoices.isNotEmpty()) {
                                 Text(
                                     text = result.invoices.joinToString(prefix = "Dokumen: ", separator = ", ") { it.type },
                                     style = MaterialTheme.typography.bodyMedium,
                                 )
+                            }
+                            result.paymentInstruction.paymentUrl?.takeIf { it.isNotBlank() }?.let { paymentUrl ->
+                                Button(
+                                    onClick = {
+                                        context.startActivity(
+                                            Intent(Intent.ACTION_VIEW, Uri.parse(paymentUrl)).apply {
+                                                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                            },
+                                        )
+                                    },
+                                ) {
+                                    Text("Bayar sekarang")
+                                }
                             }
                             Button(onClick = { onOpenOrderDetail(result.order.id) }) {
                                 Text(if (result.order.paymentMethod == "duitku-va") "Lihat detail dan bayar" else "Lihat detail pesanan")

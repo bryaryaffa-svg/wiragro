@@ -372,7 +372,7 @@ class CustomerCommerceService
 
     public function serializeCart(Cart $cart): array
     {
-        $cart->loadMissing(['items.product']);
+        $cart->loadMissing(['items.product.images']);
 
         return [
             'id' => $cart->id,
@@ -393,6 +393,9 @@ class CustomerCommerceService
                     'id' => (string) $item->id,
                     'product_id' => (string) $item->product_id,
                     'product_name' => $product?->name,
+                    'product_slug' => $product?->slug,
+                    'product_unit' => $product?->unit,
+                    'product_image_url' => $product?->primary_image_url,
                     'qty' => $item->qty,
                     'price_snapshot' => [
                         'amount' => $this->decimalString($item->unit_price),

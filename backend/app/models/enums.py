@@ -77,6 +77,17 @@ class ContentPageType(str, Enum):
     ARTICLE = "ARTICLE"
 
 
+class PaymentMethodType(str, Enum):
+    CASH = "CASH"
+    COD = "COD"
+    BANK_TRANSFER = "BANK_TRANSFER"
+    QRIS = "QRIS"
+    VA = "VA"
+    EWALLET = "EWALLET"
+    TEMPO = "TEMPO"
+    OTHER = "OTHER"
+
+
 class SyncDirection(str, Enum):
     INBOUND = "INBOUND"
     OUTBOUND = "OUTBOUND"

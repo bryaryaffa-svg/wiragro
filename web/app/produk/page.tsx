@@ -1,13 +1,49 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 
+import { JsonLd } from "@/components/json-ld";
+import { PathwaySection } from "@/components/pathway-section";
 import { ProductCard } from "@/components/product-card";
 import { StorefrontCategoryNavigator } from "@/components/storefront-category-navigator";
 import { getCategories, getFallbackProductList, getProducts } from "@/lib/api";
+import { getProductRelationCards } from "@/lib/hybrid-navigation";
 import { resolveStorefrontCategorySelection } from "@/lib/storefront-category-system";
+import {
+  buildBreadcrumbJsonLd,
+  buildCatalogMetadata,
+  buildCollectionJsonLd,
+} from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
+
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: SearchParams;
+}): Promise<Metadata> {
+  const resolved = await searchParams;
+  const search = typeof resolved.q === "string" ? resolved.q : undefined;
+  const category = typeof resolved.kategori === "string" ? resolved.kategori : undefined;
+  const mainCategoryKey = typeof resolved.kelompok === "string" ? resolved.kelompok : undefined;
+  const subcategory = typeof resolved.subkategori === "string" ? resolved.subkategori : undefined;
+  const sort = typeof resolved.sort === "string" ? resolved.sort : undefined;
+  const hasRefinement = Boolean(
+    search || category || mainCategoryKey || subcategory || (sort && sort !== "latest"),
+  );
+
+  return buildCatalogMetadata({
+    title: hasRefinement ? "Hasil pencarian produk pertanian" : "Katalog Produk Pertanian",
+    description: hasRefinement
+      ? "Hasil pencarian produk pertanian Wiragro. Buka katalog utama untuk menjelajahi seluruh produk aktif."
+      : "Jelajahi katalog produk pertanian Wiragro: pupuk, benih, pestisida, nutrisi, alat pertanian, dan kebutuhan kios.",
+    path: "/produk",
+    canonicalPath: "/produk",
+    noIndex: hasRefinement,
+    keywords: ["katalog produk", "produk pertanian", "pupuk", "benih", "pestisida"],
+  });
+}
 
 export default async function ProductsPage({
   searchParams,
@@ -42,8 +78,24 @@ export default async function ProductsPage({
 
   return (
     <section className="page-stack">
+      <JsonLd
+        data={[
+          buildCollectionJsonLd({
+            title: "Katalog Produk Pertanian Wiragro",
+            description:
+              "Katalog produk pertanian aktif dari Wiragro, mulai dari pupuk, benih, pestisida, hingga alat pertanian.",
+            path: "/produk",
+            itemUrls: products.items.slice(0, 12).map((product) => `/produk/${product.slug}`),
+          }),
+          buildBreadcrumbJsonLd([
+            { name: "Beranda", path: "/" },
+            { name: "Produk", path: "/produk" },
+          ]),
+        ]}
+        id="products-page-jsonld"
+      />
       <div className="page-intro page-intro--compact">
-        <span className="eyebrow-label">Katalog produk</span>
+        <span className="eyebrow-label">Belanja / Katalog</span>
         <h1>
           {activeCategory
             ? `Katalog ${activeCategory.name}`
@@ -161,6 +213,13 @@ export default async function ProductsPage({
           </article>
         )}
       </section>
+
+      <PathwaySection
+        cards={getProductRelationCards(undefined, activeCategory)}
+        description="Katalog perlu tetap conversion-oriented, tetapi selalu memberi jalur balik ke belajar dan solusi saat kebutuhan user belum benar-benar final."
+        eyebrow="Relasi silang"
+        title="Belanja yang sehat tetap terhubung ke konteks."
+      />
     </section>
   );
 }

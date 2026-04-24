@@ -22,7 +22,7 @@ Implementasi Android sekarang sudah mencakup:
 
 ## Menjalankan lokal
 
-1. Pastikan backend berjalan terlebih dahulu.
+1. Pastikan backend Laravel berjalan terlebih dahulu di port `8000`.
 
 2. Masuk ke folder Android:
 
@@ -45,7 +45,7 @@ http://10.0.2.2:8000/api/v1/
 5. Jika project berada di OneDrive, output APK debug akan diarahkan ke:
 
 ```text
-C:\Users\BRYAN\AppData\Local\KiosSidomakmurBuild\app\outputs\apk\debug\app-debug.apk
+C:\Users\BRYAN\AppData\Local\WiragroBuild\app\outputs\apk\debug\app-debug.apk
 ```
 
 ## Override konfigurasi build
@@ -75,7 +75,7 @@ Catatan:
 - Google login di emulator butuh image emulator yang punya Google Play / Play Store.
 - Pastikan backend juga menerima audience yang sama di `GOOGLE_OIDC_AUDIENCES`.
 - Kalau client ID belum diisi, tombol Google tetap tampil tetapi akan memberi pesan konfigurasi belum lengkap.
-- Untuk flow reseller demo lokal, backend akan menyediakan username `reseller-demo` yang bisa diaktivasi dari app.
+- Untuk flow reseller lokal di Laravel, siapkan dulu data customer yang punya `username` reseller pada database/admin sebelum mencoba aktivasi dari app.
 
 ## Cakupan fase Android saat ini
 

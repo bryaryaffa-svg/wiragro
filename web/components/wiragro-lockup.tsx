@@ -1,5 +1,6 @@
 interface WiragroLockupProps {
   className?: string;
+  contextLabel?: string;
   tone?: "dark" | "light";
   variant?: "header" | "footer";
 }
@@ -67,6 +68,7 @@ function WiragroMark() {
 
 export function WiragroLockup({
   className,
+  contextLabel = "Sidomakmur Storefront",
   tone = "dark",
   variant = "header",
 }: WiragroLockupProps) {
@@ -85,7 +87,7 @@ export function WiragroLockup({
 
       <span className="wiragro-lockup__copy">
         <strong className="wiragro-lockup__wordmark">Wiragro</strong>
-        <span className="wiragro-lockup__context">Sidomakmur Storefront</span>
+        <span className="wiragro-lockup__context">{contextLabel}</span>
       </span>
     </span>
   );

@@ -1,5 +1,5 @@
 from app.models.base import Base, TimestampMixin, UUIDPrimaryKeyMixin
-from app.models.catalog import AppSetting, Banner, Brand, Category, ContentPage, Product, ProductImage, ProductPrice, ProductVideo, Promotion, Store
+from app.models.catalog import AppSetting, Banner, Brand, Category, ContentPage, PaymentMethod, Product, ProductImage, ProductPrice, ProductVideo, Promotion, Store
 from app.models.customer import Cart, CartItem, Customer, CustomerAddress, OtpChallenge, ResellerCredential, WishlistItem
 from app.models.orders import Invoice, Order, OrderItem, Payment, Shipment, SyncLog
 
@@ -19,6 +19,7 @@ __all__ = [
     "OrderItem",
     "OtpChallenge",
     "Payment",
+    "PaymentMethod",
     "Product",
     "ProductImage",
     "ProductPrice",

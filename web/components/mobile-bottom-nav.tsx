@@ -5,9 +5,9 @@ import { usePathname } from "next/navigation";
 
 import { useAuth } from "@/components/auth-provider";
 import { useCart } from "@/components/cart/cart-provider";
-import { useWishlist } from "@/components/wishlist-provider";
+import { isHybridNavActive } from "@/lib/hybrid-navigation";
 
-type MobileNavIconKind = "home" | "grid" | "heart" | "cart" | "user";
+type MobileNavIconKind = "learn" | "solve" | "shop" | "cart" | "user";
 
 function isActivePath(pathname: string, href: string) {
   if (href === "/") {
@@ -19,33 +19,37 @@ function isActivePath(pathname: string, href: string) {
 
 function MobileNavIcon({ kind }: { kind: MobileNavIconKind }) {
   switch (kind) {
-    case "home":
+    case "learn":
       return (
         <svg aria-hidden="true" fill="none" viewBox="0 0 24 24">
           <path
-            d="M4 10.6 12 4l8 6.6v8.4a1 1 0 0 1-1 1h-4.5v-5.4h-5V20H5a1 1 0 0 1-1-1v-8.4Z"
+            d="M5 6.5A2.5 2.5 0 0 1 7.5 4H18v14.5A1.5 1.5 0 0 0 16.5 17H7.5A2.5 2.5 0 0 0 5 19.5V6.5Z"
             stroke="currentColor"
             strokeLinejoin="round"
             strokeWidth="1.8"
           />
+          <path d="M8.5 8.5H15" stroke="currentColor" strokeLinecap="round" strokeWidth="1.8" />
+          <path d="M8.5 12H15" stroke="currentColor" strokeLinecap="round" strokeWidth="1.8" />
         </svg>
       );
-    case "grid":
+    case "solve":
       return (
         <svg aria-hidden="true" fill="none" viewBox="0 0 24 24">
-          <path d="M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z" stroke="currentColor" strokeWidth="1.8" />
+          <circle cx="11" cy="11" r="6.5" stroke="currentColor" strokeWidth="1.8" />
+          <path d="m16 16 4 4" stroke="currentColor" strokeLinecap="round" strokeWidth="1.8" />
+          <path d="M8.8 11.1h4.4" stroke="currentColor" strokeLinecap="round" strokeWidth="1.8" />
         </svg>
       );
-    case "heart":
+    case "shop":
       return (
         <svg aria-hidden="true" fill="none" viewBox="0 0 24 24">
           <path
-            d="M12 20.4 5.65 14.3C2.4 11.19 2.12 6.2 5.1 3.4C6.61 1.98 8.74 1.55 10.63 2.13C11.15 2.29 11.63 2.53 12.05 2.84C12.47 2.53 12.95 2.29 13.47 2.13C15.36 1.55 17.49 1.98 19 3.4C21.98 6.2 21.7 11.19 18.45 14.3L12 20.4Z"
+            d="M5 7h14l-1.4 9.1a1 1 0 0 1-1 .9H7.4a1 1 0 0 1-1-.9L5 7Z"
             stroke="currentColor"
-            strokeLinecap="round"
             strokeLinejoin="round"
             strokeWidth="1.8"
           />
+          <path d="M8 7a4 4 0 1 1 8 0" stroke="currentColor" strokeWidth="1.8" />
         </svg>
       );
     case "cart":
@@ -81,16 +85,25 @@ export function MobileBottomNav() {
   const pathname = usePathname();
   const { cart } = useCart();
   const { session } = useAuth();
-  const { items } = useWishlist();
   const cartCount = cart?.items.reduce((total, item) => total + item.qty, 0) ?? 0;
   const mobileLinks = [
-    { href: "/", label: "Beranda", badge: null, icon: "home" as const },
-    { href: "/produk", label: "Produk", badge: null, icon: "grid" as const },
     {
-      href: "/wishlist",
-      label: "Wishlist",
-      badge: items.length > 0 ? String(items.length) : null,
-      icon: "heart" as const,
+      href: "/belajar",
+      label: "Belajar",
+      badge: null,
+      icon: "learn" as const,
+    },
+    {
+      href: "/solusi",
+      label: "Solusi",
+      badge: null,
+      icon: "solve" as const,
+    },
+    {
+      href: "/belanja",
+      label: "Belanja",
+      badge: null,
+      icon: "shop" as const,
     },
     {
       href: "/keranjang",
@@ -109,7 +122,11 @@ export function MobileBottomNav() {
   return (
     <nav className="mobile-nav" aria-label="Navigasi mobile">
       {mobileLinks.map((link) => {
-        const isActive = isActivePath(pathname, link.href);
+        const isHybridLink =
+          link.href === "/belajar" || link.href === "/solusi" || link.href === "/belanja";
+        const isActive = isHybridLink
+          ? isHybridNavActive(pathname, link.href)
+          : isActivePath(pathname, link.href);
         return (
           <Link className={isActive ? "is-active" : undefined} href={link.href} key={link.href}>
             <span className="mobile-nav__icon">

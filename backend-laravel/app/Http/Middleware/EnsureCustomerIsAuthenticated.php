@@ -18,6 +18,7 @@ class EnsureCustomerIsAuthenticated
             return response()->json([
                 'success' => false,
                 'message' => 'Unauthenticated.',
+                'detail' => 'Unauthenticated.',
             ], Response::HTTP_UNAUTHORIZED);
         }
 
@@ -28,6 +29,7 @@ class EnsureCustomerIsAuthenticated
             return response()->json([
                 'success' => false,
                 'message' => 'Unauthenticated.',
+                'detail' => 'Unauthenticated.',
             ], Response::HTTP_UNAUTHORIZED);
         }
 

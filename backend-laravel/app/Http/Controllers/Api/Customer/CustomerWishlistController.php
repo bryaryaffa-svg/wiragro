@@ -7,13 +7,14 @@ use App\Http\Requests\Customer\WishlistAddRequest;
 use App\Models\Customer;
 use App\Models\Product;
 use App\Models\WishlistItem;
+use App\Support\AndroidCompatService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class CustomerWishlistController extends Controller
 {
-    public function index(Request $request): JsonResponse
+    public function index(Request $request, AndroidCompatService $compat): JsonResponse
     {
         /** @var Customer $customer */
         $customer = $request->user();
@@ -24,15 +25,7 @@ class CustomerWishlistController extends Controller
             ->latest()
             ->get()
             ->filter(fn (WishlistItem $item): bool => $item->product !== null)
-            ->map(function (WishlistItem $item): array {
-                return [
-                    'product_id' => (string) $item->product_id,
-                    'product_name' => $item->product?->name ?? 'Produk',
-                    'product_slug' => $item->product?->slug,
-                    'product' => $item->product,
-                    'created_at' => optional($item->created_at)->toIso8601String(),
-                ];
-            })
+            ->map(fn (WishlistItem $item): array => $compat->serializeWishlistItem($item, $customer))
             ->values()
             ->all();
 

@@ -34,6 +34,7 @@ interface CartContextValue {
   isBusy: boolean;
   error: string | null;
   addItem: (productId: string, qty?: number) => Promise<void>;
+  addItems: (items: Array<{ productId: string; qty: number }>) => Promise<void>;
   setItemQty: (itemId: string, qty: number) => Promise<void>;
   removeItem: (itemId: string) => Promise<void>;
   refreshCart: () => Promise<void>;
@@ -92,6 +93,23 @@ function readStoredState(): StoredCartState | null {
     window.localStorage.removeItem(STORAGE_KEY);
     return null;
   }
+}
+
+function normalizeCartBatch(items: Array<{ productId: string; qty: number }>) {
+  const grouped = new Map<string, number>();
+
+  items.forEach((item) => {
+    if (!item.productId || item.qty <= 0) {
+      return;
+    }
+
+    grouped.set(item.productId, (grouped.get(item.productId) ?? 0) + item.qty);
+  });
+
+  return Array.from(grouped.entries()).map(([productId, qty]) => ({
+    productId,
+    qty,
+  }));
 }
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
@@ -236,21 +254,38 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }
 
   async function addItem(productId: string, qty = 1) {
+    await addItems([{ productId, qty }]);
+  }
+
+  async function addItems(items: Array<{ productId: string; qty: number }>) {
+    const normalizedItems = normalizeCartBatch(items);
+
+    if (!normalizedItems.length) {
+      return;
+    }
+
     setIsBusy(true);
     const nextRequestId = ++requestIdRef.current;
     try {
       const activeSession = await ensureSession();
-      const nextCart = await addItemToCart(
-        activeSession.cartId,
-        activeSession.guestToken,
-        productId,
-        qty,
-      );
+      let nextCart: CartPayload | null = null;
+
+      for (const item of normalizedItems) {
+        nextCart = await addItemToCart(
+          activeSession.cartId,
+          activeSession.guestToken,
+          item.productId,
+          item.qty,
+        );
+      }
+
       if (requestIdRef.current !== nextRequestId) {
         return;
       }
       startTransition(() => {
-        setCart(nextCart);
+        if (nextCart) {
+          setCart(nextCart);
+        }
         setError(null);
       });
     } catch (fetchError) {
@@ -310,6 +345,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         isBusy,
         error,
         addItem,
+        addItems,
         setItemQty,
         removeItem,
         refreshCart,

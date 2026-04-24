@@ -1,7 +1,11 @@
 const PRODUCT_IMAGE_OVERRIDES: Record<string, string> = {
+  "benih-cabai-prima-f1": "/category-photos/benih.png",
+  "benih-padi-inpari-32-5kg": "/category-photos/benih.png",
   "teballo-250-sl-400-ml": "/product-gallery/teballo-250-sl-400ml.png",
   "gamectin-30-ec-500-ml": "/product-gallery/gamectin-30-ec-500ml.png",
   "v-protect-100-ml": "/product-gallery/v-protect-100ml.png",
+  "pupuk-organik-25-kg": "/category-photos/pupuk.png",
+  "sprayer-punggung-16l": "/category-photos/sprayer.png",
   "super-kalium": "/product-gallery/super-kalium.png",
   "extra-grow-liquid-500-ml": "/product-gallery/extra-grow-liquid-500ml.png",
   "dimocel-400-sl": "/product-gallery/dimocel-400-sl.png",

@@ -3,10 +3,11 @@
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
 
-import { trackOrder } from "@/lib/api";
+import { TrustStrip } from "@/components/trust-strip";
+import { trackOrder, type StoreProfile } from "@/lib/api";
 import { formatDate } from "@/lib/format";
 
-export function OrderTracker() {
+export function OrderTracker({ store }: { store?: StoreProfile | null }) {
   const searchParams = useSearchParams();
   const queryOrder = searchParams.get("order") ?? "";
   const queryPhone = searchParams.get("phone") ?? "";
@@ -124,6 +125,12 @@ export function OrderTracker() {
           </article>
         ) : null}
       </div>
+
+      <TrustStrip
+        description="Sesudah order dibuat, user tetap perlu tahu bagaimana bantuan toko, pengiriman, dan jalur komplain bekerja agar rasa aman tidak hilang setelah checkout."
+        heading="Tracking pesanan juga harus memperkuat trust, bukan hanya menampilkan status."
+        store={store}
+      />
     </section>
   );
 }

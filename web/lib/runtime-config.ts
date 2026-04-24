@@ -1,6 +1,7 @@
 interface RuntimeConfigSource {
   API_BASE_URL?: string;
   CUSTOMER_API_BASE_URL?: string;
+  NODE_ENV?: string;
   NEXT_PUBLIC_API_BASE_URL?: string;
   NEXT_PUBLIC_CUSTOMER_API_BASE_URL?: string;
   NEXT_PUBLIC_GOOGLE_CLIENT_ID?: string;
@@ -21,6 +22,10 @@ export interface PublicRuntimeConfig {
   storefrontApiBaseUrl: string;
 }
 
+export const PRIMARY_SITE_URL = "https://wiragro.id";
+const PRIMARY_SITE_HOSTNAME = "wiragro.id";
+const LEGACY_SITE_HOSTNAMES = new Set(["www.wiragro.id"]);
+
 function trimTrailingSlash(url: string) {
   return url.replace(/\/+$/, "");
 }
@@ -33,6 +38,37 @@ function toPublicApiBase(url: string) {
 function toCustomerApiBase(url: string) {
   const trimmed = trimTrailingSlash(url);
   return trimmed.endsWith("/v1") ? trimmed : `${trimmed}/v1`;
+}
+
+function normalizeSiteUrl(rawUrl: string | undefined, environment?: string) {
+  const fallbackSiteUrl = environment === "development" ? "http://localhost:3000" : PRIMARY_SITE_URL;
+
+  if (!rawUrl) {
+    return fallbackSiteUrl;
+  }
+
+  try {
+    const parsed = new URL(rawUrl);
+    const isLocalHost =
+      parsed.hostname === "localhost" || parsed.hostname === "127.0.0.1";
+
+    if (environment === "development" && isLocalHost) {
+      return trimTrailingSlash(parsed.toString());
+    }
+
+    if (
+      parsed.hostname === PRIMARY_SITE_HOSTNAME ||
+      LEGACY_SITE_HOSTNAMES.has(parsed.hostname)
+    ) {
+      return PRIMARY_SITE_URL;
+    }
+
+    return environment === "development"
+      ? trimTrailingSlash(parsed.toString())
+      : PRIMARY_SITE_URL;
+  } catch {
+    return fallbackSiteUrl;
+  }
 }
 
 function buildPublicRuntimeConfig(source: RuntimeConfigSource): PublicRuntimeConfig {
@@ -67,7 +103,7 @@ function buildPublicRuntimeConfig(source: RuntimeConfigSource): PublicRuntimeCon
     customerApiBaseUrl,
     googleClientId: source.NEXT_PUBLIC_GOOGLE_CLIENT_ID ?? "",
     googleMapsApiKey: source.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? "",
-    siteUrl: source.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
+    siteUrl: normalizeSiteUrl(source.NEXT_PUBLIC_SITE_URL, source.NODE_ENV),
     storeCode,
     storefrontApiBaseUrl,
   };

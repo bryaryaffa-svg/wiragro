@@ -57,6 +57,11 @@ class Product extends Model
         return $this->hasMany(StockMovement::class);
     }
 
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(ProductReview::class);
+    }
+
     public function getCurrentPriceAttribute(): string
     {
         $price = $this->promo_price ?: $this->price;

@@ -2,6 +2,10 @@
 
 Panduan ini fokus untuk men-deploy `backend-laravel/` ke Hostinger sebagai backend publik untuk website `wiragro.id`.
 
+Untuk operasi lintas `Wiragro`, `Si Getan`, dan `Gembul Farm`, gunakan juga runbook pusat:
+
+- [sidomakmur-integration-runbook.md](C:/Users/BRYAN/OneDrive/Dokumen/Playground/docs/sidomakmur-integration-runbook.md)
+
 ## Target Arsitektur
 
 - frontend publik: `https://wiragro.id`
@@ -33,8 +37,13 @@ DEFAULT_CURRENCY=IDR
 ORDER_AUTO_CANCEL_HOURS=24
 GUEST_MINIMUM_ORDER_AMOUNT=0
 CHECKOUT_SHIPPING_METHODS=delivery,pickup
+CHECKOUT_SHIPPING_PROVIDER=rajaongkir
 CHECKOUT_PAYMENT_METHODS=duitku-va,COD
 CHECKOUT_INVOICE_SOURCE=STORE
+RAJAONGKIR_BASE_URL=https://rajaongkir.komerce.id/api/v1
+RAJAONGKIR_API_KEY=YOUR_RAJAONGKIR_API_KEY
+RAJAONGKIR_ORIGIN_ID=YOUR_RAJAONGKIR_ORIGIN_ID
+RAJAONGKIR_COURIERS=jne:jnt:sicepat:pos
 GOOGLE_OIDC_AUDIENCES=YOUR_GOOGLE_WEB_CLIENT_ID
 GOOGLE_TOKENINFO_URL=https://oauth2.googleapis.com/tokeninfo
 CUSTOMER_OTP_EXPIRY_SECONDS=300
@@ -99,6 +108,8 @@ php artisan route:cache
 - `https://api.wiragro.id/api/v1/public/products` merespons daftar produk
 - `https://api.wiragro.id/api/v1/admin/login` bisa dipanggil via Postman
 - `https://api.wiragro.id/api/v1/customer/carts/guest` bisa membuat guest cart
+- `https://api.wiragro.id/api/v1/customer/shipping/destinations?search=rejotangan` bisa mencari tujuan RajaOngkir
+- `https://api.wiragro.id/api/v1/customer/shipping/rates` bisa menghitung ongkir dari `cart_id`, `guest_token`, dan `destination_id`
 - `https://api.wiragro.id/api/v1/customer/orders/track?order_number=...&phone=...` bisa melacak order guest
 - `https://api.wiragro.id/api/v1/customer/orders/{orderNumber}?phone=...` bisa membuka detail order guest
 - `https://api.wiragro.id/api/v1/customer/auth/google` bisa login customer Google

@@ -15,8 +15,11 @@ val localProperties = Properties().apply {
     }
 }
 
+val isOneDriveProject = project.projectDir.absolutePath.contains("OneDrive", ignoreCase = true)
+val localBuildBase = System.getenv("LOCALAPPDATA") ?: System.getProperty("java.io.tmpdir")
 val customBuildDir = (findProperty("KIOS_ANDROID_BUILD_DIR") as String?)
     ?: System.getenv("KIOS_ANDROID_BUILD_DIR")
+    ?: if (isOneDriveProject) "$localBuildBase/WiragroBuild/app" else null
 if (!customBuildDir.isNullOrBlank()) {
     layout.buildDirectory.set(file(customBuildDir))
 }

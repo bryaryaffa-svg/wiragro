@@ -14,6 +14,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "KiosSidomakmur"
+rootProject.name = "Wiragro"
 include(":app")
-

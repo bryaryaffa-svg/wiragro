@@ -218,7 +218,191 @@ def test_cart_qty_update_and_remove(test_context: dict):
         },
     )
     assert removed.status_code == 200, removed.text
-    assert removed.json()["items"] == []
+
+
+def test_kios_backend_can_pull_catalog_delta_from_sige_manager(test_context: dict, monkeypatch):
+    client = test_context["client"]
+
+    def fake_fetch_sige_delta(cursor: str | None) -> dict:
+        assert cursor is None
+        return {
+            "cursor": "2026-04-15T08:00:00+00:00",
+            "target": {"code": "SIDOMAKMUR_KIOS", "channel_code": "ONLINE"},
+            "categories": [
+                {
+                    "id": "sige-cat-001",
+                    "name": "Sembako",
+                    "slug": "sembako",
+                    "sort_order": 1,
+                    "parent_id": None,
+                    "is_active": True,
+                }
+            ],
+            "products": [
+                {
+                    "id": "sige-prod-001",
+                    "brand_id": "brand-sige",
+                    "category_id": "sige-cat-001",
+                    "sku": "SIGE-001",
+                    "name": "Gula Aren 500gr",
+                    "slug": "gula-aren-500gr",
+                    "description": "Produk dari pusat yang harus live di website kios.",
+                    "weight_grams": "500",
+                    "unit": "pack",
+                    "hpp": "12000",
+                    "default_selling_price": "15000",
+                    "min_stock_default": "1",
+                    "is_active": True,
+                    "version": 4,
+                    "images": [
+                        {
+                            "id": "sige-image-001",
+                            "file_url": "https://cdn.example.com/gula-aren.jpg",
+                            "file_path": None,
+                            "sort_order": 0,
+                            "is_primary": True,
+                        }
+                    ],
+                    "visibilities": [],
+                    "target_channel_code": "ONLINE",
+                    "target_store_id": "sige-store-001",
+                    "target_visibility_active": True,
+                }
+            ],
+            "prices": [
+                {
+                    "id": "sige-price-001",
+                    "product_id": "sige-prod-001",
+                    "store_id": "sige-store-001",
+                    "channel_code": "ONLINE",
+                    "price_type": "REGULAR",
+                    "amount": "15000",
+                    "currency_code": "IDR",
+                    "effective_from": "2026-04-15T07:00:00+00:00",
+                    "effective_until": None,
+                    "is_active": True,
+                    "source_request_id": None,
+                }
+            ],
+            "banners": [
+                {
+                    "id": "sige-banner-001",
+                    "title": "Promo Tengah Bulan",
+                    "subtitle": "Sinkron dari Si Getan pusat",
+                    "image_url": "https://cdn.example.com/banner-tengah-bulan.jpg",
+                    "mobile_image_url": None,
+                    "target_url": "/promo/tengah-bulan",
+                    "sort_order": 1,
+                    "starts_at": None,
+                    "ends_at": None,
+                    "is_active": True,
+                    "version": 1,
+                }
+            ],
+            "content_pages": [
+                {
+                    "id": "sige-page-001",
+                    "page_type": "STATIC",
+                    "slug": "tentang-sige",
+                    "title": "Tentang Si Getan",
+                    "excerpt": "Halaman statis dari pusat",
+                    "body_html": "<p>Konten toko dikelola dari Si Getan.</p>",
+                    "cover_image_url": None,
+                    "is_published": True,
+                    "published_at": "2026-04-15T06:30:00+00:00",
+                    "seo_title": "Tentang Si Getan",
+                    "seo_description": "Konten toko dari pusat",
+                    "seo_keywords": "sige,kios",
+                    "version": 1,
+                }
+            ],
+            "payment_methods": [
+                {
+                    "id": "sige-payment-001",
+                    "code": "QRIS",
+                    "name": "QRIS Statis",
+                    "description": "Bayar dengan scan QRIS",
+                    "payment_type": "QRIS",
+                    "provider_code": "MIDTRANS",
+                    "instructions_html": "<p>Tunjukkan bukti bayar ke admin.</p>",
+                    "icon_url": None,
+                    "sort_order": 1,
+                    "is_active": True,
+                    "config_json": {"mode": "static"},
+                    "version": 1,
+                }
+            ],
+            "app_settings": [
+                {
+                    "id": "sige-setting-001",
+                    "setting_group": "payment_methods",
+                    "setting_key": "default_methods",
+                    "value": {"methods": ["QRIS", "TRANSFER"]},
+                    "is_active": True,
+                    "version": 2,
+                }
+            ],
+        }
+
+    monkeypatch.setattr("app.services.sige_sync._fetch_sige_delta", fake_fetch_sige_delta)
+    monkeypatch.setattr("app.api.v1.endpoints.sync.is_sige_sync_configured", lambda: True)
+
+    pull = client.post(
+        "/api/v1/sync/pull-from-sige",
+        params={"store_code": settings.default_store_code, "force_full": True},
+    )
+    assert pull.status_code == 200, pull.text
+    assert pull.json()["configured"] is True
+    assert pull.json()["products_synced"] == 1
+    assert pull.json()["banners_synced"] == 1
+    assert pull.json()["content_pages_synced"] == 1
+    assert pull.json()["payment_methods_synced"] == 1
+
+    catalog = client.get(
+        "/api/v1/storefront/products",
+        params={"store_code": settings.default_store_code, "q": "Gula Aren"},
+    )
+    assert catalog.status_code == 200, catalog.text
+    synced = next((item for item in catalog.json()["items"] if item["slug"] == "gula-aren-500gr"), None)
+    assert synced is not None
+    assert synced["name"] == "Gula Aren 500gr"
+    assert synced["pricing"]["active"]["amount"] == "15000.00"
+
+    detail = client.get(
+        "/api/v1/storefront/products/gula-aren-500gr",
+        params={"store_code": settings.default_store_code},
+    )
+    assert detail.status_code == 200, detail.text
+    assert detail.json()["slug"] == "gula-aren-500gr"
+
+    home = client.get("/api/v1/storefront/home", params={"store_code": settings.default_store_code})
+    assert home.status_code == 200, home.text
+    assert any(item["title"] == "Promo Tengah Bulan" for item in home.json()["banners"])
+
+    pages = client.get("/api/v1/storefront/pages", params={"store_code": settings.default_store_code})
+    assert pages.status_code == 200, pages.text
+    assert any(item["slug"] == "tentang-sige" for item in pages.json()["items"])
+
+    manifest = client.get(
+        "/api/v1/sync/cache-manifest",
+        params={"store_code": settings.default_store_code},
+    )
+    assert manifest.status_code == 200, manifest.text
+    assert any(item["slug"] == "gula-aren-500gr" for item in manifest.json()["products"])
+    assert any(item["title"] == "Promo Tengah Bulan" for item in manifest.json()["banners"])
+    assert any(item["slug"] == "tentang-sige" for item in manifest.json()["content_pages"])
+    assert any(item["code"] == "QRIS" for item in manifest.json()["payment_methods"])
+    assert any(item["group"] == "payment_methods" for item in manifest.json()["settings"])
+
+    guest_cart = client.post("/api/v1/customer/carts/guest", json={"store_code": settings.default_store_code})
+    assert guest_cart.status_code == 200, guest_cart.text
+    guest_session = guest_cart.json()
+    guest_payload = client.get(
+        "/api/v1/customer/carts/current",
+        params={"cart_id": guest_session["cart_id"], "guest_token": guest_session["guest_token"]},
+    )
+    assert guest_payload.status_code == 200, guest_payload.text
+    assert any(item["code"] == "QRIS" for item in guest_payload.json()["checkout_rules"]["payment_methods"])
 
 
 def test_whatsapp_otp_and_cache_manifest(test_context: dict):

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState, useTransition } from "react";
 
+import { AccountDashboard } from "@/components/account-dashboard";
 import { useAuth } from "@/components/auth-provider";
 import { GoogleSignInButton } from "@/components/google-signin-button";
 
@@ -90,6 +91,8 @@ export function AccountPanel() {
             <p>{session.pricing_mode || session.customer.member_tier || "Customer"}</p>
           </article>
         </div>
+
+        <AccountDashboard session={session} />
       </section>
     );
   }
