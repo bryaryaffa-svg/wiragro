@@ -320,7 +320,7 @@ function buildFaq(profile: ProductProfile, productName: string) {
     {
       question: "Kalau saya belum yakin dengan kecocokannya, apa langkah paling aman?",
       answer:
-        "Buka artikel atau halaman solusi terkait, lalu lanjutkan ke konsultasi WhatsApp agar tim toko membantu membaca kebutuhan Anda.",
+        "Buka artikel atau halaman solusi terkait, lalu lanjutkan ke konsultasi WhatsApp agar tim Wiragro membantu membaca kebutuhan Anda.",
     },
   ];
 
@@ -341,7 +341,7 @@ function buildFaq(profile: ProductProfile, productName: string) {
       {
         question: "Benih ini cocok untuk siapa?",
         answer:
-          "Cocok untuk user yang sudah tahu komoditas dan jalur tanamnya, lalu ingin mulai dari fase awal dengan lebih terarah.",
+          "Cocok untuk pembeli yang sudah tahu komoditas dan jalur tanamnya, lalu ingin mulai dari fase awal dengan lebih terarah.",
       },
       {
         question: "Kalau semai saya sering rebah, apakah cukup ganti benih?",
@@ -406,15 +406,15 @@ function buildTrustPoints(profile: ProductProfile) {
   const base: ProductTrustPoint[] = [
     {
       title: "Status stok dan harga aktif",
-      body: "Harga yang tampil mengikuti katalog aktif, dan status stok membantu user menilai apakah produk ini siap diproses sekarang.",
+      body: "Harga yang tampil mengikuti katalog aktif, dan status stok membantu pembeli menilai apakah produk ini siap diproses sekarang.",
     },
     {
       title: "Pengiriman dan tindak lanjut pesanan",
-      body: "Setelah checkout, user bisa melacak pesanan dan kembali ke produk ini saat ingin repeat order atau membandingkan opsi pelengkap.",
+      body: "Setelah checkout, pembeli bisa melacak pesanan dan kembali ke produk ini saat ingin repeat order atau membandingkan opsi pelengkap.",
     },
     {
       title: "Konsultasi sebelum beli",
-      body: "Jika kebutuhan belum jelas, arahkan user ke WhatsApp toko agar keputusan belanjanya tetap terasa aman dan masuk akal.",
+      body: "Jika kebutuhan belum jelas, arahkan pembeli ke WhatsApp Wiragro agar keputusan belanjanya tetap terasa aman dan masuk akal.",
     },
   ];
 
@@ -478,11 +478,11 @@ export function buildProductPageEnrichment(product: ProductDetailPayload): Produ
   > = {
     nutrition: {
       useCaseLabel: "Input nutrisi",
-      purpose: "Produk ini paling masuk akal dipakai ketika user ingin menjaga ritme nutrisi, mendukung fase tanam, dan mengurangi keputusan belanja yang terlalu reaktif.",
+      purpose: "Produk ini paling masuk akal dipakai ketika Anda ingin menjaga ritme nutrisi, mendukung fase tanam, dan mengurangi keputusan belanja yang terlalu reaktif.",
       guidanceNote: "Baca produk ini sebagai bagian dari ritme budidaya, bukan jawaban tunggal untuk semua gejala.",
       primaryBenefits: [
         "Membantu menopang fase awal, vegetatif, atau generatif sesuai konteks tanaman.",
-        "Cocok dipakai saat user sudah tahu tujuan aplikasi, bukan hanya nama produknya.",
+        "Cocok dipakai saat tujuan aplikasinya sudah jelas, bukan hanya karena nama produknya.",
         "Bisa menjadi bagian dari pola repeat order bila ritme penggunaannya sudah stabil.",
       ],
       usageSteps: [
@@ -502,12 +502,12 @@ export function buildProductPageEnrichment(product: ProductDetailPayload): Produ
       ],
       bundleSuggestion: {
         title: "Lengkapi dengan pendamping fase tanam",
-        description: "Bundle ringan ini cocok untuk user yang tidak ingin berhenti di satu produk saja, tetapi juga tidak ingin belanja terlalu liar.",
+        description: "Paket ringan ini cocok untuk pembeli yang tidak ingin berhenti di satu produk saja, tetapi juga tidak ingin belanja terlalu berlebihan.",
         href: buildBundleHref(BUNDLE_REFERENCE_SLUGS.starter),
       },
       reviewPlaceholder: {
         title: "Feedback penggunaan masih bertahap",
-        body: "Belum ada rating publik yang matang di storefront ini. Untuk tahap awal, tampilkan status stok, harga aktif, dan jalur konsultasi sebagai sinyal kepercayaan yang jujur.",
+        body: "Belum ada rating publik yang matang untuk produk ini. Untuk tahap awal, tampilkan status stok, harga aktif, dan jalur konsultasi sebagai sinyal kepercayaan yang jujur.",
         bullets: ["Status stok real-time", "Harga aktif saat checkout", "Konsultasi WhatsApp tersedia"],
       },
       repeatOrderTitle: "Siapkan jalur repeat order yang lebih rapi",
@@ -519,12 +519,12 @@ export function buildProductPageEnrichment(product: ProductDetailPayload): Produ
     },
     seed: {
       useCaseLabel: "Input fase awal",
-      purpose: "Produk ini paling cocok untuk user yang sedang menyiapkan fase awal tanam dan ingin memastikan fondasi budidayanya lebih rapi sejak awal.",
+      purpose: "Produk ini paling cocok untuk Anda yang sedang menyiapkan fase awal tanam dan ingin memastikan fondasi budidayanya lebih rapi sejak awal.",
       guidanceNote: "Keputusan fase awal paling sehat datang dari kombinasi benih, media, dan ritme persemaian yang saling nyambung.",
       primaryBenefits: [
-        "Membantu user mulai dari fase tanam dengan konteks yang lebih jelas.",
+        "Membantu memulai fase tanam dengan konteks yang lebih jelas.",
         "Cocok dipadukan dengan media dan perlengkapan awal yang relevan.",
-        "Lebih meyakinkan bila user memahami komoditas dan jalur semainya lebih dulu.",
+        "Lebih meyakinkan bila komoditas dan jalur semainya dipahami lebih dulu.",
       ],
       usageSteps: [
         "Pastikan komoditas dan tujuan tanamnya sudah jelas.",
@@ -542,7 +542,7 @@ export function buildProductPageEnrichment(product: ProductDetailPayload): Produ
       ],
       bundleSuggestion: {
         title: "Mulai dari paket fase semai",
-        description: "Bundle ini membantu user memulai dengan fondasi yang lebih utuh, bukan hanya membeli satu item awal.",
+        description: "Paket ini membantu memulai dengan fondasi yang lebih utuh, bukan hanya membeli satu item awal.",
         href: buildBundleHref(BUNDLE_REFERENCE_SLUGS.starter),
       },
       reviewPlaceholder: {
@@ -559,12 +559,12 @@ export function buildProductPageEnrichment(product: ProductDetailPayload): Produ
     },
     protection: {
       useCaseLabel: "Proteksi lapangan",
-      purpose: "Produk ini lebih tepat dipakai setelah user punya dugaan masalah yang cukup kuat, sehingga proteksi tidak terasa seperti pembelian panik.",
+      purpose: "Produk ini lebih tepat dipakai setelah dugaan masalahnya cukup kuat, sehingga proteksi tidak terasa seperti pembelian panik.",
       guidanceNote: "Proteksi paling efektif saat gejalanya sudah dibedakan dengan cukup jelas antara hama, penyakit, dan stres tanaman lain.",
       primaryBenefits: [
-        "Membantu user bergerak dari verifikasi gejala ke tindakan yang lebih tepat.",
+        "Membantu bergerak dari verifikasi gejala ke tindakan yang lebih tepat.",
         "Cocok dipasangkan dengan alat aplikasi dan monitoring lapangan.",
-        "Lebih aman untuk conversion karena user tidak dipaksa beli tanpa konteks gejala.",
+        "Lebih aman karena keputusan beli tidak dipaksa tanpa konteks gejala.",
       ],
       usageSteps: [
         "Verifikasi dulu apakah gejala lebih dekat ke hama atau penyakit.",
@@ -582,7 +582,7 @@ export function buildProductPageEnrichment(product: ProductDetailPayload): Produ
       ],
       bundleSuggestion: {
         title: "Lengkapi dengan alat aplikasi",
-        description: "User yang sudah masuk ke jalur proteksi biasanya butuh kombinasi produk dan alat yang saling mendukung.",
+        description: "Pembeli yang sudah masuk ke jalur proteksi biasanya butuh kombinasi produk dan alat yang saling mendukung.",
         href: buildBundleHref(BUNDLE_REFERENCE_SLUGS.protection),
       },
       reviewPlaceholder: {
@@ -592,14 +592,14 @@ export function buildProductPageEnrichment(product: ProductDetailPayload): Produ
       },
       repeatOrderTitle: "Simpan untuk proteksi berulang yang lebih terukur",
       repeatOrderBody: "Jika produk ini cocok, gunakan wishlist atau order history sebagai referensi repeat order agar ritme proteksi berikutnya lebih mudah diulang.",
-      consultationPrompt: "Kalau Anda belum yakin gejalanya hama atau penyakit, minta bantuan toko sebelum memilih proteksi.",
+      consultationPrompt: "Kalau Anda belum yakin gejalanya hama atau penyakit, minta bantuan tim sebelum memilih proteksi.",
       primaryCtaLabel: "Tambah untuk proteksi lapangan",
       secondaryCtaLabel: "Beli sekarang dan lanjut ke checkout",
       quickMeta: ["Untuk gejala yang sudah diverifikasi", "Nyambung ke alat aplikasi", "Lebih aman dengan konsultasi"],
     },
     media: {
       useCaseLabel: "Media & pendukung akar",
-      purpose: "Produk ini membantu user membangun lingkungan tumbuh yang lebih stabil pada fase semai atau awal tanam, saat akar dan media masih sangat menentukan.",
+      purpose: "Produk ini membantu membangun lingkungan tumbuh yang lebih stabil pada fase semai atau awal tanam, saat akar dan media masih sangat menentukan.",
       guidanceNote: "Masalah fase awal sering datang dari lingkungan tumbuh, jadi media dan perlengkapan pendukung perlu dibaca bersama, bukan terpisah.",
       primaryBenefits: [
         "Membantu fase semai dan awal tanam terasa lebih stabil.",
@@ -622,12 +622,12 @@ export function buildProductPageEnrichment(product: ProductDetailPayload): Produ
       ],
       bundleSuggestion: {
         title: "Padukan dengan kebutuhan semai",
-        description: "User fase awal biasanya lebih terbantu bila media, benih, dan nutrisi dasarnya disiapkan sebagai satu flow.",
+        description: "Pada fase awal, media, benih, dan nutrisi dasar biasanya lebih efektif jika disiapkan dalam satu alur.",
         href: buildBundleHref(BUNDLE_REFERENCE_SLUGS.starter),
       },
       reviewPlaceholder: {
         title: "Trust dibangun lewat konteks penggunaan",
-        body: "Pada produk media dan fase awal, user biasanya lebih percaya saat halaman menjelaskan kapan dipakai, untuk bibit apa, dan apa risiko bila salah konteks.",
+        body: "Pada produk media dan fase awal, pembeli biasanya lebih percaya saat halaman menjelaskan kapan dipakai, untuk bibit apa, dan apa risiko bila salah konteks.",
         bullets: ["Cocok untuk persemaian", "Bantu fase awal", "Terhubung ke solusi semai"],
       },
       repeatOrderTitle: "Cocok dijadikan daftar belanja awal",
@@ -639,11 +639,11 @@ export function buildProductPageEnrichment(product: ProductDetailPayload): Produ
     },
     tool: {
       useCaseLabel: "Alat pendukung lapangan",
-      purpose: "Produk ini bukan hanya tambahan aksesoris. Ia membantu user menjalankan input lain dengan lebih rapi, efisien, dan konsisten di lapangan.",
+      purpose: "Produk ini bukan hanya tambahan aksesoris. Ia membantu menjalankan input lain dengan lebih rapi, efisien, dan konsisten di lapangan.",
       guidanceNote: "Alat paling bernilai saat dipakai sebagai bagian dari alur kerja yang jelas, bukan pembelian tambahan tanpa peran yang konkret.",
       primaryBenefits: [
         "Mendukung aplikasi produk lain agar lebih rapi dan efisien.",
-        "Membantu user menjaga konsistensi penggunaan di lapangan.",
+        "Membantu menjaga konsistensi penggunaan di lapangan.",
         "Bisa menjadi pendamping penting untuk proteksi atau nutrisi berulang.",
       ],
       usageSteps: [
@@ -668,23 +668,23 @@ export function buildProductPageEnrichment(product: ProductDetailPayload): Produ
       reviewPlaceholder: {
         title: "Belum ada rating publik",
         body: "Untuk tahap awal, nilai kepercayaan produk alat bisa dibangun dari konteks penggunaannya, produk pendampingnya, dan konsultasi sebelum beli.",
-        bullets: ["Cek peran alat", "Cek input pendamping", "Hubungi toko bila ragu"],
+        bullets: ["Cek peran alat", "Cek input pendamping", "Hubungi tim bila ragu"],
       },
       repeatOrderTitle: "Bantu pola kerja dan pembelian ulang",
-      repeatOrderBody: "Setelah alat yang tepat ditemukan, user akan lebih mudah mengulang pembelian input pendamping karena alur aplikasinya sudah stabil.",
-      consultationPrompt: "Kalau Anda bingung alat ini paling tepat dipakai bersama produk apa, tim toko bisa membantu menyesuaikannya.",
+      repeatOrderBody: "Setelah alat yang tepat ditemukan, pembelian input pendamping akan lebih mudah diulang karena alur aplikasinya sudah stabil.",
+      consultationPrompt: "Kalau Anda bingung alat ini paling tepat dipakai bersama produk apa, tim Wiragro bisa membantu menyesuaikannya.",
       primaryCtaLabel: "Tambah alat ini ke keranjang",
       secondaryCtaLabel: "Beli sekarang",
       quickMeta: ["Untuk ritme kerja lapangan", "Mendukung input utama", "Nyambung ke repeat order"],
     },
     general: {
       useCaseLabel: "Kebutuhan lapangan",
-      purpose: "Produk ini paling baik dibaca dari konteks kebutuhan user, lalu dihubungkan ke komoditas, fase tanam, dan masalah yang sedang dihadapi.",
-      guidanceNote: "Jika konteks belum jelas, jangan paksa user langsung checkout. Gunakan artikel, solusi, dan konsultasi sebagai jembatan.",
+      purpose: "Produk ini paling baik dibaca dari konteks kebutuhan yang sedang dicari, lalu dihubungkan ke komoditas, fase tanam, dan masalah yang sedang dihadapi.",
+      guidanceNote: "Jika konteks belum jelas, jangan paksa pembeli langsung checkout. Gunakan artikel, solusi, dan konsultasi sebagai jembatan.",
       primaryBenefits: [
         "Memberi opsi belanja yang tetap terhubung ke konteks penggunaan.",
-        "Bisa diposisikan sebagai produk inti atau pelengkap sesuai kebutuhan user.",
-        "Lebih meyakinkan bila user tahu masalah dan fase yang sedang ia hadapi.",
+        "Bisa diposisikan sebagai produk inti atau pelengkap sesuai kebutuhan.",
+        "Lebih meyakinkan bila masalah dan fase yang sedang dihadapi sudah dipahami.",
       ],
       usageSteps: [
         "Hubungkan produk ini dengan kebutuhan atau problem yang sedang berjalan.",
@@ -702,7 +702,7 @@ export function buildProductPageEnrichment(product: ProductDetailPayload): Produ
       ],
       bundleSuggestion: {
         title: "Cari pasangan produk yang paling relevan",
-        description: "Bundle di tahap ini sebaiknya tidak dipaksakan; lebih baik bantu user menyusun kombinasi yang benar-benar ia butuhkan.",
+        description: "Paket di tahap ini sebaiknya tidak dipaksakan; lebih baik bantu menyusun kombinasi yang benar-benar dibutuhkan.",
         href: buildBundleHref(BUNDLE_REFERENCE_SLUGS.kioskRestock),
       },
       reviewPlaceholder: {

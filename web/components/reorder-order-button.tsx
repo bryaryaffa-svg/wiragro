@@ -28,10 +28,11 @@ export function ReorderOrderButton({
     <div className="inline-action-stack">
       <button
         className={buttonClassName ?? "btn btn-secondary"}
-        disabled={!session?.access_token || isPending}
+        disabled={isPending}
         onClick={() => {
           if (!session?.access_token) {
             setMessage("Login dulu untuk membuka riwayat order.");
+            router.push("/akun");
             return;
           }
 

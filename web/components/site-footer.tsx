@@ -15,26 +15,28 @@ export async function SiteFooter() {
     <footer className="site-footer">
       <div className="site-footer__brand">
         <WiragroLockup
-          contextLabel="Platform pertanian hybrid"
+          contextLabel="Platform Solusi Pertanian Digital"
           tone="light"
           variant="footer"
         />
-        <h2>Belajar, cari solusi, lalu belanja kebutuhan tani dalam satu alur yang lebih jelas.</h2>
+        <h2>Solusi tanaman, edukasi, produk, dan layanan pertanian digital dalam satu platform.</h2>
         <p>
-          Wiragro membantu {store?.name ?? "Sidomakmur"} tampil bukan hanya sebagai toko,
-          tetapi sebagai platform pertanian hybrid yang tetap kuat untuk conversion dan
-          tetap nyaman dipakai mencari konteks.
+          Wiragro membantu petani, pehobi, kios, dan buyer bisnis bergerak dari masalah
+          ke keputusan yang lebih tepat dengan alur yang terasa modern, terpercaya, dan
+          mudah dipahami.
         </p>
         <div className="site-footer__badges">
-          <span>Belajar</span>
-          <span>Cari Solusi</span>
-          <span>Belanja</span>
+          <span>Solusi</span>
+          <span>Produk</span>
+          <span>Edukasi</span>
+          <span>AI Chat</span>
+          <span>B2C & B2B</span>
         </div>
         {store ? (
           <div className="site-footer__contact">
-            <strong>{store.name}</strong>
-            <span>{store.address || "Alamat toko sedang diperbarui."}</span>
-            {store.operational_hours ? <span>Jam operasional: {store.operational_hours}</span> : null}
+            <strong>Pusat Layanan Wiragro</strong>
+            <span>{store.address || "Alamat layanan sedang diperbarui."}</span>
+            {store.operational_hours ? <span>Jam layanan: {store.operational_hours}</span> : null}
             {store.whatsapp_number ? <span>WhatsApp: {store.whatsapp_number}</span> : null}
             {mapsUrl ? (
               <a href={mapsUrl} rel="noreferrer" target="_blank">

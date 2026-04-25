@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { ArticleCard } from "@/components/article-card";
+import { B2BInquiryForm } from "@/components/b2b-inquiry-form";
 import { BundlePurchaseActions } from "@/components/bundle-purchase-actions";
 import { CommerceIntentGrid } from "@/components/commerce-intent-grid";
 import { ContentRelationAlert } from "@/components/content-relation-alert";
@@ -109,18 +110,22 @@ export default async function BundleDetailPage({
     bundle.relatedCommoditySlugs.length === 1
       ? bundle.relatedCommoditySlugs[0].replace(/-/g, " ")
       : undefined;
+  const commoditySlug =
+    bundle.relatedCommoditySlugs.length === 1 ? bundle.relatedCommoditySlugs[0] : undefined;
   const intentCards = buildCommerceIntentCards({
     phone: store.whatsapp_number,
     storeName: store.name,
+    sourcePath: `/belanja/paket/${bundle.slug}`,
+    surface: "bundle-detail",
+    bundleSlug: bundle.slug,
     bundleTitle: bundle.title,
     commodityLabel,
-    includeCampaign: bundle.kind === "commodity",
   });
   const purchaseDisabledReason = resolvedBundle.isFullyPurchasable
     ? null
     : resolvedBundle.catalogCoverage === "snapshot"
-      ? "Bundle ini belum tersambung ke katalog aktif penuh. Lengkapi slug produk di backend agar CTA bundle bisa dipakai end-to-end."
-      : "Sebagian SKU bundle belum aktif atau belum tersambung ke katalog, jadi pembelian massal masih ditahan dulu.";
+      ? "Paket ini masih ditampilkan sebagai referensi kebutuhan, jadi checkout langsung belum tersedia."
+      : "Sebagian item paket belum siap diproses langsung, jadi checkout paket lengkap masih ditahan dulu.";
   const pricingPreview = resolvedBundle.pricingPreview;
 
   return (
@@ -172,7 +177,7 @@ export default async function BundleDetailPage({
               <span>Total normal</span>
               <strong>{formatCurrency(pricingPreview.normalTotalAmount)}</strong>
               <small>
-                {pricingPreview.skuCount} SKU tetap • {pricingPreview.itemCount} item
+                {pricingPreview.skuCount} SKU tetap | {pricingPreview.itemCount} item
               </small>
             </article>
             <article className="bundle-hero__pricing-card bundle-hero__pricing-card--featured">
@@ -197,8 +202,8 @@ export default async function BundleDetailPage({
             <Link className="btn btn-secondary" href={bundle.catalogHref}>
               Buka katalog terkait
             </Link>
-            <Link className="btn btn-secondary" href="/b2b">
-              Minta penawaran B2B
+            <Link className="btn btn-secondary" href="#b2b-quote-form">
+              Ajukan penawaran awal
             </Link>
           </div>
         </div>
@@ -214,16 +219,16 @@ export default async function BundleDetailPage({
             </div>
             <div>
               <span>Status harga</span>
-              <strong>{bundle.pricing.priceStatus === "mock" ? "Pilot / mock" : "Terkonfirmasi"}</strong>
+              <strong>{bundle.pricing.priceStatus === "mock" ? "Estimasi awal" : "Terkonfirmasi"}</strong>
             </div>
             <div>
               <span>Cakupan katalog</span>
               <strong>
                 {resolvedBundle.catalogCoverage === "full"
-                  ? "Penuh"
+                  ? "Semua item aktif"
                   : resolvedBundle.catalogCoverage === "partial"
-                    ? "Parsial"
-                    : "Snapshot"}
+                    ? "Sebagian item aktif"
+                    : "Referensi paket"}
               </strong>
             </div>
           </div>
@@ -271,7 +276,7 @@ export default async function BundleDetailPage({
                 <span>{item.product.sku}</span>
                 <span>{item.product.unit}</span>
                 <span>
-                  {item.source === "catalog" ? "Tersambung ke katalog" : "Masih snapshot bundle"}
+                  {item.source === "catalog" ? "Tersambung ke katalog" : "Referensi paket"}
                 </span>
               </div>
               <div className="bundle-lineup-card__price">
@@ -286,20 +291,20 @@ export default async function BundleDetailPage({
       </section>
 
       <ContentRelationAlert
-        actionLabel="Buka hub Belajar"
+        actionLabel="Buka Edukasi"
         href="/belajar"
         items={missingRelations}
-        title="Sebagian referensi bundle belum lengkap"
+        title="Sebagian referensi bundle sedang dilengkapi"
       />
 
       <section className="section-block">
         <div className="section-heading">
           <div>
-            <span className="eyebrow-label">Kenapa bundle ini penting</span>
-            <h2>Bundle dipakai sebagai growth surface, bukan bundling kosmetik.</h2>
+            <span className="eyebrow-label">Kenapa paket ini membantu</span>
+            <h2>Paket ini merangkum kebutuhan yang sering dibeli bersama.</h2>
             <p>
-              Halaman ini menghubungkan intent user ke komposisi produk, edukasi, solusi,
-              dan assisted conversion dalam satu flow yang lebih siap ditutup menjadi transaksi.
+              Halaman ini merangkum isi paket, edukasi pendukung, solusi terkait, dan jalur
+              bantuan beli dalam satu alur yang lebih mudah dipahami.
             </p>
           </div>
         </div>
@@ -313,14 +318,40 @@ export default async function BundleDetailPage({
         </div>
       </section>
 
+      <section className="section-block">
+        <div className="section-heading">
+          <div>
+            <span className="eyebrow-label">Penawaran awal untuk paket</span>
+            <h2>Kebutuhan partai bisa diajukan dari paket ini tanpa memulai dari form kosong.</h2>
+            <p>
+              Form ini otomatis membawa konteks paket, halaman sumber, dan komoditas utama
+              agar tim Wiragro bisa menyiapkan penawaran awal yang lebih mudah dipahami.
+            </p>
+          </div>
+          <Link href="/b2b">Halaman B2B penuh</Link>
+        </div>
+        <B2BInquiryForm
+          bundleSlug={bundle.slug}
+          bundleTitle={bundle.title}
+          commoditySlug={commoditySlug}
+          defaultCommodityFocus={commodityLabel}
+          description="Jalur ini cocok untuk kios, reseller, atau kebun yang ingin membahas volume paket ini tanpa harus menyusun inquiry ulang dari nol."
+          heading="Ajukan kebutuhan partai dari bundle ini."
+          eyebrowLabel="Inquiry bundle"
+          sourcePage={`/belanja/paket/${bundle.slug}`}
+          submitLabel="Ajukan penawaran paket ini"
+          summaryPlaceholder="Jelaskan kebutuhan volume paket ini, lokasi kirim, jadwal pengadaan, atau kombinasi item yang masih perlu disesuaikan."
+        />
+      </section>
+
       {intentCards.length ? (
         <section className="section-block">
           <div className="section-heading">
             <div>
-              <span className="eyebrow-label">WhatsApp commerce flow</span>
-              <h2>Bantu user memilih assisted conversion yang paling tepat.</h2>
+              <span className="eyebrow-label">Bantuan WhatsApp</span>
+              <h2>Butuh arahan cepat sebelum memilih jalur berikutnya?</h2>
             </div>
-            <Link href="/kontak">Kontak toko</Link>
+            <Link href="/kontak">Kontak tim</Link>
           </div>
           <CommerceIntentGrid items={intentCards} />
         </section>
@@ -334,7 +365,7 @@ export default async function BundleDetailPage({
               <h2>Produk yang sudah tersambung ke katalog dan siap diproses di keranjang.</h2>
               <p>
                 {resolvedBundle.missingItemCount > 0
-                  ? `${resolvedBundle.missingItemCount} SKU lain masih memakai snapshot bundle sampai sinkron katalog selesai.`
+                  ? `${resolvedBundle.missingItemCount} item lain masih ditampilkan sebagai referensi paket sambil menunggu sinkron katalog selesai.`
                   : "Semua item bundle ini sudah tersambung ke katalog aktif."}
               </p>
             </div>
@@ -370,9 +401,9 @@ export default async function BundleDetailPage({
           <div className="section-heading">
             <div>
               <span className="eyebrow-label">Edukasi terkait</span>
-              <h2>Artikel yang membantu user paham sebelum membeli paket ini.</h2>
+              <h2>Artikel yang membantu pembeli paham sebelum membeli paket ini.</h2>
             </div>
-            <Link href="/belajar">Masuk ke Belajar</Link>
+            <Link href="/belajar">Buka Edukasi</Link>
           </div>
           <div className="article-grid article-grid--editorial">
             {relatedArticles.map((article) => (
@@ -385,11 +416,11 @@ export default async function BundleDetailPage({
       <section className="section-block">
         <div className="section-heading">
           <div>
-            <span className="eyebrow-label">Trust layer</span>
-            <h2>Sinyal validasi awal sampai review publik bundle matang.</h2>
+            <span className="eyebrow-label">Sinyal kepercayaan</span>
+            <h2>Sinyal awal untuk menilai kecocokan paket ini.</h2>
             <p>
-              Untuk fase sekarang, bundle ini memakai proof signal yang jujur: konteks
-              penggunaan, assisted selling, serta relasi ke solusi dan artikel.
+              Saat review publik bundle belum tersedia, halaman ini menampilkan konteks
+              penggunaan, bantuan tim, serta relasi ke solusi dan artikel sebagai dasar pertimbangan.
             </p>
           </div>
         </div>

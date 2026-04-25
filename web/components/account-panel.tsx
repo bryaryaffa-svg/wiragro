@@ -22,12 +22,13 @@ export function AccountPanel() {
   const { session, isBusy, logout, requestOtpCode, verifyOtpCode } = useAuth();
   const [otpPhone, setOtpPhone] = useState("");
   const [challengeId, setChallengeId] = useState<string | null>(null);
-  const [debugCode, setDebugCode] = useState<string | null>(null);
+  const [, setDebugCode] = useState<string | null>(null);
   const [otpCode, setOtpCode] = useState("");
   const [message, setMessage] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const redirected = useRef(false);
   const nextPath = normalizeNextPath(searchParams.get("next"));
+  const reviewOrderNumber = searchParams.get("reviewOrder");
 
   useEffect(() => {
     if (!session || !nextPath || redirected.current) {
@@ -43,11 +44,11 @@ export function AccountPanel() {
       <section className="page-stack account-page">
         <div className="account-hero account-hero--signed">
           <div className="account-hero__copy">
-            <span className="eyebrow-label">Akun customer</span>
+            <span className="eyebrow-label">Akun Wiragro</span>
             <h1>Halo, {session.customer.full_name}</h1>
             <p>
-              Akun customer aktif di browser ini. Wishlist, checkout, dan order berikutnya
-              akan langsung memakai data akun yang sama sampai Anda logout.
+              Akun Anda aktif di browser ini. Wishlist, checkout, pelacakan pesanan, dan
+              akses berikutnya akan memakai data yang sama sampai Anda logout.
             </p>
           </div>
           <div className="account-actions">
@@ -72,7 +73,7 @@ export function AccountPanel() {
         <div className="account-summary-grid">
           <article className="account-summary">
             <span className="eyebrow-label">Identitas</span>
-            <strong>ID customer</strong>
+            <strong>ID akun</strong>
             <p>{session.customer.id}</p>
           </article>
           <article className="account-summary">
@@ -88,11 +89,11 @@ export function AccountPanel() {
           <article className="account-summary">
             <span className="eyebrow-label">Akses</span>
             <strong>Mode akun</strong>
-            <p>{session.pricing_mode || session.customer.member_tier || "Customer"}</p>
+            <p>{session.pricing_mode || session.customer.member_tier || "Pengguna"}</p>
           </article>
         </div>
 
-        <AccountDashboard session={session} />
+        <AccountDashboard reviewOrderNumber={reviewOrderNumber} session={session} />
       </section>
     );
   }
@@ -101,8 +102,8 @@ export function AccountPanel() {
     <section className="page-stack account-page">
       <div className="account-hero">
         <div className="account-hero__copy">
-          <span className="eyebrow-label">Masuk customer</span>
-          <h1>Akses wishlist, checkout, dan pesanan dengan akun customer.</h1>
+          <span className="eyebrow-label">Masuk ke akun</span>
+          <h1>Akses wishlist, checkout, pesanan, dan fitur premium dengan akun Wiragro.</h1>
           <p>
             Masuk dengan Google atau WhatsApp OTP. Setelah berhasil, website langsung
             melanjutkan Anda ke halaman yang sedang dibutuhkan.
@@ -115,7 +116,7 @@ export function AccountPanel() {
           <ul className="account-benefits">
             <li>
               <strong>Wishlist tersimpan</strong>
-              <span>Produk favorit dapat dibuka lagi dari akun customer yang sama.</span>
+              <span>Produk favorit dapat dibuka lagi dari akun yang sama.</span>
             </li>
             <li>
               <strong>Checkout lebih singkat</strong>
@@ -128,7 +129,7 @@ export function AccountPanel() {
           </ul>
           <div className="account-actions">
             <Link className="btn btn-secondary" href="/produk">
-              Lanjut sebagai guest
+              Jelajahi dulu
             </Link>
             <Link className="btn btn-secondary" href="/wishlist">
               Buka wishlist
@@ -138,16 +139,16 @@ export function AccountPanel() {
 
         <div className="auth-stack">
           <div className="auth-panel">
-            <span className="eyebrow-label">Google OIDC</span>
+            <span className="eyebrow-label">Google</span>
             <h2>Masuk dengan akun Google</h2>
             <p>
-              Pilihan tercepat untuk customer yang ingin login langsung dengan popup resmi
+              Pilihan tercepat untuk pengguna yang ingin login langsung dengan popup resmi
               Google.
             </p>
             <GoogleSignInButton onMessage={setMessage} />
             <div className="panel-card panel-card--inline">
-              Jika login Google gagal, biasanya origin domain belum didaftarkan di Google
-              Cloud Console atau popup diblokir browser.
+              Jika login Google belum berhasil, pastikan popup browser diizinkan lalu coba
+              beberapa saat lagi.
             </div>
           </div>
 
@@ -179,7 +180,7 @@ export function AccountPanel() {
           >
             <span className="eyebrow-label">WhatsApp OTP</span>
             <h2>Masuk dengan WhatsApp OTP</h2>
-            <p>Masukkan nomor customer, minta OTP, lalu verifikasi tanpa perlu password.</p>
+            <p>Masukkan nomor WhatsApp, minta OTP, lalu verifikasi tanpa perlu password.</p>
             <label>
               Nomor WhatsApp
               <input
@@ -203,9 +204,6 @@ export function AccountPanel() {
                 />
               </label>
             ) : null}
-
-            {debugCode ? <p className="inline-note">Kode debug: {debugCode}</p> : null}
-
             <div className="content-shell__cta">
               <button className="btn btn-primary" disabled={isPending || isBusy} type="submit">
                 {isPending || isBusy

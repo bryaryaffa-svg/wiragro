@@ -4,7 +4,7 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "Wiragro",
     short_name: "Wiragro",
-    description: "Platform pertanian digital Wiragro untuk storefront Sidomakmur",
+    description: "Platform Solusi Pertanian Digital untuk solusi tanaman, edukasi, produk, dan layanan pertanian.",
     start_url: "/",
     display: "standalone",
     background_color: "#f5fbef",

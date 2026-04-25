@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { ArticleCard } from "@/components/article-card";
+import { B2BInquiryForm } from "@/components/b2b-inquiry-form";
 import { CampaignSpotlightCard } from "@/components/campaign-spotlight-card";
 import { GrowthBundleCard } from "@/components/growth-bundle-card";
 import { JsonLd } from "@/components/json-ld";
@@ -27,6 +28,7 @@ import {
   getAllSolutions,
   getRelatedSolutions,
   getSolutionBySlug,
+  getSolutionTaxonomyTerm,
 } from "@/lib/solution-content";
 
 export const dynamic = "force-dynamic";
@@ -137,6 +139,9 @@ export default async function SolutionDetailPage({
   const relatedSolutions = getRelatedSolutions(solution, allSolutions, 3);
   const taxonomyLinks = buildSolutionTaxonomyLinks(solution);
   const primaryCommodity = solution.taxonomy.commodities[0];
+  const primaryCommodityLabel = primaryCommodity
+    ? getSolutionTaxonomyTerm('komoditas', primaryCommodity)?.label ?? primaryCommodity.replace(/-/g, ' ')
+    : undefined;
 
   const [articleFeed, store, productGroups] = await Promise.all([
     getArticles({ page_size: 40 }).catch(() => ({
@@ -226,7 +231,7 @@ export default async function SolutionDetailPage({
         <div className="rich-content solution-detail-content">
           <section className="solution-detail-section">
             <span className="eyebrow-label">Gejala / masalah</span>
-            <h2>Apa yang biasanya user lihat di lapangan</h2>
+            <h2>Apa yang biasanya terlihat di lapangan</h2>
             <p>{solution.symptom_summary}</p>
           </section>
 
@@ -252,7 +257,7 @@ export default async function SolutionDetailPage({
 
           <section className="solution-detail-section">
             <span className="eyebrow-label">Solusi tindakan</span>
-            <h2>Langkah awal yang lebih aman sebelum user langsung belanja</h2>
+            <h2>Langkah awal yang lebih aman sebelum langsung belanja</h2>
             <ol className="plain-list">
               {solution.action_steps.map((item) => (
                 <li key={`${solution.slug}-${item}`}>{item}</li>
@@ -265,16 +270,19 @@ export default async function SolutionDetailPage({
           <section className="solution-detail-sidebar__card">
             <span className="eyebrow-label">CTA konsultasi</span>
             <strong>Masih ragu membaca gejalanya sendiri?</strong>
-            <p>Bawa konteks masalah ini ke konsultasi toko agar user tidak salah langkah atau salah beli.</p>
+            <p>Bawa konteks masalah ini ke konsultasi tim agar keputusan berikutnya tidak salah langkah atau salah beli.</p>
             {consultationUrl ? (
               <a className="btn btn-primary" href={consultationUrl} rel="noreferrer" target="_blank">
                 Konsultasi via WhatsApp
               </a>
             ) : (
               <Link className="btn btn-secondary" href="/kontak">
-                Hubungi toko
+                Hubungi tim
               </Link>
             )}
+            <Link className="btn btn-secondary" href="#b2b-quote-form">
+              Minta penawaran penanganan ini
+            </Link>
           </section>
 
           <section className="solution-detail-sidebar__card">
@@ -283,7 +291,7 @@ export default async function SolutionDetailPage({
             <p>
               {primaryCommodity
                 ? "Masalah ini sering perlu dibaca bersama konteks komoditas agar tindakan dan produk lebih relevan."
-                : "Gunakan jalur komoditas untuk mempersempit solusi yang paling dekat dengan konteks user."}
+                : "Gunakan jalur komoditas untuk mempersempit solusi yang paling dekat dengan kebutuhan saat ini."}
             </p>
             <Link
               className="btn btn-secondary"
@@ -296,9 +304,9 @@ export default async function SolutionDetailPage({
           <section className="solution-detail-sidebar__card">
             <span className="eyebrow-label">Edukasi terkait</span>
             <strong>Butuh konteks yang lebih lengkap sebelum memilih produk?</strong>
-            <p>Pindahkan user ke artikel edukasi agar problem-solving tetap terasa meyakinkan, bukan sekadar hard sell.</p>
+            <p>Lanjutkan ke artikel edukasi agar proses memahami masalah tetap meyakinkan, bukan terasa memaksa untuk langsung membeli.</p>
             <Link className="btn btn-secondary" href="/belajar">
-              Masuk ke Belajar
+              Buka Edukasi
             </Link>
           </section>
         </aside>
@@ -326,7 +334,7 @@ export default async function SolutionDetailPage({
           <div className="section-heading">
             <div>
               <span className="eyebrow-label">Artikel edukasi terkait</span>
-              <h2>Konten yang membantu user memahami kenapa langkahnya seperti ini.</h2>
+              <h2>Konten yang membantu pengunjung memahami kenapa langkahnya seperti ini.</h2>
             </div>
             <Link href="/artikel">Buka artikel</Link>
           </div>
@@ -343,7 +351,7 @@ export default async function SolutionDetailPage({
           <div className="section-heading">
             <div>
               <span className="eyebrow-label">Produk relevan</span>
-              <h2>Produk tampil setelah user punya cukup konteks untuk membandingkan pilihan.</h2>
+              <h2>Produk tampil setelah pengunjung punya cukup konteks untuk membandingkan pilihan.</h2>
             </div>
             <Link href="/belanja">Masuk ke Belanja</Link>
           </div>
@@ -355,14 +363,40 @@ export default async function SolutionDetailPage({
         </section>
       ) : null}
 
+      <section className="section-block">
+        <div className="section-heading">
+          <div>
+            <span className="eyebrow-label">Lead B2B dari solusi</span>
+            <h2>Masalah lapangan ini bisa langsung diturunkan menjadi inquiry pembelian yang lebih rapi.</h2>
+            <p>
+              Jika kebutuhan sudah jelas dan Anda ingin membahas input, volume, atau opsi pengiriman,
+              konteks halaman dan komoditas utama ikut tersimpan agar tim Wiragro bisa menindaklanjuti lebih cepat.
+            </p>
+          </div>
+          <Link href="/b2b">Halaman B2B penuh</Link>
+        </div>
+        <B2BInquiryForm
+          commoditySlug={primaryCommodity}
+          contextLabel="Solusi"
+          contextTitle={solution.title}
+          defaultCommodityFocus={primaryCommodityLabel}
+          description="Form ini cocok untuk Anda yang datang dari masalah lapangan dan ingin mengubah pembacaan solusi menjadi draft kebutuhan pembelian atau penanganan."
+          eyebrowLabel="Inquiry solusi"
+          heading="Ajukan penawaran awal dari jalur solusi ini."
+          sourcePage={`/solusi/masalah/${solution.slug}`}
+          submitLabel="Minta penawaran penanganan ini"
+          summaryPlaceholder="Jelaskan gejala lapangan, luas area, target tindakan, komoditas yang terdampak, dan input apa yang ingin Anda estimasikan."
+        />
+      </section>
+
       {relatedBundles.length ? (
         <section className="section-block">
           <div className="section-heading">
             <div>
               <span className="eyebrow-label">Bundle terkait</span>
-              <h2>Masalah ini sekarang punya jalur bundle yang lebih siap dikonversi.</h2>
+              <h2>Masalah ini sekarang punya jalur paket yang lebih siap ditindaklanjuti.</h2>
               <p>
-                Bundle resmi membantu user yang sudah paham masalahnya tetapi masih ingin
+                Paket resmi membantu pengunjung yang sudah paham masalahnya tetapi masih ingin
                 dibantu menyusun langkah belanjanya dengan lebih cepat.
               </p>
             </div>
@@ -381,7 +415,7 @@ export default async function SolutionDetailPage({
           <div className="section-heading">
             <div>
               <span className="eyebrow-label">Campaign terkait</span>
-              <h2>Landing komersial yang cocok untuk problem ini saat momentumnya sedang tinggi.</h2>
+              <h2>Halaman tematik yang cocok untuk masalah ini saat momentumnya sedang tinggi.</h2>
             </div>
             <Link href="/kampanye">Lihat campaign</Link>
           </div>

@@ -4,17 +4,17 @@ export default function NotFound() {
   return (
     <section className="empty-state empty-state--404">
       <span className="eyebrow-label">404 / Halaman tidak ditemukan</span>
-      <h1>Alamat yang Anda buka sudah tidak tersedia di storefront baru.</h1>
+      <h1>Alamat yang Anda buka tidak tersedia di Wiragro.</h1>
       <p>
         Beberapa halaman lama dari website sebelumnya sudah dipensiunkan. Gunakan navigasi
-        utama atau lanjutkan ke katalog untuk menemukan produk dan konten terbaru.
+        utama atau lanjutkan ke halaman produk untuk menemukan konten dan penawaran terbaru.
       </p>
       <div className="empty-state__actions">
         <Link className="btn btn-primary" href="/">
           Kembali ke beranda
         </Link>
         <Link className="btn btn-secondary" href="/produk">
-          Buka katalog
+          Buka produk
         </Link>
       </div>
     </section>

@@ -22,11 +22,11 @@ export function StorefrontCategoryDirectory({
     <section className="storefront-section storefront-section--category-directory">
       <div className="storefront-section__header storefront-section__header--category-directory">
         <div>
-          <span className="storefront-eyebrow">Kategori storefront</span>
-          <h2>Sistem kategori Wiragro</h2>
+          <span className="storefront-eyebrow">Kategori produk</span>
+          <h2>Sistem kategori produk Wiragro</h2>
           <p>
-            Main category sekarang tampil dengan foto utama asli agar lebih cepat dikenali, sementara
-            subcategory tetap ringkas sebagai chips yang nyaman dipindai di mobile maupun desktop.
+            Kategori utama ditampilkan dengan visual yang lebih mudah dikenali, sementara
+            subkategori tetap ringkas sebagai chip yang nyaman dipindai di mobile maupun desktop.
           </p>
         </div>
         <Link href="/produk">Buka katalog</Link>

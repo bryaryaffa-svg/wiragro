@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 export async function generateMetadata(): Promise<Metadata> {
   return generateStaticPageMetadata("kontak", "/kontak", {
     title: "Kontak Wiragro",
-    description: "Hubungi Wiragro dan Kios Sidomakmur untuk informasi toko, alamat, dan layanan.",
+    description: "Hubungi tim Wiragro untuk informasi layanan, alamat, pesanan, dan bantuan produk pertanian.",
   });
 }
 

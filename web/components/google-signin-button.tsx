@@ -191,8 +191,8 @@ export function GoogleSignInButton({
             </button>
           </div>
           <p className="inline-note">
-            Google sign-in memakai popup OIDC resmi Google dan backend memverifikasi ID
-            token sebelum session customer dibuat.
+            Login Google diproses lewat layanan resmi Google agar sesi akun dibuat dengan
+            aman.
           </p>
           {promptState ? <p className="inline-note">{promptState}</p> : null}
           {isBusy ? <p className="inline-note">Memproses login Google...</p> : null}

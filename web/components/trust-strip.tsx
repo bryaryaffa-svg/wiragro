@@ -22,8 +22,8 @@ function buildConsultationUrl(phone?: string | null, storeName?: string | null) 
 
 export function TrustStrip({
   store,
-  heading = "Beli lebih tenang karena jalur trust dasar selalu terlihat.",
-  description = "Layer ini menjaga user tetap tahu bagaimana pengiriman, pembayaran, bantuan toko, dan kebijakan dasar bekerja sebelum atau sesudah checkout.",
+  heading = "Belanja lebih tenang dengan informasi layanan yang jelas.",
+  description = "Ringkasan ini membantu pembeli memahami pengiriman, pembayaran, bantuan layanan, dan kebijakan dasar sebelum maupun sesudah checkout.",
 }: {
   store?: StoreProfile | null;
   heading?: string;
@@ -51,19 +51,19 @@ export function TrustStrip({
       <div className="commerce-trust-strip__grid">
         <article className="storefront-trust-card">
           <strong>Pengiriman dan pickup</strong>
-          <p>Website mendukung delivery dan pickup toko agar user bisa memilih alur pemenuhan yang paling nyaman.</p>
+          <p>Delivery dan pickup tersedia agar pembeli bisa memilih cara pemenuhan yang paling nyaman.</p>
           <Link href="/pengiriman-pembayaran">Lihat opsi pengiriman</Link>
         </article>
 
         <article className="storefront-trust-card">
           <strong>Pembayaran yang aktif</strong>
-          <p>Duitku VA dan COD / nota merah ditampilkan langsung saat checkout agar metode bayar tidak terasa misterius.</p>
+          <p>Metode pembayaran aktif ditampilkan langsung saat checkout agar keputusan akhir terasa lebih jelas.</p>
           <Link href="/pengiriman-pembayaran">Lihat metode pembayaran</Link>
         </article>
 
         <article className="storefront-trust-card">
-          <strong>Garansi bantuan toko</strong>
-          <p>Jika ada kendala order atau produk, user punya jalur bantuan yang jelas sebelum panik atau meninggalkan transaksi.</p>
+          <strong>Bantuan layanan</strong>
+          <p>Jika ada kendala pesanan atau produk, pembeli punya jalur bantuan yang jelas tanpa harus menebak harus mulai dari mana.</p>
           <Link href="/garansi-retur">Buka kebijakan bantuan</Link>
         </article>
 
@@ -71,8 +71,8 @@ export function TrustStrip({
           <strong>{store?.name ?? "Wiragro"}</strong>
           <p>
             {store?.operational_hours
-              ? `Jam operasional: ${store.operational_hours}.`
-              : "Toko tetap bisa dihubungi melalui kontak resmi untuk validasi order dan konsultasi."}
+              ? `Jam layanan: ${store.operational_hours}.`
+              : "Tim Wiragro tetap bisa dihubungi lewat kontak resmi untuk konfirmasi pesanan, konsultasi, atau bantuan sesudah beli."}
           </p>
           <div className="commerce-trust-strip__card-links">
             {consultationUrl ? (
@@ -80,7 +80,7 @@ export function TrustStrip({
                 Konsultasi WhatsApp
               </a>
             ) : (
-              <Link href="/kontak">Hubungi toko</Link>
+              <Link href="/kontak">Hubungi tim</Link>
             )}
             {mapsUrl ? (
               <a href={mapsUrl} rel="noreferrer" target="_blank">

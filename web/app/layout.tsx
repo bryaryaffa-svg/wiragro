@@ -68,9 +68,12 @@ export const metadata: Metadata = {
   },
   keywords: [
     "wiragro",
+    "platform pertanian digital",
+    "solusi masalah tanaman",
     "edukasi pertanian",
-    "toko pertanian",
     "produk pertanian",
+    "ai pertanian premium",
+    "b2b pertanian",
     "pupuk",
     "benih",
     "pestisida",

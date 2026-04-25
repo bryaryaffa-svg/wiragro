@@ -5,7 +5,7 @@ import { buildUtilityMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = buildUtilityMetadata(
   "Wishlist",
-  "Daftar produk favorit customer di Wiragro.",
+  "Daftar produk favorit Anda di Wiragro.",
   "/wishlist",
 );
 

@@ -102,3 +102,21 @@ Catatan:
 - Jika backend memproteksi CORS, origin `https://wiragro.id` dan bila perlu `https://www.wiragro.id` harus diizinkan.
 - Google Sign-In production juga harus mengizinkan origin domain yang sama.
 - Jika ingin autocomplete alamat checkout aktif, aktifkan Maps JavaScript API + Places API di Google Cloud lalu isi `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY`.
+
+## Operasional bundle dan campaign
+
+Lini penawaran bundle dan campaign sekarang memakai source-of-truth file-based yang lebih disiplin:
+
+- bundle: `web/lib/commercial-content/bundles.ts`
+- campaign: `web/lib/commercial-content/campaigns.ts`
+- validator: `web/lib/static-content-validation.ts`
+
+Untuk panduan lengkap penambahan offer baru, scheduling, status aktif/nonaktif, dan validasi build, lihat:
+
+- `web/docs/commercial-offers.md`
+
+Command yang disarankan sebelum merge perubahan komersial:
+
+```powershell
+npm run validate:commercial-content
+```

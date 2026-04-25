@@ -11,7 +11,7 @@ export function WishlistPageClient() {
   const { items, isLoading, error } = useWishlist();
 
   if (!isReady) {
-    return <div className="panel-card">Menyiapkan session customer...</div>;
+    return <div className="panel-card">Menyiapkan sesi akun...</div>;
   }
 
   if (!session) {
@@ -20,18 +20,18 @@ export function WishlistPageClient() {
         <span className="eyebrow-label">Wishlist</span>
         <h1>Login dulu untuk menyimpan produk favorit</h1>
         <p>
-          Wishlist customer tersimpan di backend storefront, jadi perlu auth Google atau
-          WhatsApp OTP sebelum dipakai.
+          Wishlist tersimpan di akun Anda, jadi silakan masuk dengan Google atau
+          WhatsApp OTP sebelum mulai menyimpan produk.
         </p>
         <Link className="btn btn-primary" href="/masuk?next=%2Fwishlist">
-          Buka auth customer
+          Masuk ke akun
         </Link>
       </section>
     );
   }
 
   if (isLoading && items.length === 0) {
-    return <div className="panel-card">Memuat wishlist customer...</div>;
+    return <div className="panel-card">Memuat wishlist Anda...</div>;
   }
 
   if (items.length === 0) {
@@ -51,9 +51,9 @@ export function WishlistPageClient() {
     <section className="page-stack">
       <div className="page-intro">
         <span className="eyebrow-label">Wishlist</span>
-        <h1>Produk favorit customer</h1>
+        <h1>Produk favorit Anda</h1>
         <p>
-          Daftar ini sinkron dengan akun customer yang sedang login dan siap dipakai dari
+          Daftar ini sinkron dengan akun yang sedang login dan siap dibuka lagi dari
           browser mobile maupun desktop.
         </p>
       </div>

@@ -19,9 +19,10 @@ export default async function CheckoutPage() {
   const checkoutIntentCards = buildCommerceIntentCards({
     phone: store.whatsapp_number,
     storeName: store.name,
-    includeCheckoutFollowUp: true,
+    sourcePath: "/checkout",
+    surface: "checkout",
     checkoutLabel: "checkout pesanan",
-  }).filter((item) => item.title === "Follow-up checkout" || item.title === "Konsultasi cepat");
+  });
 
   return (
     <section className="page-stack">
@@ -30,11 +31,12 @@ export default async function CheckoutPage() {
         <section className="section-block">
           <div className="section-heading">
             <div>
-              <span className="eyebrow-label">Checkout assist</span>
+              <span className="eyebrow-label">Bantuan checkout</span>
               <h2>Butuh bantuan sebelum order benar-benar dikirim?</h2>
               <p>
-                Jika Anda sudah masuk ke checkout tetapi masih ragu soal stok, ongkir, atau
-                metode pembayaran, lanjutkan lewat bantuan cepat tanpa keluar dari flow.
+                Halaman checkout hanya menampilkan satu jalur bantuan WhatsApp yang paling
+                relevan agar tim layanan segera memahami bahwa Anda sudah berada di tahap akhir
+                penyelesaian pesanan.
               </p>
             </div>
             <Link href="/pengiriman-pembayaran">Info pengiriman</Link>

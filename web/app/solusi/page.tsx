@@ -125,7 +125,7 @@ export default async function SolusiPage({
           buildWebPageJsonLd({
             title: "Cari Solusi Tanaman & Problem Lapangan",
             description:
-              "Explorer solusi Wiragro membantu user masuk dari gejala, verifikasi penyebab, tindakan awal, artikel, dan produk terkait.",
+              "Explorer solusi Wiragro membantu pengguna masuk dari gejala, verifikasi penyebab, tindakan awal, artikel, dan produk terkait.",
             path: "/solusi",
           }),
           buildCollectionJsonLd({
@@ -146,10 +146,10 @@ export default async function SolusiPage({
       <section className="hub-hero hub-hero--solve">
         <div className="hub-hero__copy">
           <span className="eyebrow-label">Cari Solusi</span>
-          <h1>Pilar problem-solving untuk user yang datang dengan masalah nyata di lapangan.</h1>
+          <h1>Pilar pemecahan masalah untuk pengguna yang datang dengan situasi nyata di lapangan.</h1>
           <p>
             Mulai dari gejala, hama, penyakit, fase tanam, atau komoditas. Setiap
-            halaman solusi disusun untuk membantu user memverifikasi penyebab, mengambil
+            halaman solusi disusun untuk membantu Anda memverifikasi penyebab, mengambil
             tindakan awal, lalu bergerak ke edukasi atau produk yang lebih relevan.
           </p>
           <div className="hub-hero__actions">
@@ -198,13 +198,13 @@ export default async function SolusiPage({
         <div className="section-heading">
           <div>
             <span className="eyebrow-label">Explorer solusi</span>
-            <h2>Masuk dari taxonomy yang paling dekat dengan bahasa user.</h2>
+            <h2>Masuk dari klasifikasi yang paling dekat dengan bahasa petani.</h2>
             <p>
-              Untuk MVP, explorer ini sudah cukup kuat untuk SEO dan UX tanpa perlu
-              sistem AI. User tinggal memilih jalur masalah yang paling sesuai.
+              Explorer ini dirancang agar tetap mudah dipakai. Anda tinggal memilih jalur
+              masalah yang paling sesuai dengan kondisi tanaman.
             </p>
           </div>
-          <Link href="/kontak">Butuh bantuan toko</Link>
+          <Link href="/kontak">Butuh bantuan tim</Link>
         </div>
         <SolutionTaxonomyDirectory
           availableSlugs={availableSlugs}
@@ -219,7 +219,7 @@ export default async function SolusiPage({
             <span className="eyebrow-label">Masalah & gejala</span>
             <h2>{filteredSolutions.length} solusi siap dijelajahi</h2>
             <p>
-              Setiap solusi menghubungkan problem user ke verifikasi lapangan,
+              Setiap solusi menghubungkan masalah di lapangan ke verifikasi,
               tindakan awal, artikel edukasi, dan produk yang lebih masuk akal dipertimbangkan.
             </p>
           </div>
@@ -269,7 +269,7 @@ export default async function SolusiPage({
             <span className="eyebrow-label">Solusi belum cocok</span>
             <h2>Tidak ada solusi yang cocok dengan kombinasi filter saat ini.</h2>
             <p>
-              Coba reset filter, ubah keyword, atau masuk ke jalur belajar agar user tetap
+              Coba reset filter, ubah keyword, atau masuk ke jalur belajar agar Anda tetap
               punya konteks sebelum mengambil tindakan berikutnya.
             </p>
             <div className="empty-state__actions">
@@ -277,7 +277,7 @@ export default async function SolusiPage({
                 Reset filter
               </Link>
               <Link className="btn btn-secondary" href="/belajar">
-                Mulai dari Belajar
+                Mulai dari Edukasi
               </Link>
             </div>
           </article>
@@ -297,7 +297,7 @@ export default async function SolusiPage({
           <div className="section-heading">
             <div>
               <span className="eyebrow-label">Edukasi pendukung</span>
-              <h2>Artikel yang membantu user memahami konteks masalahnya.</h2>
+              <h2>Artikel yang membantu Anda memahami konteks masalahnya.</h2>
             </div>
             <Link href="/artikel">Buka artikel</Link>
           </div>
@@ -314,7 +314,7 @@ export default async function SolusiPage({
           <div className="section-heading">
             <div>
               <span className="eyebrow-label">Produk pendukung</span>
-              <h2>Jembatan ke conversion tetap ada, tetapi muncul setelah konteks solusi lebih jelas.</h2>
+              <h2>Jembatan ke pembelian tetap ada, tetapi muncul setelah konteks solusi lebih jelas.</h2>
             </div>
             <Link href="/produk">Buka katalog</Link>
           </div>
@@ -331,9 +331,9 @@ export default async function SolusiPage({
           <div className="section-heading">
             <div>
               <span className="eyebrow-label">Campaign prioritas</span>
-              <h2>Landing komersial yang cocok untuk seasonality dan masalah yang paling sering dicari.</h2>
+              <h2>Halaman tematik yang cocok untuk musim tanam dan masalah yang paling sering dicari.</h2>
               <p>
-                Saat problem user sudah jelas, campaign landing bisa menjadi jembatan cepat ke
+                Saat masalahnya sudah jelas, kampanye bisa menjadi jembatan cepat ke
                 bundle, konsultasi, dan produk yang paling siap ditransaksikan.
               </p>
             </div>
@@ -348,9 +348,9 @@ export default async function SolusiPage({
       ) : null}
 
       <PathwaySection
-        action={{ href: "/kontak", label: "Konsultasi toko" }}
+        action={{ href: "/kontak", label: "Konsultasi tim" }}
         cards={getSolutionHubCards()}
-        description="Pilar ini sengaja menjadi jembatan: cukup kuat untuk diindex, cukup membantu untuk membangun trust, dan tetap mengantar user ke conversion."
+        description="Pilar ini sengaja menjadi jembatan: mudah ditemukan, membantu membangun kepercayaan, dan tetap mengantar pengguna ke langkah berikutnya."
         eyebrow="Relasi jalur"
         title="Solusi harus selalu punya jalan lanjut ke edukasi, katalog, dan bantuan manusia."
       />

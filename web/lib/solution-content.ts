@@ -87,13 +87,13 @@ const COMMODITY_TERMS: SolutionTaxonomyTerm[] = [
   { slug: "jagung", label: "Jagung", description: "Fokus pada fase awal dan vegetatif." },
   { slug: "sayuran-daun", label: "Sayuran Daun", description: "Sensitif pada media, daun, dan kelembapan." },
   { slug: "horti-buah", label: "Horti & Buah", description: "Masalah generatif dan pembentukan hasil." },
-  { slug: "kebun-rumah", label: "Kebun Rumah", description: "Untuk user yang butuh solusi sederhana dan aman." },
+  { slug: "kebun-rumah", label: "Kebun Rumah", description: "Untuk pengunjung yang butuh solusi sederhana dan aman." },
 ];
 
 export const SOLUTION_TAXONOMY_SECTIONS: SolutionTaxonomySection[] = [
   { key: "symptoms", queryKey: "gejala", title: "Berdasarkan gejala", description: "Mulai dari apa yang terlihat di lapangan.", items: SYMPTOM_TERMS },
   { key: "pests", queryKey: "hama", title: "Berdasarkan hama", description: "Pisahkan serangan organisme pengganggu.", items: PEST_TERMS },
-  { key: "diseases", queryKey: "penyakit", title: "Berdasarkan penyakit", description: "Bantu user membedakan pola penyakit umum.", items: DISEASE_TERMS },
+  { key: "diseases", queryKey: "penyakit", title: "Berdasarkan penyakit", description: "Bantu pengunjung membedakan pola penyakit umum.", items: DISEASE_TERMS },
   { key: "stages", queryKey: "fase", title: "Berdasarkan fase tanam", description: "Masalah pada fase berbeda perlu tindakan berbeda.", items: STAGE_TERMS },
   { key: "commodities", queryKey: "komoditas", title: "Berdasarkan komoditas", description: "Masuk dari tanaman yang sedang dibudidayakan.", items: COMMODITY_TERMS },
 ];
@@ -226,7 +226,7 @@ const solutionSeeds: SolutionRecord[] = [
       "Perbaiki fondasi media dan ritme input dasar sebelum menambah booster.",
       "Setelah masalah dasar lebih jelas, pilih nutrisi atau pendamping pertumbuhan yang memang relevan.",
     ],
-    caution_note: "Pertumbuhan lambat sering membuat user tergoda membeli booster terlalu cepat. Pastikan faktor dasar fase awal sudah diperiksa.",
+    caution_note: "Pertumbuhan lambat sering membuat pembeli tergoda membeli booster terlalu cepat. Pastikan faktor dasar fase awal sudah diperiksa.",
     related_article_slugs: ["panduan-memilih-pupuk", "fase-tanam-cabai-dari-semai-sampai-berbuah"],
     related_product_queries: ["pupuk", "nutrisi daun", "benih"],
     taxonomy: {
@@ -242,7 +242,7 @@ const solutionSeeds: SolutionRecord[] = [
   {
     slug: "bunga-rontok-dan-buah-tidak-jadi",
     title: "Bunga rontok atau buah tidak jadi pada fase generatif",
-    excerpt: "Masuk dari fase generatif agar user memahami stres tanaman, ritme nutrisi, dan langkah koreksi sebelum memilih produk pendukung.",
+    excerpt: "Masuk dari fase generatif agar pengunjung memahami stres tanaman, ritme nutrisi, dan langkah koreksi sebelum memilih produk pendukung.",
     symptom_summary: "Gejala umum: bunga banyak gugur, pembentukan buah lemah, atau hasil tidak berkembang stabil.",
     probable_causes: [
       "Tanaman stres pada fase generatif akibat air, cuaca, atau akar yang belum stabil.",

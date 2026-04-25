@@ -34,10 +34,10 @@ export async function generateMetadata({
   );
 
   return buildCatalogMetadata({
-    title: hasRefinement ? "Hasil pencarian produk pertanian" : "Katalog Produk Pertanian",
+    title: hasRefinement ? "Hasil pencarian produk pertanian" : "Produk Pertanian Wiragro",
     description: hasRefinement
-      ? "Hasil pencarian produk pertanian Wiragro. Buka katalog utama untuk menjelajahi seluruh produk aktif."
-      : "Jelajahi katalog produk pertanian Wiragro: pupuk, benih, pestisida, nutrisi, alat pertanian, dan kebutuhan kios.",
+      ? "Hasil pencarian produk pertanian Wiragro. Buka halaman produk utama untuk menjelajahi seluruh produk aktif."
+      : "Jelajahi produk pertanian Wiragro: pupuk, benih, pestisida, nutrisi, alat pertanian, bundle, dan penawaran terkait.",
     path: "/produk",
     canonicalPath: "/produk",
     noIndex: hasRefinement,
@@ -95,17 +95,17 @@ export default async function ProductsPage({
         id="products-page-jsonld"
       />
       <div className="page-intro page-intro--compact">
-        <span className="eyebrow-label">Belanja / Katalog</span>
+            <span className="eyebrow-label">Belanja / Katalog</span>
         <h1>
           {activeCategory
             ? `Katalog ${activeCategory.name}`
             : activeStorefrontMain
               ? activeStorefrontMain.label
-              : "Katalog produk Sidomakmur"}
+              : "Produk pertanian Wiragro"}
         </h1>
         <p>
-          Gunakan pencarian, kategori, dan urutan untuk menemukan produk yang Anda butuhkan.
-          Harga, status stok, dan kategori utama ditampilkan langsung di katalog.
+          Gunakan pencarian, kategori, dan urutan untuk menemukan produk yang paling relevan.
+          Harga, ketersediaan, dan kategori utama ditampilkan langsung agar proses belanja terasa lebih jelas.
         </p>
       </div>
 
@@ -183,7 +183,7 @@ export default async function ProductsPage({
         {catalogUnavailable ? (
           <article className="empty-state empty-state--shopping">
             <span className="eyebrow-label">Katalog belum dapat dimuat</span>
-            <h2>Daftar produk sementara tidak tersedia dari server.</h2>
+            <h2>Daftar produk sementara belum bisa dimuat.</h2>
             <p>
               Silakan muat ulang halaman beberapa saat lagi. Pencarian dan filter Anda tetap
               dipertahankan.
@@ -216,7 +216,7 @@ export default async function ProductsPage({
 
       <PathwaySection
         cards={getProductRelationCards(undefined, activeCategory)}
-        description="Katalog perlu tetap conversion-oriented, tetapi selalu memberi jalur balik ke belajar dan solusi saat kebutuhan user belum benar-benar final."
+        description="Katalog perlu tetap fokus pada pembelian, tetapi selalu memberi jalan kembali ke belajar dan solusi saat kebutuhan belum benar-benar final."
         eyebrow="Relasi silang"
         title="Belanja yang sehat tetap terhubung ke konteks."
       />

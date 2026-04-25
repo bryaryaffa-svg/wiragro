@@ -21,7 +21,7 @@ export const dynamic = "force-dynamic";
 export const metadata = buildPageMetadata({
   title: "B2B Inquiry & Pembelian Partai",
   description:
-    "Jalur B2B Wiragro untuk kebutuhan kios, reseller, kebun, proyek, dan pembelian rutin yang butuh assisted selling lebih terarah.",
+    "Jalur B2B Wiragro untuk kebutuhan kios, reseller, kebun, proyek, dan pembelian rutin yang ingin dibahas lebih terarah.",
   path: "/b2b",
   canonicalPath: "/b2b",
   section: "static",
@@ -40,9 +40,9 @@ export default async function B2BPage() {
   const intentCards = buildCommerceIntentCards({
     phone: store.whatsapp_number,
     storeName: store.name,
-    bundleTitle: "paket B2B pertanian",
-    includeCampaign: true,
-  }).filter((item) => item.title !== "Repeat order via WA");
+    sourcePath: "/b2b",
+    surface: "b2b",
+  });
 
   return (
     <section className="page-stack">
@@ -51,7 +51,7 @@ export default async function B2BPage() {
           buildWebPageJsonLd({
             title: "B2B Inquiry & Pembelian Partai",
             description:
-              "Jalur B2B ringan untuk kebutuhan partai, belanja kios, dan assisted selling pertanian.",
+              "Jalur B2B untuk kebutuhan partai, belanja kios, dan pembelian pertanian yang perlu dibahas lebih lanjut.",
             path: "/b2b",
           }),
           buildCollectionJsonLd({
@@ -72,19 +72,17 @@ export default async function B2BPage() {
       <section className="bundle-hero bundle-hero--b2b">
         <div className="bundle-hero__copy">
           <span className="eyebrow-label">B2B</span>
-          <h1>Jalur ringan untuk pembelian partai, inquiry kios, dan assisted selling yang lebih siap ditutup.</h1>
+          <h1>Jalur B2B untuk pembelian partai, kios, dan kebutuhan rutin yang butuh penawaran lebih rapi.</h1>
           <p>
-            B2B page ini sengaja dibuat pragmatis. Ia belum memerlukan sistem grosir penuh,
-            tetapi sudah cukup kuat untuk menerima inquiry, mengarahkan ke bundle, menyimpan
-            lead ke backend, dan
-            menghubungkan user ke WhatsApp dengan intent yang lebih jelas.
+            Halaman ini membantu mengirim inquiry, menyimpan konteks kebutuhan, dan memudahkan
+            tindak lanjut penawaran tanpa memindahkan pembeli ke proses grosir yang rumit.
           </p>
           <div className="bundle-hero__actions">
             <Link className="btn btn-primary" href="/belanja/paket">
               Lihat paket yang bisa diajukan
             </Link>
-            <Link className="btn btn-secondary" href="/belanja">
-              Buka hub Belanja
+            <Link className="btn btn-secondary" href="/produk">
+              Jelajahi produk
             </Link>
           </div>
         </div>
@@ -93,14 +91,19 @@ export default async function B2BPage() {
           <span className="eyebrow-label">Kapan dipakai</span>
           <strong>Kios, reseller, proyek kebun, atau kebutuhan rutin yang terlalu berat jika disusun manual dari katalog.</strong>
           <p>
-            Gunakan halaman ini untuk menyaring lead yang lebih serius, lalu bawa mereka ke
-            bundle, penawaran WhatsApp, atau follow-up manual oleh tim toko.
+            Gunakan halaman ini saat kebutuhan sudah mulai menyentuh volume, ritme pembelian,
+            atau kombinasi item yang lebih nyaman dibahas bersama tim Wiragro.
           </p>
         </aside>
       </section>
 
       <section className="section-block">
-        <B2BInquiryForm sourcePage="/b2b" />
+        <B2BInquiryForm
+          description="Isi kebutuhan utama, item yang ingin dibahas, dan ritme pembeliannya. Jika login, status inquiry dan estimasi kebutuhan akan muncul lagi di akun Anda."
+          heading="Kirim kebutuhan B2B dan pantau perkembangannya dari akun Anda."
+          sourcePage="/b2b"
+          submitLabel="Kirim inquiry & minta penawaran"
+        />
       </section>
 
       <section className="section-block">
@@ -112,7 +115,7 @@ export default async function B2BPage() {
         </div>
         <ProofSignalGrid items={B2B_OFFERS.map((offer) => ({
           title: offer.title,
-          body: `${offer.description} ${offer.bullets.join(" | ")}`,
+          body: `${offer.description} Fokus pembahasannya: ${offer.bullets.join(", ")}.`,
         }))} />
       </section>
 
@@ -120,10 +123,14 @@ export default async function B2BPage() {
         <section className="section-block">
           <div className="section-heading">
             <div>
-              <span className="eyebrow-label">Lead capture</span>
-              <h2>Pilih cara masuk yang paling mudah bagi calon pembeli partai.</h2>
+              <span className="eyebrow-label">WhatsApp B2B</span>
+              <h2>Lanjutkan inquiry lewat jalur WhatsApp yang memang khusus B2B.</h2>
+              <p>
+                CTA WhatsApp di halaman ini dikhususkan untuk kebutuhan kios, reseller, proyek,
+                dan pembelian rutin agar percakapannya tidak bercampur dengan intent retail umum.
+              </p>
             </div>
-            <Link href="/kontak">Kontak toko</Link>
+            <Link href="/kontak">Kontak tim</Link>
           </div>
           <CommerceIntentGrid items={intentCards} />
         </section>

@@ -1,45 +1,180 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState, useTransition } from "react";
 
 import { useAuth } from "@/components/auth-provider";
-import { type B2BInquiryInput, submitB2BInquiry } from "@/lib/api";
+import {
+  type B2BInquiryInput,
+  type B2BInquiryRequestedItemInput,
+  submitB2BInquiry,
+} from "@/lib/api";
 
-const DEFAULT_FORM: B2BInquiryInput = {
-  buyerType: "kebun",
-  businessName: "",
-  contactName: "",
-  phone: "",
-  email: "",
-  commodityFocus: "",
-  monthlyVolume: "",
-  fulfillmentType: "delivery",
-  preferredFollowUp: "whatsapp",
-  budgetHint: "",
-  needSummary: "",
-  notes: "",
-  sourcePage: "/b2b",
+type B2BInquiryFormProps = {
+  sourcePage?: string;
+  bundleSlug?: string;
+  bundleTitle?: string;
+  campaignSlug?: string;
+  campaignTitle?: string;
+  productSlug?: string;
+  productName?: string;
+  commoditySlug?: string;
+  defaultCommodityFocus?: string;
+  contextLabel?: string;
+  contextTitle?: string;
+  eyebrowLabel?: string;
+  heading?: string;
+  description?: string;
+  submitLabel?: string;
+  summaryPlaceholder?: string;
 };
+
+function buildDefaultRequestedItems(
+  source: Pick<B2BInquiryFormProps, "bundleTitle" | "campaignTitle" | "productName">,
+): B2BInquiryRequestedItemInput[] {
+  if (source.productName) {
+      return [
+        {
+          label: source.productName,
+          qty: "",
+          unit: "",
+          notes: "Membahas kebutuhan dari produk ini.",
+        },
+      ];
+  }
+
+  if (source.bundleTitle) {
+      return [
+        {
+          label: source.bundleTitle,
+          qty: "",
+          unit: "",
+          notes: "Membahas volume atau penyesuaian paket ini.",
+        },
+      ];
+  }
+
+  if (source.campaignTitle) {
+      return [
+        {
+          label: source.campaignTitle,
+          qty: "",
+          unit: "",
+          notes: "Membahas kebutuhan yang datang dari campaign ini.",
+        },
+      ];
+  }
+
+  return [
+    {
+      label: "",
+      qty: "",
+      unit: "",
+      notes: "",
+    },
+  ];
+}
+
+function buildInitialForm(
+  props: Pick<
+    B2BInquiryFormProps,
+    | "sourcePage"
+    | "bundleSlug"
+    | "campaignSlug"
+    | "productSlug"
+    | "productName"
+    | "commoditySlug"
+    | "bundleTitle"
+    | "campaignTitle"
+    | "defaultCommodityFocus"
+  >,
+): B2BInquiryInput {
+  return {
+    buyerType: "kebun",
+    businessName: "",
+    contactName: "",
+    phone: "",
+    email: "",
+    commodityFocus: props.defaultCommodityFocus ?? "",
+    commoditySlug: props.commoditySlug,
+    bundleSlug: props.bundleSlug,
+    campaignSlug: props.campaignSlug,
+    productSlug: props.productSlug,
+    productName: props.productName,
+    monthlyVolume: "",
+    fulfillmentType: "delivery",
+    preferredFollowUp: "whatsapp",
+    budgetHint: "",
+    needSummary: "",
+    requestedItems: buildDefaultRequestedItems(props),
+    notes: "",
+    sourcePage: props.sourcePage ?? "/b2b",
+  };
+}
 
 export function B2BInquiryForm({
   sourcePage = "/b2b",
   bundleSlug,
+  bundleTitle,
   campaignSlug,
-}: {
-  sourcePage?: string;
-  bundleSlug?: string;
-  campaignSlug?: string;
-}) {
+  campaignTitle,
+  productSlug,
+  productName,
+  commoditySlug,
+  defaultCommodityFocus,
+  contextLabel,
+  contextTitle,
+  eyebrowLabel = "Inquiry B2B",
+  heading = "Kirim kebutuhan B2B dengan format yang rapi.",
+  description = "Isi ringkasannya, lalu tim Wiragro akan menindaklanjuti lewat kanal yang Anda pilih. Form ini cocok untuk kebutuhan kebun, reseller, proyek, atau pembelian rutin.",
+  submitLabel = "Kirim inquiry B2B",
+  summaryPlaceholder = "Jelaskan kebutuhan utama, komoditas, ritme pembelian, target proyek, atau keputusan yang ingin Anda ambil dari penawaran ini.",
+}: B2BInquiryFormProps) {
   const { session, isReady } = useAuth();
-  const [form, setForm] = useState<B2BInquiryInput>({
-    ...DEFAULT_FORM,
+  const [form, setForm] = useState<B2BInquiryInput>(() =>
+    buildInitialForm({
+      sourcePage,
+      bundleSlug,
+      campaignSlug,
+      productSlug,
+      productName,
+      commoditySlug,
+      bundleTitle,
+      campaignTitle,
+      defaultCommodityFocus,
+    }),
+  );
+  const [feedback, setFeedback] = useState<string | null>(null);
+  const [submittedInquiryNumber, setSubmittedInquiryNumber] = useState<string | null>(null);
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [isPending, startTransition] = useTransition();
+
+  useEffect(() => {
+    setForm((current) => ({
+      ...current,
+      sourcePage,
+      bundleSlug,
+      campaignSlug,
+      productSlug,
+      productName,
+      commoditySlug,
+      commodityFocus: current.commodityFocus || defaultCommodityFocus || "",
+      requestedItems:
+        current.requestedItems.length > 0
+          ? current.requestedItems
+          : buildDefaultRequestedItems({ bundleTitle, campaignTitle, productName }),
+    }));
+  }, [
     sourcePage,
     bundleSlug,
     campaignSlug,
-  });
-  const [feedback, setFeedback] = useState<string | null>(null);
-  const [isSuccess, setIsSuccess] = useState(false);
-  const [isPending, startTransition] = useTransition();
+    productSlug,
+    productName,
+    commoditySlug,
+    bundleTitle,
+    campaignTitle,
+    defaultCommodityFocus,
+  ]);
 
   useEffect(() => {
     if (!isReady || !session) {
@@ -61,15 +196,77 @@ export function B2BInquiryForm({
     }));
   }
 
+  function updateRequestedItem(
+    index: number,
+    key: keyof B2BInquiryRequestedItemInput,
+    value: string,
+  ) {
+    setForm((current) => ({
+      ...current,
+      requestedItems: current.requestedItems.map((item, itemIndex) =>
+        itemIndex === index
+          ? {
+              ...item,
+              [key]: value,
+            }
+          : item,
+      ),
+    }));
+  }
+
+  function addRequestedItem() {
+    setForm((current) => ({
+      ...current,
+      requestedItems: [
+        ...current.requestedItems,
+        {
+          label: "",
+          qty: "",
+          unit: "",
+          notes: "",
+        },
+      ],
+    }));
+  }
+
+  function removeRequestedItem(index: number) {
+    setForm((current) => {
+      const nextItems = current.requestedItems.filter((_, itemIndex) => itemIndex !== index);
+
+      return {
+        ...current,
+        requestedItems:
+          nextItems.length > 0
+            ? nextItems
+            : buildDefaultRequestedItems({ bundleTitle, campaignTitle, productName }),
+      };
+    });
+  }
+
+  const contextBadges = [
+    contextLabel && contextTitle ? `${contextLabel}: ${contextTitle}` : null,
+    productName ? `Produk: ${productName}` : null,
+    bundleTitle ? `Bundle: ${bundleTitle}` : null,
+    campaignTitle ? `Campaign: ${campaignTitle}` : null,
+    defaultCommodityFocus ? `Komoditas: ${defaultCommodityFocus}` : null,
+  ].filter(Boolean);
+
   return (
-    <div className="b2b-inquiry-panel">
+    <div className="b2b-inquiry-panel" id="b2b-quote-form">
       <div className="b2b-inquiry-panel__intro">
-        <span className="eyebrow-label">Lead capture</span>
-        <h2>Kirim kebutuhan B2B tanpa menunggu flow quotation yang berat.</h2>
-        <p>
-          Isi ringkasannya, lalu tim toko bisa follow-up lewat kanal yang paling Anda pilih.
-          Form ini dibuat untuk kebutuhan kebun, reseller, proyek, atau pembelian rutin.
-        </p>
+        <span className="eyebrow-label">{eyebrowLabel}</span>
+        <h2>{heading}</h2>
+        <p>{description}</p>
+        {contextBadges.length ? (
+          <div className="b2b-inquiry-context">
+            <strong>Konteks yang ikut terkirim</strong>
+            <div className="b2b-inquiry-context__badges">
+              {contextBadges.map((badge) => (
+                <span key={badge}>{badge}</span>
+              ))}
+            </div>
+          </div>
+        ) : null}
       </div>
 
       <form
@@ -78,23 +275,39 @@ export function B2BInquiryForm({
           event.preventDefault();
           setFeedback(null);
           setIsSuccess(false);
+          setSubmittedInquiryNumber(null);
 
           startTransition(async () => {
             try {
-              const response = await submitB2BInquiry(form);
+              const response = await submitB2BInquiry(form, {
+                accessToken: session?.access_token,
+              });
+              setSubmittedInquiryNumber(response.inquiry_number);
               setFeedback(
-                `Inquiry masuk dengan status ${response.status}. Tim akan follow-up lewat ${response.preferred_follow_up}.`,
+                `Inquiry ${response.inquiry_number} masuk dengan status ${response.status_label.toLowerCase()}. Tim akan follow-up lewat ${response.preferred_follow_up}.`,
               );
               setIsSuccess(true);
-              setForm((current) => ({
-                ...DEFAULT_FORM,
-                sourcePage,
-                bundleSlug,
-                campaignSlug,
-                contactName: current.contactName,
-                phone: current.phone,
-                email: current.email,
-              }));
+              setForm((current) => {
+                const nextBase = buildInitialForm({
+                  sourcePage,
+                  bundleSlug,
+                  campaignSlug,
+                  productSlug,
+                  productName,
+                  commoditySlug,
+                  bundleTitle,
+                  campaignTitle,
+                  defaultCommodityFocus,
+                });
+
+                return {
+                  ...nextBase,
+                  contactName: current.contactName,
+                  phone: current.phone,
+                  email: current.email,
+                  businessName: current.businessName,
+                };
+              });
             } catch (submitError) {
               setFeedback(
                 submitError instanceof Error
@@ -108,7 +321,9 @@ export function B2BInquiryForm({
         <label>
           <span>Jenis kebutuhan</span>
           <select
-            onChange={(event) => updateField("buyerType", event.target.value as B2BInquiryInput["buyerType"])}
+            onChange={(event) =>
+              updateField("buyerType", event.target.value as B2BInquiryInput["buyerType"])
+            }
             value={form.buyerType}
           >
             <option value="kebun">Kebun / lahan</option>
@@ -181,7 +396,10 @@ export function B2BInquiryForm({
             <span>Preferensi fulfillment</span>
             <select
               onChange={(event) =>
-                updateField("fulfillmentType", event.target.value as B2BInquiryInput["fulfillmentType"])
+                updateField(
+                  "fulfillmentType",
+                  event.target.value as B2BInquiryInput["fulfillmentType"],
+                )
               }
               value={form.fulfillmentType}
             >
@@ -220,11 +438,78 @@ export function B2BInquiryForm({
           </label>
         </div>
 
+        <div className="b2b-inquiry-items">
+          <div className="b2b-inquiry-items__header">
+            <div>
+              <span className="eyebrow-label">Item kebutuhan</span>
+              <strong>Susun kebutuhan utama agar tim Wiragro bisa menyiapkan penawaran awal.</strong>
+            </div>
+            <button className="btn btn-secondary" onClick={addRequestedItem} type="button">
+              Tambah item
+            </button>
+          </div>
+
+          <div className="b2b-inquiry-items__list">
+            {form.requestedItems.map((item, index) => (
+              <article className="b2b-inquiry-item" key={`requested-item-${index}`}>
+                <div className="b2b-inquiry-item__grid">
+                  <label className="form-grid__full">
+                    <span>Nama item / kebutuhan</span>
+                    <input
+                      onChange={(event) => updateRequestedItem(index, "label", event.target.value)}
+                      placeholder="Contoh: paket cabai, pupuk dasar, sprayer, atau kombinasi SKU"
+                      required
+                      value={item.label}
+                    />
+                  </label>
+
+                  <label>
+                    <span>Perkiraan qty</span>
+                    <input
+                      onChange={(event) => updateRequestedItem(index, "qty", event.target.value)}
+                      placeholder="Contoh: 20"
+                      value={item.qty}
+                    />
+                  </label>
+
+                  <label>
+                    <span>Satuan</span>
+                    <input
+                      onChange={(event) => updateRequestedItem(index, "unit", event.target.value)}
+                      placeholder="Contoh: sak, botol, pak"
+                      value={item.unit}
+                    />
+                  </label>
+
+                  <label className="form-grid__full">
+                    <span>Catatan item</span>
+                    <textarea
+                      onChange={(event) => updateRequestedItem(index, "notes", event.target.value)}
+                      placeholder="Opsional: merek yang disukai, fase tanam, batas budget per item, atau kebutuhan setara."
+                      rows={3}
+                      value={item.notes}
+                    />
+                  </label>
+                </div>
+                <div className="b2b-inquiry-item__actions">
+                  <button
+                    className="btn btn-secondary"
+                    onClick={() => removeRequestedItem(index)}
+                    type="button"
+                  >
+                    Hapus item
+                  </button>
+                </div>
+              </article>
+            ))}
+          </div>
+        </div>
+
         <label>
           <span>Ringkasan kebutuhan</span>
           <textarea
             onChange={(event) => updateField("needSummary", event.target.value)}
-            placeholder="Jelaskan kebutuhan utama, komoditas, ritme pembelian, atau target proyek."
+            placeholder={summaryPlaceholder}
             required
             rows={5}
             value={form.needSummary}
@@ -243,18 +528,38 @@ export function B2BInquiryForm({
 
         {feedback ? (
           <div className={`b2b-inquiry-form__feedback ${isSuccess ? "is-success" : "is-error"}`}>
-            {feedback}
+            <strong>{feedback}</strong>
+            {isSuccess && session ? (
+              <span>
+                Status inquiry dan estimasi kebutuhan akan muncul di <Link href="/akun">akun Anda</Link>.
+              </span>
+            ) : null}
+            {isSuccess && submittedInquiryNumber && !session ? (
+              <span>
+                Simpan nomor ini untuk referensi manual: <strong>{submittedInquiryNumber}</strong>.
+              </span>
+            ) : null}
           </div>
         ) : null}
 
         <div className="b2b-inquiry-form__actions">
           <button className="btn btn-primary" disabled={isPending} type="submit">
-            {isPending ? "Mengirim inquiry..." : "Kirim inquiry B2B"}
+            {isPending ? "Mengirim inquiry..." : submitLabel}
           </button>
           <p>
-            Inquiry ini masuk ke jalur operasional untuk follow-up ringan, bukan proses tender
-            penuh. Cocok untuk validasi awal dan pengumpulan kebutuhan.
+            Tim Wiragro akan menindaklanjuti bila diperlukan. Form ini membantu kebutuhan,
+            item utama, dan estimasi awal tercatat lebih rapi.
           </p>
+          {session ? (
+            <p>
+              Karena Anda sudah login, inquiry ini otomatis ditautkan ke akun Anda agar
+              status dan estimasi kebutuhan bisa dipantau lagi nanti.
+            </p>
+          ) : (
+            <p>
+              Login ke akun membuat status inquiry dan estimasi kebutuhan lebih mudah dipantau dari halaman akun.
+            </p>
+          )}
         </div>
       </form>
     </div>

@@ -9,7 +9,10 @@ import { useCart } from "@/components/cart/cart-provider";
 import { WiragroLockup } from "@/components/wiragro-lockup";
 import { useWishlist } from "@/components/wishlist-provider";
 import {
-  PRIMARY_PILLAR_LINKS,
+  COMMERCIAL_ENTRY_LINKS,
+  GLOBAL_SEARCH_HREF,
+  HEADER_NAV_LINKS,
+  PLATFORM_ENTRY_LINKS,
   UTILITY_NAV_LINKS,
   isHybridNavActive,
 } from "@/lib/hybrid-navigation";
@@ -63,14 +66,18 @@ export function SiteHeader() {
   const accountHref = session ? "/akun" : "/masuk";
   const [isMobileNavCollapsed, setIsMobileNavCollapsed] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const mobilePrimaryLinks = PRIMARY_PILLAR_LINKS;
+  const mobilePrimaryLinks = PLATFORM_ENTRY_LINKS.slice(0, 3);
   const mobileMenuGroups = [
     {
-      title: "Pilar utama",
-      links: PRIMARY_PILLAR_LINKS,
+      title: "Jelajah platform",
+      links: HEADER_NAV_LINKS,
     },
     {
-      title: "Belanja & akun",
+      title: "Belanja lanjutan",
+      links: COMMERCIAL_ENTRY_LINKS,
+    },
+    {
+      title: "Akun & favorit",
       links: [
         { href: "/wishlist", label: "Wishlist" },
         { href: "/keranjang", label: "Keranjang" },
@@ -78,7 +85,7 @@ export function SiteHeader() {
       ],
     },
     {
-      title: "Utility",
+      title: "Bantuan",
       links: UTILITY_NAV_LINKS,
     },
   ];
@@ -118,17 +125,17 @@ export function SiteHeader() {
     >
       <div className="site-header__bar">
         <Link className="brand-mark" href="/">
-          <WiragroLockup contextLabel="Belajar • Solusi • Belanja" variant="header" />
+          <WiragroLockup contextLabel="Platform Solusi Pertanian Digital" variant="header" />
         </Link>
 
-        <form action="/produk" className="header-search">
+        <form action={GLOBAL_SEARCH_HREF} className="header-search">
           <input
-            aria-label="Cari produk"
+            aria-label="Cari penawaran Wiragro"
             name="q"
-            placeholder="Cari pupuk, benih, pestisida, atau kebutuhan toko..."
+            placeholder="Cari solusi, produk, artikel, bundle, atau campaign..."
             type="search"
           />
-          <button aria-label="Cari produk" type="submit">
+          <button aria-label="Cari penawaran" type="submit">
             <HeaderIcon kind="search" />
           </button>
         </form>
@@ -169,7 +176,7 @@ export function SiteHeader() {
 
       <nav className="site-nav" aria-label="Navigasi utama">
         <div className="site-nav__group site-nav__group--desktop">
-          {PRIMARY_PILLAR_LINKS.map((link) => {
+          {HEADER_NAV_LINKS.map((link) => {
             const isActive = isHybridNavActive(pathname, link.href);
             return (
               <Link
@@ -214,7 +221,7 @@ export function SiteHeader() {
             <span className="site-header__mobile-panel-label">{group.title}</span>
             {group.links.map((link) => {
               const isActive =
-                group.title === "Pilar utama"
+                group.title === "Jelajah platform"
                   ? isHybridNavActive(pathname, link.href)
                   : isActivePath(pathname, link.href);
               return (

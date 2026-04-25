@@ -483,11 +483,11 @@ export function CheckoutForm({ store }: { store?: StoreProfile | null }) {
     <section className="page-stack checkout-page">
       <div className="checkout-overview">
         <div className="checkout-overview__copy">
-          <span className="eyebrow-label">{session ? "Checkout customer" : "Checkout guest"}</span>
+          <span className="eyebrow-label">{session ? "Checkout akun" : "Checkout tamu"}</span>
           <h1>Selesaikan pesanan dengan alur kirim dan bayar yang lebih jelas.</h1>
           <p>
-            Isi data penerima, tentukan metode pengiriman, lalu review total order sebelum
-            membuat pesanan ke backend yang sama dengan katalog publik.
+            Isi data penerima, tentukan metode pengiriman, lalu tinjau total belanja sebelum
+            pesanan dikirim.
           </p>
         </div>
         <div className="checkout-overview__stats">
@@ -508,10 +508,10 @@ export function CheckoutForm({ store }: { store?: StoreProfile | null }) {
 
       {session ? (
         <div className="panel-card checkout-account-note">
-          <strong>Akun customer aktif di browser ini.</strong>
+          <strong>Akun Anda aktif di browser ini.</strong>
           <span>
-            Data profil dan alamat tersimpan bisa dipakai untuk mempercepat order berikutnya,
-            meski fase ini masih menjaga flow checkout tetap sederhana.
+            Data profil dan alamat tersimpan bisa dipakai untuk mempercepat pesanan berikutnya
+            agar checkout terasa lebih ringkas.
           </span>
         </div>
       ) : null}
@@ -694,7 +694,7 @@ export function CheckoutForm({ store }: { store?: StoreProfile | null }) {
               <div className="panel-card checkout-address-book">
                 <div className="checkout-address-book__header">
                   <div>
-                    <span className="eyebrow-label">Saved address</span>
+                    <span className="eyebrow-label">Alamat tersimpan</span>
                     <strong>Gunakan alamat tersimpan agar form lebih cepat terisi.</strong>
                   </div>
                   <Link className="btn btn-secondary" href="/akun">
@@ -702,9 +702,7 @@ export function CheckoutForm({ store }: { store?: StoreProfile | null }) {
                   </Link>
                 </div>
 
-                {isLoadingSavedAddresses ? (
-                  <p className="inline-note">Memuat alamat customer...</p>
-                ) : null}
+                {isLoadingSavedAddresses ? <p className="inline-note">Memuat alamat tersimpan...</p> : null}
                 {savedAddressError ? <p className="inline-note">{savedAddressError}</p> : null}
 
                 {savedAddresses.length ? (
@@ -881,7 +879,7 @@ export function CheckoutForm({ store }: { store?: StoreProfile | null }) {
                     </div>
                   ) : (
                     <div className="panel-card panel-card--inline">
-                      Pilih tujuan pengiriman agar storefront bisa menghitung tarif ongkir.
+                      Pilih tujuan pengiriman agar ongkir bisa dihitung dengan tepat.
                     </div>
                   )}
 
@@ -921,17 +919,17 @@ export function CheckoutForm({ store }: { store?: StoreProfile | null }) {
               </>
             ) : (
               <div className="panel-card panel-card--inline panel-card--store-pickup">
-                <strong>Ambil pesanan langsung di toko</strong>
+                <strong>Ambil pesanan langsung di lokasi layanan</strong>
                 <span>
-                  {store?.name ?? "Kios Sidomakmur"}
-                  {store?.address ? ` · ${store.address}` : ""}
+                  {store?.name ?? "Wiragro"}
+                  {store?.address ? ` - ${store.address}` : ""}
                 </span>
                 {store?.operational_hours ? (
-                  <span>Jam operasional: {store.operational_hours}</span>
+                  <span>Jam layanan: {store.operational_hours}</span>
                 ) : null}
                 {pickupMapsUrl ? (
                   <a href={pickupMapsUrl} rel="noreferrer" target="_blank">
-                    Buka lokasi toko di Google Maps
+                    Buka lokasi di Google Maps
                   </a>
                 ) : null}
               </div>
@@ -956,7 +954,7 @@ export function CheckoutForm({ store }: { store?: StoreProfile | null }) {
                   type="radio"
                 />
                 <strong>Duitku VA</strong>
-                <span>Pesanan dibuat dulu, lalu storefront menyiapkan link pembayaran.</span>
+                <span>Pesanan dibuat lebih dulu, lalu Anda menerima link pembayaran.</span>
               </label>
               <label className={`choice-card ${form.paymentMethod === "COD" ? "is-selected" : ""}`}>
                 <input
@@ -968,7 +966,7 @@ export function CheckoutForm({ store }: { store?: StoreProfile | null }) {
                   type="radio"
                 />
                 <strong>COD / nota merah</strong>
-                <span>Pembayaran ditangani saat pesanan diterima atau setelah konfirmasi toko.</span>
+                <span>Pembayaran ditangani saat pesanan diterima atau setelah konfirmasi tim layanan.</span>
               </label>
             </div>
             <label>
@@ -979,7 +977,7 @@ export function CheckoutForm({ store }: { store?: StoreProfile | null }) {
                 onChange={(event) =>
                   setForm((current) => ({ ...current, notes: event.target.value }))
                 }
-                placeholder="Opsional: catatan tambahan untuk toko"
+                placeholder="Opsional: catatan tambahan untuk tim Wiragro"
               />
             </label>
           </div>

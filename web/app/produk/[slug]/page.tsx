@@ -4,6 +4,8 @@ import { notFound } from "next/navigation";
 import { cache } from "react";
 
 import { ArticleCard } from "@/components/article-card";
+import { B2BInquiryForm } from "@/components/b2b-inquiry-form";
+import { CommerceIntentLink } from "@/components/commerce-intent-link";
 import { CommerceIntentGrid } from "@/components/commerce-intent-grid";
 import { ContentRelationAlert } from "@/components/content-relation-alert";
 import { GrowthBundleCard } from "@/components/growth-bundle-card";
@@ -25,11 +27,12 @@ import {
   resolveProductReferences,
   resolveSolutionReferences,
 } from "@/lib/content-relation-resolver";
+import { buildProductPageEnrichment } from "@/lib/product-content";
 import {
-  buildProductConsultationUrl,
-  buildProductPageEnrichment,
-} from "@/lib/product-content";
-import { buildCommerceIntentCards, getGrowthBundlesForContext } from "@/lib/growth-commerce";
+  buildCommerceIntentCards,
+  buildCommerceWhatsAppLink,
+  getGrowthBundlesForContext,
+} from "@/lib/growth-commerce";
 import {
   buildBreadcrumbJsonLd,
   buildProductJsonLd,
@@ -187,18 +190,28 @@ export default async function ProductDetailPage({
     },
     2,
   );
-  const consultationUrl = buildProductConsultationUrl(
-    store.whatsapp_number,
-    store.name,
-    product.name,
-  );
+  const consultationLink = buildCommerceWhatsAppLink({
+    phone: store.whatsapp_number,
+    storeName: store.name,
+    intent: "consultation",
+    sourcePath: `/produk/${product.slug}`,
+    surface: "product-detail",
+    funnelStage: "consider",
+    productSlug: product.slug,
+    productName: product.name,
+    commodityLabel: enrichment.commodityLinks[0]?.label,
+  });
   const commerceIntentCards = buildCommerceIntentCards({
     phone: store.whatsapp_number,
     storeName: store.name,
+    sourcePath: `/produk/${product.slug}`,
+    surface: "product-detail",
+    productSlug: product.slug,
     productName: product.name,
     bundleTitle: enrichment.bundleSuggestion.title,
+    bundleSlug: enrichment.bundleSuggestion.href.split("/").filter(Boolean).pop(),
     commodityLabel: enrichment.commodityLinks[0]?.label,
-  }).filter((item) => item.title !== "Minta campaign landing");
+  });
 
   return (
     <div className="page-stack">
@@ -209,7 +222,7 @@ export default async function ProductDetailPage({
             { name: "Produk", path: "/produk" },
             { name: product.name, path: `/produk/${product.slug}` },
           ]),
-          buildProductJsonLd(product),
+          buildProductJsonLd(product, reviewFeed),
           buildProductFaqJsonLd(product.slug, enrichment.faq),
         ]}
         id={`product-jsonld-${product.slug}`}
@@ -224,7 +237,9 @@ export default async function ProductDetailPage({
       </div>
 
       <ProductDetailView
-        consultationUrl={consultationUrl}
+        b2bInquiryHref="#b2b-quote-form"
+        b2bInquiryLabel="Butuh penawaran partai"
+        consultationLink={consultationLink}
         enrichment={enrichment}
         product={product}
       />
@@ -233,10 +248,10 @@ export default async function ProductDetailPage({
         <div className="section-heading">
           <div>
             <span className="eyebrow-label">Cara pakai & kecocokan</span>
-            <h2>Bantu user memahami kapan produk ini masuk akal untuk dipakai.</h2>
+            <h2>Bantu pembeli memahami kapan produk ini masuk akal untuk dipakai.</h2>
             <p>
-              PDP ini sengaja menjelaskan fungsi produk, fase pakai, komoditas yang relevan,
-              dan problem yang bisa dibantu sebelum user diarahkan terlalu cepat ke checkout.
+              Halaman ini menjelaskan fungsi produk, fase pakai, komoditas yang relevan,
+              dan masalah yang bisa dibantu sebelum pembeli melangkah terlalu cepat ke checkout.
             </p>
           </div>
         </div>
@@ -293,7 +308,7 @@ export default async function ProductDetailPage({
 
           <article className="product-insight-card">
             <span className="eyebrow-label">Spesifikasi ringkas</span>
-            <h3>Data dasar sebelum user membeli</h3>
+            <h3>Data dasar sebelum membeli</h3>
             <div className="product-spec-list">
               <div>
                 <span>Kategori</span>
@@ -324,8 +339,8 @@ export default async function ProductDetailPage({
               </ul>
             ) : (
               <p>
-                Belum ada video panduan. Untuk tahap sekarang, konsultasi toko menjadi jalur tercepat
-                bila user ingin memastikan cara pakai sebelum membeli.
+                Video panduan belum tersedia. Untuk saat ini, konsultasi tim menjadi jalur
+                tercepat bila pembeli ingin memastikan cara pakai sebelum membeli.
               </p>
             )}
           </article>
@@ -356,10 +371,10 @@ export default async function ProductDetailPage({
       />
 
       <ContentRelationAlert
-        actionLabel="Masuk ke Belajar"
+        actionLabel="Buka Edukasi"
         href="/belajar"
         items={missingRelations}
-        title="Sebagian relasi PDP belum lengkap"
+        title="Sebagian referensi pendukung sedang dilengkapi"
       />
 
       {relatedArticles.length ? (
@@ -367,7 +382,7 @@ export default async function ProductDetailPage({
           <div className="section-heading">
             <div>
               <span className="eyebrow-label">Artikel terkait</span>
-              <h2>Edukasi yang membantu user memahami kenapa produk ini relevan.</h2>
+              <h2>Edukasi yang membantu pengunjung memahami kenapa produk ini relevan.</h2>
             </div>
             <Link href="/artikel">Buka artikel</Link>
           </div>
@@ -384,7 +399,7 @@ export default async function ProductDetailPage({
           <div className="section-heading">
             <div>
               <span className="eyebrow-label">Solusi terkait</span>
-              <h2>Masuk ke jalur problem-solving bila user datang dari gejala, bukan daftar belanja.</h2>
+              <h2>Masuk ke jalur solusi bila pengunjung datang dari gejala, bukan daftar belanja.</h2>
             </div>
             <Link href="/solusi">Buka Cari Solusi</Link>
           </div>
@@ -401,7 +416,7 @@ export default async function ProductDetailPage({
           <div className="section-heading">
             <div>
               <span className="eyebrow-label">Alternatif sejenis</span>
-              <h2>Bantu user membandingkan tanpa keluar dari flow conversion.</h2>
+              <h2>Bantu pengunjung membandingkan tanpa keluar dari alur belanja.</h2>
             </div>
           </div>
           <div className="product-grid product-grid--catalog">
@@ -435,10 +450,10 @@ export default async function ProductDetailPage({
           <div className="section-heading">
             <div>
               <span className="eyebrow-label">Bundle resmi</span>
-              <h2>PDP ini sekarang punya jalur bundle yang lebih eksplisit untuk cross-sell.</h2>
+              <h2>Butuh paket yang lebih lengkap dari produk ini?</h2>
               <p>
-                Ini membuat produk tidak berhenti sebagai item tunggal. User bisa naik ke
-                paket yang lebih lengkap bila kebutuhan belinya memang sudah berkembang.
+                Produk ini juga punya jalur paket untuk pembeli yang ingin kebutuhan terkait
+                langsung terkumpul dalam satu penawaran.
               </p>
             </div>
             <Link href="/belanja/paket">Lihat semua bundle</Link>
@@ -454,8 +469,34 @@ export default async function ProductDetailPage({
       <section className="section-block">
         <div className="section-heading">
           <div>
-            <span className="eyebrow-label">Trust, review beta, dan repeat order</span>
-            <h2>Bangun rasa aman sambil social proof tumbuh secara bertahap.</h2>
+            <span className="eyebrow-label">Inquiry B2B dari produk ini</span>
+            <h2>Butuh volume lebih besar atau pengiriman rutin?</h2>
+            <p>
+              Jika produk ini sudah sesuai kebutuhan, Anda bisa langsung meminta penawaran awal
+              untuk volume, ritme pengiriman, atau diskusi paket yang lebih lengkap.
+            </p>
+          </div>
+          <Link href="/b2b">Halaman B2B penuh</Link>
+        </div>
+        <B2BInquiryForm
+          productSlug={product.slug}
+          productName={product.name}
+          commoditySlug={enrichment.commodityLinks[0]?.slug}
+          defaultCommodityFocus={enrichment.commodityLinks[0]?.label}
+          description="Form ini cocok saat Anda datang dari halaman produk dan sudah tahu SKU yang ingin dibahas, tetapi masih butuh estimasi volume, ritme pengiriman, atau kombinasi item."
+          eyebrowLabel="Inquiry produk"
+          heading="Ajukan penawaran awal dari produk ini."
+          sourcePage={`/produk/${product.slug}`}
+          submitLabel="Ajukan penawaran produk ini"
+          summaryPlaceholder="Jelaskan volume produk ini, kebutuhan rutin atau proyek, area kirim, dan keputusan apa yang ingin Anda capai dari penawaran ini."
+        />
+      </section>
+
+      <section className="section-block">
+        <div className="section-heading">
+          <div>
+            <span className="eyebrow-label">Trust, repeat order, dan bantuan</span>
+            <h2>Lengkapi rasa aman setelah pembeli yakin dengan produk dan alur belinya.</h2>
           </div>
         </div>
 
@@ -470,18 +511,9 @@ export default async function ProductDetailPage({
           </div>
 
           <aside className="product-repeat-panel">
-            <span className="eyebrow-label">Repeat order & validasi awal</span>
+            <span className="eyebrow-label">Repeat order & layanan sesudah beli</span>
             <h3>{enrichment.repeatOrderTitle}</h3>
             <p>{enrichment.repeatOrderBody}</p>
-            <div className="product-review-placeholder">
-              <strong>{enrichment.reviewPlaceholder.title}</strong>
-              <p>{enrichment.reviewPlaceholder.body}</p>
-              <ul className="plain-list">
-                {enrichment.reviewPlaceholder.bullets.map((item) => (
-                  <li key={`${product.slug}-${item}`}>{item}</li>
-                ))}
-              </ul>
-            </div>
             <div className="homepage-trust-panel__actions">
               <Link className="btn btn-secondary" href="/wishlist">
                 Simpan untuk repeat order
@@ -495,13 +527,19 @@ export default async function ProductDetailPage({
               <Link className="btn btn-secondary" href="/garansi-retur">
                 Garansi & retur
               </Link>
-              {consultationUrl ? (
-                <a className="btn btn-primary" href={consultationUrl} rel="noreferrer" target="_blank">
+              {consultationLink ? (
+                <CommerceIntentLink
+                  className="btn btn-primary"
+                  href={consultationLink.href}
+                  leadRef={consultationLink.leadRef}
+                  leadSummary={consultationLink.leadSummary}
+                  tracking={consultationLink.tracking}
+                >
                   Konsultasi WhatsApp
-                </a>
+                </CommerceIntentLink>
               ) : (
                 <Link className="btn btn-primary" href="/kontak">
-                  Hubungi toko
+                  Hubungi tim
                 </Link>
               )}
             </div>
@@ -513,8 +551,12 @@ export default async function ProductDetailPage({
         <section className="section-block">
           <div className="section-heading">
             <div>
-              <span className="eyebrow-label">Assisted checkout</span>
-              <h2>Fase 3 membuat PDP siap untuk konsultasi, repeat order, dan inquiry partai.</h2>
+              <span className="eyebrow-label">Bantuan WhatsApp</span>
+              <h2>Pilih jalur bantuan yang paling cocok dari halaman produk ini.</h2>
+              <p>
+                Konsultasi produk tetap muncul di panel beli utama. Section ini dikhususkan
+                untuk dua kebutuhan yang lebih spesifik: rekomendasi kombinasi dan repeat order via WhatsApp.
+              </p>
             </div>
             <Link href={enrichment.bundleSuggestion.href}>{enrichment.bundleSuggestion.title}</Link>
           </div>

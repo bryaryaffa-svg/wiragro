@@ -15,16 +15,16 @@ import {
 
 export const dynamic = "force-dynamic";
 export const metadata = buildCatalogMetadata({
-  title: "Kampanye Musiman & Intent Komersial",
+  title: "Kampanye Musiman & Kebutuhan Prioritas",
   description:
-    "Landing page komersial Wiragro untuk musim, komoditas, dan masalah prioritas yang siap dipakai untuk ads, WA assisted sales, dan SEO intent komersial.",
+    "Halaman kampanye Wiragro untuk musim, komoditas, dan masalah prioritas agar kebutuhan lebih cepat menemukan solusi dan produk yang relevan.",
   path: "/kampanye",
   canonicalPath: "/kampanye",
   keywords: [
     "kampanye pertanian",
     "landing page musiman pertanian",
     "promo komoditas pertanian",
-    "landing intent komersial",
+    "program pertanian musiman",
   ],
 });
 
@@ -34,24 +34,24 @@ export default async function CampaignHubPage() {
   const intentCards = buildCommerceIntentCards({
     phone: store.whatsapp_number,
     storeName: store.name,
-    bundleTitle: "campaign pertanian",
-    includeCampaign: true,
-  }).filter((item) => item.title !== "Minta campaign landing");
+    sourcePath: "/kampanye",
+    surface: "campaign-hub",
+  });
 
   return (
     <section className="page-stack">
       <JsonLd
         data={[
           buildWebPageJsonLd({
-            title: "Kampanye Musiman & Intent Komersial",
+            title: "Kampanye Musiman & Kebutuhan Prioritas",
             description:
-              "Hub campaign landing page Wiragro untuk musim, komoditas, dan masalah prioritas yang paling dekat dengan intent beli.",
+              "Hub campaign Wiragro untuk musim, komoditas, dan masalah prioritas yang paling dekat dengan kebutuhan beli.",
             path: "/kampanye",
           }),
           buildCollectionJsonLd({
             title: "Campaign Landing Wiragro",
             description:
-              "Kumpulan landing komersial yang dirancang untuk bundle, assisted sales, dan seasonality.",
+              "Kumpulan halaman kampanye yang dirancang untuk bundle, bantuan tim, dan momentum musiman.",
             path: "/kampanye",
             itemUrls: campaigns.map((campaign) => campaign.href),
           }),
@@ -66,40 +66,39 @@ export default async function CampaignHubPage() {
       <section className="campaign-hero campaign-hero--hub">
         <div className="campaign-hero__copy">
           <span className="eyebrow-label">Kampanye</span>
-          <h1>Landing komersial untuk musim, komoditas, dan masalah yang sudah dekat ke transaksi.</h1>
+          <h1>Halaman tematik untuk musim, komoditas, dan masalah yang sudah dekat ke transaksi.</h1>
           <p>
-            Hub ini dipakai untuk menangkap permintaan musiman dan intent komersial yang
-            lebih tajam. Setiap landing menghubungkan bundle, solusi, artikel, produk, dan
-            WhatsApp commerce dalam satu halaman yang siap dipakai untuk growth.
+            Hub ini merangkum landing musiman dan problem-first yang membantu pembeli masuk ke
+            konteks yang lebih tepat sebelum memilih produk, bundle, atau jalur bantuan beli.
           </p>
           <div className="campaign-hero__actions">
             <Link className="btn btn-primary" href="#campaign-grid">
               Lihat landing aktif
             </Link>
-            <Link className="btn btn-secondary" href="/belanja/paket">
-              Buka paket & bundle
+            <Link className="btn btn-secondary" href="/b2b">
+              Ajukan inquiry B2B
             </Link>
           </div>
         </div>
 
         <aside className="campaign-hero__aside">
-          <span className="eyebrow-label">Peran bisnis</span>
-          <strong>Menangkap seasonality, memperkuat SEO komersial, dan memberi permukaan yang lebih siap untuk ads maupun WA assisted sales.</strong>
+          <span className="eyebrow-label">Kapan dipakai</span>
+          <strong>Dipakai saat kebutuhan sudah dipengaruhi musim, komoditas, atau masalah lapangan yang sedang diprioritaskan.</strong>
           <p>
-            Campaign bukan hanya banner promo. Ia menjadi landing yang bisa langsung dipakai
-            untuk bundle, konsultasi, repeat order, dan inquiry B2B saat momentum permintaan sedang tinggi.
+            Setiap kampanye membantu pembeli melanjutkan ke bundle, konsultasi kontekstual,
+            atau inquiry B2B tanpa kehilangan konteks halaman asalnya.
           </p>
         </aside>
       </section>
 
       <section className="section-block" id="campaign-grid">
-        <div className="section-heading">
-          <div>
-            <span className="eyebrow-label">Campaign aktif</span>
-            <h2>Pilih landing yang paling dekat dengan konteks musim atau problem user.</h2>
-            <p>
-              Kampanye ini sengaja dibuat lintas intent: ada yang season-first, commodity-first,
-              dan problem-first supaya user masuk ke konteks yang tepat lebih cepat.
+          <div className="section-heading">
+            <div>
+              <span className="eyebrow-label">Campaign aktif</span>
+              <h2>Pilih kampanye yang paling dekat dengan konteks musim atau masalah Anda.</h2>
+              <p>
+                Ada kampanye musiman, komoditas, dan problem lapangan agar pembeli lebih cepat masuk
+              ke konteks yang paling relevan.
             </p>
           </div>
         </div>
@@ -114,8 +113,12 @@ export default async function CampaignHubPage() {
         <section className="section-block">
           <div className="section-heading">
             <div>
-              <span className="eyebrow-label">WhatsApp commerce</span>
-              <h2>Campaign juga siap dibantu lewat jalur konsultasi dan assisted selling.</h2>
+              <span className="eyebrow-label">Bantuan WhatsApp</span>
+              <h2>Butuh arahan cepat dari jalur campaign?</h2>
+              <p>
+                CTA WhatsApp di hub campaign difokuskan untuk membantu memilih landing atau paket
+                yang paling tepat sebelum pembeli turun ke halaman detail.
+              </p>
             </div>
             <Link href="/b2b">B2B inquiry</Link>
           </div>

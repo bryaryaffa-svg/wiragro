@@ -86,7 +86,7 @@ const COMMODITY_TERMS: ArticleTaxonomyTerm[] = [
   { slug: "jagung", label: "Jagung", description: "Panduan benih, nutrisi, dan ritme tanam jagung." },
   { slug: "sayuran-daun", label: "Sayuran Daun", description: "Konten media, daun, dan pertumbuhan cepat." },
   { slug: "horti-buah", label: "Horti & Buah", description: "Konten pembungaan, pembuahan, dan pemulihan." },
-  { slug: "kebun-rumah", label: "Kebun Rumah", description: "Untuk user yang baru memulai dari skala kecil." },
+  { slug: "kebun-rumah", label: "Kebun Rumah", description: "Untuk pembaca yang baru memulai dari skala kecil." },
 ];
 
 const TOPIC_TERMS: ArticleTaxonomyTerm[] = [
@@ -115,19 +115,19 @@ const STAGE_TERMS: ArticleTaxonomyTerm[] = [
 ];
 
 const GOAL_TERMS: ArticleTaxonomyTerm[] = [
-  { slug: "belajar-dasar", label: "Belajar Dasar", description: "Untuk user yang masih butuh konteks awal." },
-  { slug: "atasi-masalah", label: "Atasi Masalah", description: "Untuk user yang datang dengan gejala." },
-  { slug: "pilih-produk", label: "Pilih Produk", description: "Untuk user yang ingin mempersempit opsi." },
-  { slug: "susun-belanja", label: "Susun Belanja", description: "Untuk user yang ingin pola belanja lebih rapi." },
-  { slug: "optimasi-hasil", label: "Optimasi Hasil", description: "Untuk user yang mengejar performa tanam." },
+  { slug: "belajar-dasar", label: "Belajar Dasar", description: "Untuk pembaca yang masih butuh konteks awal." },
+  { slug: "atasi-masalah", label: "Atasi Masalah", description: "Untuk pembaca yang datang dengan gejala." },
+  { slug: "pilih-produk", label: "Pilih Produk", description: "Untuk pembaca yang ingin mempersempit opsi." },
+  { slug: "susun-belanja", label: "Susun Belanja", description: "Untuk pembaca yang ingin pola belanja lebih rapi." },
+  { slug: "optimasi-hasil", label: "Optimasi Hasil", description: "Untuk pembaca yang mengejar performa tanam." },
 ];
 
 export const ARTICLE_TAXONOMY_SECTIONS: ArticleTaxonomySection[] = [
   { key: "commodities", queryKey: "komoditas", title: "Berdasarkan komoditas", description: "Masuk dari tanaman atau usaha tani.", items: COMMODITY_TERMS },
   { key: "topics", queryKey: "topik", title: "Berdasarkan topik", description: "Masuk dari area belajar yang dicari.", items: TOPIC_TERMS },
   { key: "symptoms", queryKey: "gejala", title: "Berdasarkan gejala", description: "Masuk dari masalah lapangan.", items: SYMPTOM_TERMS },
-  { key: "stages", queryKey: "fase", title: "Berdasarkan fase tanam", description: "Masuk dari posisi user di siklus budidaya.", items: STAGE_TERMS },
-  { key: "goals", queryKey: "tujuan", title: "Berdasarkan tujuan user", description: "Masuk dari niat user hari ini.", items: GOAL_TERMS },
+  { key: "stages", queryKey: "fase", title: "Berdasarkan fase tanam", description: "Masuk dari posisi budidaya saat ini.", items: STAGE_TERMS },
+  { key: "goals", queryKey: "tujuan", title: "Berdasarkan tujuan", description: "Masuk dari kebutuhan hari ini.", items: GOAL_TERMS },
 ];
 
 export const ARTICLE_TAXONOMY_SEGMENTS = {
@@ -142,11 +142,11 @@ const ARTICLE_SEEDS: ArticleSeed[] = [
   {
     slug: "panduan-memilih-pupuk",
     title: "Panduan memilih pupuk sesuai kebutuhan tanaman",
-    excerpt: "Mulai dari pemupukan dasar sampai penguatan akar, artikel ini membantu customer memilih produk dengan lebih tepat.",
+    excerpt: "Mulai dari pemupukan dasar sampai penguatan akar, artikel ini membantu pembeli memilih produk dengan lebih tepat.",
     published_at: "2026-04-02T08:00:00.000Z",
     updated_at: "2026-04-12T08:00:00.000Z",
     body_html:
-      "<p>Memilih pupuk yang tepat dimulai dari tujuan aplikasi: membangun akar, mendorong daun, memperbaiki tanah, atau menyiapkan fase generatif.</p><h2>Apa yang perlu dicek</h2><ul><li>Lihat fase tanam dan tujuan aplikasi.</li><li>Periksa kebutuhan lahan dan pola aplikasi.</li><li>Bandingkan bentuk pupuk, dosis, dan kemudahan penggunaan.</li></ul><p>Setelah konteksnya jelas, user baru turun ke katalog untuk membandingkan produk yang masuk akal.</p>",
+      "<p>Memilih pupuk yang tepat dimulai dari tujuan aplikasi: membangun akar, mendorong daun, memperbaiki tanah, atau menyiapkan fase generatif.</p><h2>Apa yang perlu dicek</h2><ul><li>Lihat fase tanam dan tujuan aplikasi.</li><li>Periksa kebutuhan lahan dan pola aplikasi.</li><li>Bandingkan bentuk pupuk, dosis, dan kemudahan penggunaan.</li></ul><p>Setelah konteksnya jelas, pembeli baru turun ke katalog untuk membandingkan produk yang masuk akal.</p>",
     taxonomy: {
       commodities: ["padi", "jagung", "sayuran-daun", "horti-buah"],
       topics: ["pupuk-nutrisi"],
@@ -170,7 +170,7 @@ const ARTICLE_SEEDS: ArticleSeed[] = [
       label: "Padi dan tanaman pangan",
       description: "Komoditas yang paling sering membutuhkan pemupukan dasar terstruktur.",
     },
-    user_goal_summary: "Membantu user memahami dasar pemupukan sebelum membandingkan produk.",
+    user_goal_summary: "Membantu pembaca memahami dasar pemupukan sebelum membandingkan produk.",
   },
   {
     slug: "dasar-memilih-benih",
@@ -179,7 +179,7 @@ const ARTICLE_SEEDS: ArticleSeed[] = [
     published_at: "2026-04-05T08:00:00.000Z",
     updated_at: "2026-04-14T08:00:00.000Z",
     body_html:
-      "<p>Benih yang baik bukan hanya soal merek. User perlu melihat varietas, tujuan tanam, kondisi lahan, dan kesiapan fase awal.</p><h2>Tiga pemeriksaan penting</h2><ol><li>Pastikan varietas cocok dengan komoditas.</li><li>Cek kebutuhan fase awal seperti persemaian dan media.</li><li>Hubungkan pilihan benih dengan input lanjutan agar flow belanja lebih efisien.</li></ol><p>User sering masuk ke katalog terlalu cepat, lalu bingung memilih benih karena belum punya gambaran langkah setelahnya.</p>",
+      "<p>Benih yang baik bukan hanya soal merek. Pembeli perlu melihat varietas, tujuan tanam, kondisi lahan, dan kesiapan fase awal.</p><h2>Tiga pemeriksaan penting</h2><ol><li>Pastikan varietas cocok dengan komoditas.</li><li>Cek kebutuhan fase awal seperti persemaian dan media.</li><li>Hubungkan pilihan benih dengan input lanjutan agar alur belanja lebih efisien.</li></ol><p>Pembeli sering masuk ke katalog terlalu cepat, lalu bingung memilih benih karena belum punya gambaran langkah setelahnya.</p>",
     taxonomy: {
       commodities: ["cabai", "jagung", "sayuran-daun", "kebun-rumah"],
       topics: ["benih-bibit", "fase-budidaya"],
@@ -190,7 +190,7 @@ const ARTICLE_SEEDS: ArticleSeed[] = [
     key_takeaways: [
       "Varietas harus dibaca bersama tujuan tanam dan kondisi lahan.",
       "Benih dan fase awal tidak bisa dipisahkan dari media atau persemaian.",
-      "Keputusan beli lebih sehat jika user tahu langkah setelah benih dibeli.",
+      "Keputusan beli lebih sehat jika langkah setelah benih dibeli sudah dipahami.",
     ],
     related_product_queries: ["benih", "tray semai", "media tanam"],
     related_solution: {
@@ -203,16 +203,16 @@ const ARTICLE_SEEDS: ArticleSeed[] = [
       label: "Cabai",
       description: "Komoditas intensif yang sensitif pada kualitas benih dan fase awal.",
     },
-    user_goal_summary: "Mengarahkah user agar lebih paham sebelum membeli benih dan input awal.",
+    user_goal_summary: "Mengarahkan pembaca agar lebih paham sebelum membeli benih dan input awal.",
   },
   {
     slug: "daun-menguning-dan-nutrisi-awal",
     title: "Daun menguning: mulai dari cek nutrisi, akar, dan pola air",
-    excerpt: "Gejala daun menguning sering membuat user buru-buru beli produk. Artikel ini membantu memeriksa penyebab umum lebih dulu.",
+    excerpt: "Gejala daun menguning sering membuat pembeli buru-buru beli produk. Artikel ini membantu memeriksa penyebab umum lebih dulu.",
     published_at: "2026-04-10T08:00:00.000Z",
     updated_at: "2026-04-18T08:00:00.000Z",
     body_html:
-      "<p>Daun menguning adalah gejala, bukan diagnosis akhir. Penyebabnya bisa datang dari nutrisi, akar, media, pola air, atau stres lingkungan.</p><h2>Urutan pemeriksaan yang aman</h2><ol><li>Cek media dan kelembapan akar.</li><li>Nilai kebutuhan nutrisi dasar.</li><li>Baru bandingkan apakah perlu pupuk, pembenah tanah, atau nutrisi tambahan.</li></ol><p>Produk baru masuk akal dipertimbangkan setelah user punya dugaan penyebab yang cukup kuat.</p>",
+      "<p>Daun menguning adalah gejala, bukan diagnosis akhir. Penyebabnya bisa datang dari nutrisi, akar, media, pola air, atau stres lingkungan.</p><h2>Urutan pemeriksaan yang aman</h2><ol><li>Cek media dan kelembapan akar.</li><li>Nilai kebutuhan nutrisi dasar.</li><li>Baru bandingkan apakah perlu pupuk, pembenah tanah, atau nutrisi tambahan.</li></ol><p>Produk baru masuk akal dipertimbangkan setelah dugaan penyebabnya cukup kuat.</p>",
     taxonomy: {
       commodities: ["cabai", "sayuran-daun", "horti-buah"],
       topics: ["pupuk-nutrisi", "hama-penyakit"],
@@ -236,16 +236,16 @@ const ARTICLE_SEEDS: ArticleSeed[] = [
       label: "Sayuran daun",
       description: "Komoditas yang cepat menunjukkan gejala nutrisi dan stres media.",
     },
-    user_goal_summary: "Membantu user yang datang dengan problem nyata agar tidak langsung salah beli.",
+    user_goal_summary: "Membantu pembaca yang datang dengan masalah nyata agar tidak langsung salah beli.",
   },
   {
     slug: "pengendalian-hama-awal-yang-lebih-tenang",
     title: "Pengendalian hama awal yang lebih tenang dan tidak reaktif",
-    excerpt: "Saat daun mulai rusak atau serangga terlihat, user butuh langkah awal yang jelas sebelum memilih proteksi.",
+    excerpt: "Saat daun mulai rusak atau serangga terlihat, pembeli butuh langkah awal yang jelas sebelum memilih proteksi.",
     published_at: "2026-04-12T08:00:00.000Z",
     updated_at: "2026-04-19T08:00:00.000Z",
     body_html:
-      "<p>Masalah hama sering mendorong user membeli proteksi terlalu cepat. Langkah awal terbaik dimulai dari identifikasi gejala dan tingkat serangan.</p><h2>Prinsip awal</h2><ul><li>Pastikan gejala benar-benar serangan hama.</li><li>Catat bagian tanaman yang terdampak paling dulu.</li><li>Sesuaikan pilihan proteksi dengan intensitas masalah dan alat aplikasi.</li></ul><p>Artikel edukasi seperti ini membantu user memilih proteksi dengan lebih masuk akal dan mencegah overbuy.</p>",
+      "<p>Masalah hama sering mendorong pembeli membeli proteksi terlalu cepat. Langkah awal terbaik dimulai dari identifikasi gejala dan tingkat serangan.</p><h2>Prinsip awal</h2><ul><li>Pastikan gejala benar-benar serangan hama.</li><li>Catat bagian tanaman yang terdampak paling dulu.</li><li>Sesuaikan pilihan proteksi dengan intensitas masalah dan alat aplikasi.</li></ul><p>Artikel edukasi seperti ini membantu memilih proteksi dengan lebih masuk akal dan mencegah pembelian berlebihan.</p>",
     taxonomy: {
       commodities: ["cabai", "horti-buah", "sayuran-daun"],
       topics: ["hama-penyakit"],
@@ -269,16 +269,16 @@ const ARTICLE_SEEDS: ArticleSeed[] = [
       label: "Cabai",
       description: "Komoditas dengan tekanan hama dan penyakit yang sering tinggi di lapangan.",
     },
-    user_goal_summary: "Memandu user dari gejala hama ke pilihan proteksi yang lebih terukur.",
+    user_goal_summary: "Memandu pembaca dari gejala hama ke pilihan proteksi yang lebih terukur.",
   },
   {
     slug: "fase-tanam-cabai-dari-semai-sampai-berbuah",
     title: "Fase tanam cabai: dari semai sampai berbuah dengan ritme input yang lebih jelas",
-    excerpt: "Cabai sering membuat user bingung kapan fokus ke media, nutrisi, proteksi, atau booster. Artikel ini menyusun alurnya.",
+    excerpt: "Cabai sering membuat pembeli bingung kapan fokus ke media, nutrisi, proteksi, atau booster. Artikel ini menyusun alurnya.",
     published_at: "2026-04-14T08:00:00.000Z",
     updated_at: "2026-04-20T08:00:00.000Z",
     body_html:
-      "<p>Cabai adalah komoditas yang menuntut ritme keputusan yang lebih tertib. Input di fase semai sangat berbeda dari kebutuhan saat generatif.</p><h2>Pembacaan per fase</h2><ul><li>Persemaian: fokus kestabilan media, tray, dan kelembapan.</li><li>Vegetatif: perhatikan daun, akar, dan pertumbuhan batang.</li><li>Generatif: jaga pembungaan, pembuahan, dan kestabilan nutrisi.</li></ul><p>Dengan struktur fase, user lebih mudah memahami kenapa satu produk cocok sekarang tetapi belum tentu cocok di fase berikutnya.</p>",
+      "<p>Cabai adalah komoditas yang menuntut ritme keputusan yang lebih tertib. Input di fase semai sangat berbeda dari kebutuhan saat generatif.</p><h2>Pembacaan per fase</h2><ul><li>Persemaian: fokus kestabilan media, tray, dan kelembapan.</li><li>Vegetatif: perhatikan daun, akar, dan pertumbuhan batang.</li><li>Generatif: jaga pembungaan, pembuahan, dan kestabilan nutrisi.</li></ul><p>Dengan struktur fase, pembeli lebih mudah memahami kenapa satu produk cocok sekarang tetapi belum tentu cocok di fase berikutnya.</p>",
     taxonomy: {
       commodities: ["cabai"],
       topics: ["fase-budidaya", "benih-bibit", "pupuk-nutrisi"],
@@ -289,7 +289,7 @@ const ARTICLE_SEEDS: ArticleSeed[] = [
     key_takeaways: [
       "Cabai perlu dibaca per fase, bukan hanya per masalah.",
       "Kebutuhan di persemaian, vegetatif, dan generatif tidak sama.",
-      "User akan lebih siap memilih produk jika ritme fase sudah dipahami.",
+      "Pembeli akan lebih siap memilih produk jika ritme fase sudah dipahami.",
     ],
     related_product_queries: ["benih cabai", "media tanam", "booster buah", "pestisida"],
     related_solution: {
@@ -302,7 +302,7 @@ const ARTICLE_SEEDS: ArticleSeed[] = [
       label: "Cabai",
       description: "Komoditas populer yang paling cocok dibaca dengan pendekatan fase.",
     },
-    user_goal_summary: "Membantu user melihat komoditas dan fase sebagai konteks keputusan.",
+    user_goal_summary: "Membantu pembaca melihat komoditas dan fase sebagai konteks keputusan.",
   },
 ];
 

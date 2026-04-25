@@ -21,7 +21,7 @@ export function ArticleCard({
 
   return (
     <article className="article-card">
-      <span className="eyebrow-label">Field Notes</span>
+      <span className="eyebrow-label">Edukasi</span>
       {article.taxonomy_labels?.length ? (
         <div className="article-card__chips">
           {article.taxonomy_labels.slice(0, 3).map((label) => (
@@ -32,11 +32,11 @@ export function ArticleCard({
       <h3>
         {isLinked ? <Link href={safeHref}>{article.title}</Link> : <span>{article.title}</span>}
       </h3>
-      <p>{article.excerpt || "Artikel ini sedang disiapkan untuk modul konten storefront."}</p>
+      <p>{article.excerpt || "Artikel ini sedang disiapkan untuk kanal edukasi Wiragro."}</p>
       <div className="article-card__footer">
         <span>
           {formatDate(article.published_at)}
-          {article.reading_time_minutes ? ` • ${article.reading_time_minutes} menit` : ""}
+          {article.reading_time_minutes ? ` | ${article.reading_time_minutes} menit` : ""}
         </span>
         {isLinked ? <Link href={safeHref}>Baca artikel</Link> : <span>Segera tersedia</span>}
       </div>

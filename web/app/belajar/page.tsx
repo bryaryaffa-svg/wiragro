@@ -20,9 +20,9 @@ import {
 
 export const dynamic = "force-dynamic";
 export const metadata = buildArticleListingMetadata({
-  title: "Belajar Pertanian di Wiragro",
+  title: "Edukasi Pertanian di Wiragro",
   description:
-    "Masuk ke hub belajar Wiragro untuk memahami input pertanian, ritme budidaya, dan konteks belanja sebelum turun ke katalog.",
+    "Masuk ke pusat edukasi Wiragro untuk memahami input pertanian, ritme budidaya, dan konteks belanja sebelum turun ke katalog.",
   path: "/belajar",
   canonicalPath: "/belajar",
   keywords: ["belajar pertanian", "hub edukasi pertanian", "panduan input pertanian"],
@@ -45,9 +45,9 @@ const fallbackArticles = [
   },
   {
     slug: "manajemen-belanja-toko",
-    title: "Menyusun ritme belanja toko dan lahan agar tidak reaktif",
+    title: "Menyusun ritme belanja lahan agar tidak reaktif",
     excerpt:
-      "Belajar menghubungkan kebutuhan budidaya dengan pola belanja yang lebih rapi dan efisien.",
+      "Edukasi yang menghubungkan kebutuhan budidaya dengan pola belanja yang lebih rapi dan efisien.",
     published_at: null,
   },
 ];
@@ -77,15 +77,15 @@ export default async function BelajarPage() {
       <JsonLd
         data={[
           buildWebPageJsonLd({
-            title: "Belajar Pertanian di Wiragro",
+            title: "Edukasi Pertanian di Wiragro",
             description:
-              "Hub belajar untuk memahami dasar budidaya, input pertanian, dan konteks belanja sebelum turun ke katalog.",
+              "Pusat edukasi untuk memahami dasar budidaya, input pertanian, dan konteks belanja sebelum turun ke katalog.",
             path: "/belajar",
           }),
           buildCollectionJsonLd({
-            title: "Hub Belajar Wiragro",
+            title: "Pusat Edukasi Wiragro",
             description:
-              "Kumpulan jalur belajar dan artikel pertanian untuk membantu user bergerak dari pemahaman ke keputusan.",
+              "Kumpulan jalur edukasi dan artikel pertanian untuk membantu pengguna bergerak dari pemahaman ke keputusan.",
             path: "/belajar",
             itemUrls: hasLiveArticles
               ? articles.items.slice(0, 12).map((article) => `/artikel/${article.slug}`)
@@ -93,7 +93,7 @@ export default async function BelajarPage() {
           }),
           buildBreadcrumbJsonLd([
             { name: "Beranda", path: "/" },
-            { name: "Belajar", path: "/belajar" },
+            { name: "Edukasi", path: "/belajar" },
           ]),
         ]}
         id="belajar-page-jsonld"
@@ -101,12 +101,12 @@ export default async function BelajarPage() {
 
       <section className="hub-hero hub-hero--learn">
         <div className="hub-hero__copy">
-          <span className="eyebrow-label">Belajar</span>
-          <h1>Pusat belajar untuk memahami tanaman, masalah, dan keputusan belanja dengan lebih tenang.</h1>
+          <span className="eyebrow-label">Edukasi</span>
+          <h1>Pusat edukasi untuk memahami tanaman, masalah, dan keputusan belanja dengan lebih tenang.</h1>
           <p>
-            Mulai dari komoditas, topik, gejala, fase tanam, atau tujuan user. Hub ini
+            Mulai dari komoditas, topik, gejala, fase tanam, atau tujuan belajar Anda. Hub ini
             menjadi pintu masuk edukasi yang terhubung langsung ke solusi dan produk
-            tanpa menjebak user ke katalog terlalu cepat.
+            tanpa mendorong Anda ke katalog terlalu cepat.
           </p>
           <div className="hub-hero__actions">
             <Link className="btn btn-primary" href="/artikel">
@@ -138,11 +138,10 @@ export default async function BelajarPage() {
         <div className="section-heading">
           <div>
             <span className="eyebrow-label">Taxonomy edukasi</span>
-            <h2>Masuk ke mesin konten dari jalur yang paling masuk akal untuk user.</h2>
+            <h2>Masuk ke pusat konten dari jalur yang paling masuk akal untuk Anda.</h2>
             <p>
-              Struktur ini menjadi MVP yang scalable untuk konten edukasi: bisa
-              diperluas per komoditas, topik, gejala, fase tanam, dan tujuan tanpa
-              menunggu CMS besar atau rebuild total.
+              Struktur ini disusun agar edukasi mudah diperluas per komoditas, topik,
+              gejala, fase tanam, dan tujuan tanpa membuat pengalaman baca terasa rumit.
             </p>
           </div>
           <Link href="/artikel">Buka explorer artikel</Link>
@@ -157,19 +156,19 @@ export default async function BelajarPage() {
       <PathwaySection
         action={{ href: "/artikel", label: "Lihat semua materi" }}
         cards={getLearningHubCards()}
-        description="Struktur ini dipakai agar user yang ingin paham dulu tetap punya jalur yang jelas sebelum diarahkan ke solusi atau produk."
-        eyebrow="Jalur belajar"
-        title="Belajar tidak berdiri sendiri. Ia selalu punya jalan lanjut ke solusi dan belanja."
+        description="Struktur ini dipakai agar pengguna yang ingin paham dulu tetap punya jalur yang jelas sebelum diarahkan ke solusi atau produk."
+        eyebrow="Jalur edukasi"
+        title="Edukasi tidak berdiri sendiri. Ia selalu punya jalan lanjut ke solusi dan produk."
       />
 
       <section className="section-block">
         <div className="section-heading">
           <div>
             <span className="eyebrow-label">Materi terbaru</span>
-            <h2>Artikel yang bisa langsung membantu user mulai dari konteks yang benar.</h2>
+            <h2>Artikel yang bisa langsung membantu Anda mulai dari konteks yang benar.</h2>
             <p>
               Feed ini mengambil artikel live saat tersedia, lalu tetap aman dengan
-              fallback editorial bila source data belum lengkap.
+              fallback editorial bila materi live belum lengkap.
             </p>
           </div>
           <Link href="/artikel">Buka artikel</Link>
@@ -191,7 +190,7 @@ export default async function BelajarPage() {
           <div className="section-heading">
             <div>
               <span className="eyebrow-label">Mulai dari dasar</span>
-              <h2>Untuk user yang baru ingin belajar tanpa langsung dibebani katalog.</h2>
+              <h2>Untuk pengunjung yang baru ingin belajar tanpa langsung dibebani katalog.</h2>
             </div>
             <Link href={buildArticleTaxonomyBrowseHref("tujuan", "belajar-dasar")}>Lihat jalur dasar</Link>
           </div>

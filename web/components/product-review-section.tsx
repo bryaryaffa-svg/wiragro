@@ -11,8 +11,48 @@ import {
   submitProductReview,
 } from "@/lib/api";
 
+const STAR_FILLED = "\u2605";
+const STAR_EMPTY = "\u2606";
+const EMPTY_BREAKDOWN = [5, 4, 3, 2, 1].map((rating) => ({
+  rating,
+  count: 0,
+}));
+
 function renderStars(value: number) {
-  return "★".repeat(value) + "☆".repeat(Math.max(0, 5 - value));
+  return STAR_FILLED.repeat(value) + STAR_EMPTY.repeat(Math.max(0, 5 - value));
+}
+
+function formatModerationStatus(status?: string | null) {
+  if (status === "approved") {
+    return "Sudah tayang";
+  }
+
+  if (status === "pending") {
+    return "Menunggu moderasi";
+  }
+
+  if (status === "rejected") {
+    return "Perlu revisi";
+  }
+
+  return "Sedang diproses";
+}
+
+function formatReviewDate(value?: string | null) {
+  if (!value) {
+    return null;
+  }
+
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) {
+    return null;
+  }
+
+  return new Intl.DateTimeFormat("id-ID", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  }).format(parsed);
 }
 
 export function ProductReviewSection({
@@ -27,6 +67,8 @@ export function ProductReviewSection({
   const { session, isReady } = useAuth();
   const [eligibility, setEligibility] = useState<CustomerProductReviewStatusPayload | null>(null);
   const [feedback, setFeedback] = useState<string | null>(null);
+  const [feedbackTone, setFeedbackTone] = useState<"success" | "error">("success");
+  const [isEligibilityLoading, setIsEligibilityLoading] = useState(false);
   const [rating, setRating] = useState(5);
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
@@ -34,11 +76,19 @@ export function ProductReviewSection({
   const [isPending, startTransition] = useTransition();
 
   useEffect(() => {
-    if (!isReady || !session?.access_token) {
+    if (!isReady) {
+      return;
+    }
+
+    if (!session?.access_token) {
+      setEligibility(null);
+      setFeedback(null);
+      setIsEligibilityLoading(false);
       return;
     }
 
     let isCancelled = false;
+    setIsEligibilityLoading(true);
 
     void getCustomerProductReviewStatus(session.access_token, productId)
       .then((payload) => {
@@ -47,6 +97,8 @@ export function ProductReviewSection({
         }
 
         setEligibility(payload);
+        setFeedbackTone("success");
+        setFeedback(null);
 
         if (payload.existing_review) {
           setRating(payload.existing_review.rating);
@@ -60,9 +112,16 @@ export function ProductReviewSection({
           return;
         }
 
+        setEligibility(null);
+        setFeedbackTone("error");
         setFeedback(
           error instanceof Error ? error.message : "Status review belum bisa dimuat sekarang.",
         );
+      })
+      .finally(() => {
+        if (!isCancelled) {
+          setIsEligibilityLoading(false);
+        }
       });
 
     return () => {
@@ -71,20 +130,27 @@ export function ProductReviewSection({
   }, [isReady, productId, session?.access_token]);
 
   const ownReview = eligibility?.existing_review ?? null;
-  const canSubmit =
-    Boolean(session?.access_token) &&
-    Boolean(eligibility?.eligible) &&
-    ownReview?.moderation_status !== "approved";
+  const reviewSummary = reviewFeed?.summary ?? null;
+  const totalReviews = reviewSummary?.total_reviews ?? 0;
+  const averageRating = reviewSummary?.average_rating ?? null;
+  const breakdown = reviewSummary?.rating_breakdown ?? EMPTY_BREAKDOWN;
+  const hasPublicReviews = totalReviews > 0 && averageRating !== null;
+  const reviewFeedUnavailable = reviewFeed === null;
+  const publicReviewSummary = hasPublicReviews
+    ? `${totalReviews} review terverifikasi tayang`
+    : reviewFeedUnavailable
+      ? "Ringkasan review belum tersedia saat ini."
+      : "Belum ada review pembeli terverifikasi yang tayang.";
 
   return (
-    <section className="section-block">
+    <section className="section-block" id="review-terverifikasi">
       <div className="section-heading">
         <div>
           <span className="eyebrow-label">Review terverifikasi</span>
-          <h2>Social proof mulai dirilis bertahap untuk pembeli yang benar-benar sudah checkout.</h2>
+          <h2>Ulasan pembeli membantu menilai kecocokan produk sebelum membeli.</h2>
           <p>
-            Review publik hanya muncul setelah pembelian terverifikasi dan lolos moderasi ringan.
-            Ini menjaga trust tetap jujur saat fitur baru mulai diaktifkan.
+            Semua review publik berasal dari order terverifikasi dan tetap melalui peninjauan
+            singkat agar informasi yang tampil tetap jujur, relevan, dan aman dibaca calon pembeli.
           </p>
         </div>
       </div>
@@ -92,23 +158,20 @@ export function ProductReviewSection({
       <div className="product-review-layout">
         <div className="product-review-summary">
           <div className="product-review-summary__score">
-            <strong>{reviewFeed?.summary.average_rating?.toFixed(1) ?? "-"}</strong>
-            <span>{reviewFeed?.summary.average_rating ? renderStars(Math.round(reviewFeed.summary.average_rating)) : "Belum ada rating publik"}</span>
-            <small>
-              {reviewFeed?.summary.total_reviews
-                ? `${reviewFeed.summary.total_reviews} review tampil`
-                : "Review publik masih dikurasi"}
-            </small>
+            <strong>{averageRating?.toFixed(1) ?? "-"}</strong>
+            <span>
+              {hasPublicReviews ? renderStars(Math.round(averageRating)) : "Belum ada rating publik"}
+            </span>
+            <small>{publicReviewSummary}</small>
           </div>
 
           <div className="product-review-breakdown">
-            {(reviewFeed?.summary.rating_breakdown ?? []).map((item) => {
-              const total = reviewFeed?.summary.total_reviews ?? 0;
-              const width = total ? `${(item.count / total) * 100}%` : "0%";
+            {breakdown.map((item) => {
+              const width = totalReviews ? `${(item.count / totalReviews) * 100}%` : "0%";
 
               return (
                 <div className="product-review-breakdown__row" key={`${productId}-${item.rating}`}>
-                  <span>{item.rating}★</span>
+                  <span>{`${item.rating}${STAR_FILLED}`}</span>
                   <div className="product-review-breakdown__bar">
                     <i style={{ width }} />
                   </div>
@@ -120,28 +183,41 @@ export function ProductReviewSection({
 
           <div className="product-review-list">
             {reviewFeed?.items.length ? (
-              reviewFeed.items.map((item) => (
-                <article className="product-review-card" key={item.id}>
-                  <div className="product-review-card__header">
-                    <div>
-                      <strong>{item.title || `${item.rating} bintang untuk ${productName}`}</strong>
-                      <span>{renderStars(item.rating)}</span>
+              reviewFeed.items.map((item) => {
+                const publishedLabel = formatReviewDate(item.approved_at ?? item.submitted_at);
+
+                return (
+                  <article className="product-review-card" key={item.id}>
+                    <div className="product-review-card__header">
+                      <div>
+                        <strong>{item.title || `${item.rating} bintang untuk ${productName}`}</strong>
+                        <span>{renderStars(item.rating)}</span>
+                      </div>
+                      <div className="product-review-card__meta">
+                        <small>{item.reviewer_name}</small>
+                        <small>{item.verified_purchase ? "Pembeli terverifikasi" : "Review"}</small>
+                        {publishedLabel ? <small>{publishedLabel}</small> : null}
+                      </div>
                     </div>
-                    <div className="product-review-card__meta">
-                      <small>{item.reviewer_name}</small>
-                      <small>{item.verified_purchase ? "Pembeli terverifikasi" : "Review"}</small>
-                    </div>
-                  </div>
-                  {item.body ? <p>{item.body}</p> : null}
-                  {item.usage_context ? <em>{item.usage_context}</em> : null}
-                </article>
-              ))
+                    {item.body ? <p>{item.body}</p> : null}
+                    {item.usage_context ? <em>{item.usage_context}</em> : null}
+                  </article>
+                );
+              })
+            ) : reviewFeedUnavailable ? (
+              <article className="product-review-card product-review-card--empty">
+                <strong>Ringkasan review belum tersedia saat ini.</strong>
+                <p>
+                  Feed review publik sedang tidak bisa dimuat. Review untuk pembeli terverifikasi
+                  tetap aktif dan bisa dicek lagi beberapa saat lagi.
+                </p>
+              </article>
             ) : (
               <article className="product-review-card product-review-card--empty">
-                <strong>Belum ada review publik yang tayang.</strong>
+                <strong>Belum ada review pembeli terverifikasi yang tayang.</strong>
                 <p>
-                  Produk ini sudah siap menerima review pembeli terverifikasi. Review baru akan
-                  tampil setelah dikurasi ringan oleh tim.
+                  Produk ini sudah siap menerima review pembeli terverifikasi. Review pertama yang
+                  lolos peninjauan akan langsung menambah kepercayaan di halaman produk ini.
                 </p>
               </article>
             )}
@@ -154,18 +230,37 @@ export function ProductReviewSection({
             <p>Menyiapkan status akun Anda untuk cek kelayakan review.</p>
           ) : !session ? (
             <>
-              <h3>Login dulu untuk review pembelian terverifikasi.</h3>
+              <h3>Login untuk menulis review dari pembelian Anda.</h3>
               <p>
-                Review hanya dibuka untuk customer yang sudah login dan punya order terbayar
+                Review hanya dibuka untuk pembeli yang sudah login dan punya order terbayar
                 dengan produk ini.
               </p>
               <Link className="btn btn-primary btn-block" href="/masuk">
-                Login customer
+                Masuk ke akun
               </Link>
+            </>
+          ) : isEligibilityLoading ? (
+            <>
+              <h3>Memeriksa riwayat pembelian Anda.</h3>
+              <p>
+                Kami sedang memastikan apakah akun ini sudah punya order terverifikasi untuk
+                produk ini.
+              </p>
+            </>
+          ) : feedbackTone === "error" && !eligibility ? (
+            <>
+              <h3>Status review belum bisa dicek.</h3>
+              <p>
+                Coba muat ulang halaman atau kembali beberapa saat lagi. Review tetap hanya
+                tersedia untuk pembeli dengan order terbayar.
+              </p>
+              {feedback ? (
+                <div className={`product-review-submit__feedback is-${feedbackTone}`}>{feedback}</div>
+              ) : null}
             </>
           ) : !eligibility?.eligible ? (
             <>
-              <h3>Review aktif setelah ada order terverifikasi.</h3>
+              <h3>Review aktif setelah ada order terbayar.</h3>
               <p>
                 Akun ini belum punya pembelian terbayar untuk produk ini, jadi review belum
                 bisa dikirim.
@@ -175,8 +270,8 @@ export function ProductReviewSection({
             <>
               <h3>Review Anda sudah tayang.</h3>
               <p>
-                Terima kasih. Review ini sudah lolos moderasi ringan dan ikut membangun trust
-                di PDP.
+                Terima kasih. Review ini sudah tayang dan membantu pembeli lain memahami
+                kecocokan produk ini.
               </p>
               <div className="product-review-submit__status">
                 <strong>{ownReview.title || "Review terverifikasi"}</strong>
@@ -190,6 +285,7 @@ export function ProductReviewSection({
               onSubmit={(event) => {
                 event.preventDefault();
                 setFeedback(null);
+                setFeedbackTone("success");
 
                 if (!session?.access_token) {
                   return;
@@ -212,8 +308,9 @@ export function ProductReviewSection({
                           }
                         : current,
                     );
-                    setFeedback("Review berhasil dikirim dan sedang menunggu moderasi ringan.");
+                    setFeedback("Review berhasil dikirim dan sedang menunggu peninjauan singkat.");
                   } catch (submitError) {
+                    setFeedbackTone("error");
                     setFeedback(
                       submitError instanceof Error
                         ? submitError.message
@@ -223,10 +320,10 @@ export function ProductReviewSection({
                 });
               }}
             >
-              <h3>Tulis review untuk pembelian Anda.</h3>
+              <h3>Tulis review dari pengalaman pakai Anda.</h3>
               <p>
-                Review Anda akan dicek singkat sebelum tayang. Fokuskan pada pengalaman pakai,
-                kecocokan konteks, dan kualitas bantuan produk ini.
+                Review akan ditinjau singkat sebelum tayang. Fokuskan pada pengalaman pakai, konteks
+                penggunaan, dan hasil yang paling terasa setelah produk digunakan.
               </p>
 
               <label>
@@ -273,17 +370,20 @@ export function ProductReviewSection({
                 />
               </label>
 
-              {ownReview ? (
-                <div className="product-review-submit__status">
-                  <strong>Status saat ini: {ownReview.moderation_status}</strong>
-                  <p>
-                    Anda masih bisa memperbarui review ini. Setiap perubahan akan masuk ke
-                    antrean moderasi ringan lagi.
-                  </p>
+                {ownReview ? (
+                  <div className="product-review-submit__status">
+                    <strong>Status saat ini: {formatModerationStatus(ownReview.moderation_status)}</strong>
+                    <p>
+                      Anda masih bisa memperbarui review ini. Setiap perubahan akan masuk ke
+                      antrean peninjauan lagi.
+                    </p>
+                  {ownReview.moderation_note ? <p>{ownReview.moderation_note}</p> : null}
                 </div>
               ) : null}
 
-              {feedback ? <div className="product-review-submit__feedback">{feedback}</div> : null}
+              {feedback ? (
+                <div className={`product-review-submit__feedback is-${feedbackTone}`}>{feedback}</div>
+              ) : null}
 
               <button className="btn btn-primary btn-block" disabled={isPending} type="submit">
                 {isPending ? "Mengirim review..." : "Kirim review terverifikasi"}

@@ -6,7 +6,7 @@ import { buildUtilityMetadata } from "@/lib/seo";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = buildUtilityMetadata(
-  "Login Customer",
+  "Masuk ke Akun Wiragro",
   "Masuk ke akun Wiragro dengan Google atau WhatsApp OTP.",
   "/login",
   "/masuk",

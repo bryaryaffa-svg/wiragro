@@ -298,7 +298,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   async function setItemQty(itemId: string, qty: number) {
     if (!sessionRef.current) {
-      throw new Error("Keranjang guest belum tersedia");
+      throw new Error("Keranjang sementara belum tersedia");
     }
 
     setIsBusy(true);

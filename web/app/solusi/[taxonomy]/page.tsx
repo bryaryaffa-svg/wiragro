@@ -70,7 +70,7 @@ export async function generateMetadata({
 
   return buildPageMetadata({
     title: `Solusi Tanaman Berdasarkan ${getSectionTitle(section.title)}`,
-    description: `Masuk ke cluster solusi Wiragro berdasarkan ${getSectionTitle(section.title).toLowerCase()} agar user bisa bergerak dari gejala ke tindakan dengan lebih terarah.`,
+    description: `Masuk ke cluster solusi Wiragro berdasarkan ${getSectionTitle(section.title).toLowerCase()} agar pengunjung bisa bergerak dari gejala ke tindakan dengan lebih terarah.`,
     path: `/solusi/${taxonomy}`,
     canonicalPath: `/solusi/${taxonomy}`,
     section: "static",
@@ -186,7 +186,7 @@ export default async function SolutionTaxonomyIndexPage({
               <span className="eyebrow-label">Solusi aktif</span>
               <h2>Halaman solusi yang sudah mengisi cluster ini sekarang.</h2>
             </div>
-            <Link href="/belajar">Buka Belajar</Link>
+            <Link href="/belajar">Buka Edukasi</Link>
           </div>
           <div className="solution-grid">
             {axisSolutions.map((solution) => (

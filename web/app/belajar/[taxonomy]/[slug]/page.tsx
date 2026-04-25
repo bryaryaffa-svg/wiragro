@@ -88,8 +88,8 @@ export async function generateMetadata({
 
   if (!section || !term) {
     return buildArticleListingMetadata({
-      title: "Cluster belajar tidak tersedia",
-      description: "Cluster belajar yang Anda cari belum tersedia di Wiragro.",
+      title: "Cluster edukasi tidak tersedia",
+      description: "Cluster edukasi yang Anda cari belum tersedia di Wiragro.",
       path: `/belajar/${taxonomy}/${slug}`,
       canonicalPath: "/belajar",
       noIndex: true,
@@ -101,8 +101,8 @@ export async function generateMetadata({
 
   if (!filteredArticles.length) {
     return buildArticleListingMetadata({
-      title: "Cluster belajar sedang disiapkan",
-      description: "Cluster belajar ini belum memiliki materi yang siap ditampilkan.",
+      title: "Cluster edukasi sedang disiapkan",
+      description: "Cluster edukasi ini belum memiliki materi yang siap ditampilkan.",
       path: `/belajar/${taxonomy}/${slug}`,
       canonicalPath: buildArticleTaxonomyBrowseHref(section.queryKey),
       noIndex: true,
@@ -110,13 +110,13 @@ export async function generateMetadata({
   }
 
   return buildArticleListingMetadata({
-    title: `${term.label} | Belajar Pertanian`,
+    title: `${term.label} | Edukasi Pertanian`,
     description: term.description,
     path: `/belajar/${taxonomy}/${slug}`,
     canonicalPath: `/belajar/${taxonomy}/${slug}`,
     keywords: [
       term.label,
-      `belajar ${term.label.toLowerCase()}`,
+      `edukasi ${term.label.toLowerCase()}`,
       "artikel pertanian",
       "edukasi pertanian",
     ],
@@ -154,19 +154,19 @@ export default async function LearningTaxonomyDetailPage({
       <JsonLd
         data={[
           buildWebPageJsonLd({
-            title: `${term.label} | Belajar Pertanian`,
+            title: `${term.label} | Edukasi Pertanian`,
             description: term.description,
             path: `/belajar/${taxonomy}/${slug}`,
           }),
           buildCollectionJsonLd({
-            title: `Cluster Belajar ${term.label}`,
+            title: `Cluster Edukasi ${term.label}`,
             description: term.description,
             path: `/belajar/${taxonomy}/${slug}`,
             itemUrls: filteredArticles.map((article) => `/artikel/${article.slug}`),
           }),
           buildBreadcrumbJsonLd([
             { name: "Beranda", path: "/" },
-            { name: "Belajar", path: "/belajar" },
+            { name: "Edukasi", path: "/belajar" },
             { name: section.title.replace(/^Berdasarkan /, ""), path: `/belajar/${taxonomy}` },
             { name: term.label, path: `/belajar/${taxonomy}/${slug}` },
           ]),
@@ -177,7 +177,7 @@ export default async function LearningTaxonomyDetailPage({
       <div className="breadcrumbs">
         <Link href="/">Beranda</Link>
         <span>/</span>
-        <Link href="/belajar">Belajar</Link>
+        <Link href="/belajar">Edukasi</Link>
         <span>/</span>
         <Link href={`/belajar/${taxonomy}`}>{section.title.replace(/^Berdasarkan /, "")}</Link>
         <span>/</span>
@@ -185,10 +185,10 @@ export default async function LearningTaxonomyDetailPage({
       </div>
 
       <div className="page-intro page-intro--compact">
-        <span className="eyebrow-label">Cluster belajar</span>
+        <span className="eyebrow-label">Cluster edukasi</span>
         <h1>{term.label}</h1>
         <p>
-          {term.description} Halaman ini mengikat artikel yang paling relevan agar user
+          {term.description} Halaman ini mengikat artikel yang paling relevan agar pembaca
           tidak perlu meloncat-loncat antara daftar artikel, solusi, dan katalog.
         </p>
       </div>
@@ -197,7 +197,7 @@ export default async function LearningTaxonomyDetailPage({
         <div className="section-heading">
           <div>
             <span className="eyebrow-label">Navigasi cluster</span>
-            <h2>Geser ke jalur belajar lain tanpa kehilangan konteks.</h2>
+            <h2>Geser ke jalur edukasi lain tanpa kehilangan konteks.</h2>
           </div>
           <Link href="/artikel">Explorer artikel</Link>
         </div>
@@ -247,7 +247,7 @@ export default async function LearningTaxonomyDetailPage({
               <span className="eyebrow-label">Kenapa cluster ini penting</span>
               <strong>Jalur ini membuat edukasi terasa operasional, bukan hanya bacaan tipis.</strong>
               <ul className="plain-list">
-                <li>Masuk dari konteks yang paling dekat dengan bahasa user.</li>
+                <li>Masuk dari konteks yang paling dekat dengan bahasa pembaca.</li>
                 <li>Turun ke artikel yang sudah disaring, bukan daftar yang generik.</li>
                 <li>Selalu ada jalan lanjut ke solusi, komoditas, atau produk.</li>
               </ul>
@@ -270,7 +270,7 @@ export default async function LearningTaxonomyDetailPage({
             <span className="eyebrow-label">Langkah berikutnya</span>
             <h2>Bawa konteks {term.label.toLowerCase()} ke jalur berikutnya yang paling relevan.</h2>
             <p>
-              Edukasi yang sehat tidak berhenti di bacaan. Begitu user punya cukup konteks,
+              Edukasi yang sehat tidak berhenti di bacaan. Begitu pembaca punya cukup konteks,
               arahkan ke solusi atau komoditas agar keputusan berikutnya tetap terasa logis.
             </p>
             <div className="article-list-highlight__actions">
@@ -288,7 +288,7 @@ export default async function LearningTaxonomyDetailPage({
             <ul className="plain-list">
               <li>Masuk ke solusi saat masalah lapangan mulai nyata.</li>
               <li>Pakai hub komoditas untuk menyatukan artikel, produk, dan bundle.</li>
-              <li>Turun ke produk setelah user tahu konteks dan fase kebutuhannya.</li>
+              <li>Turun ke produk setelah konteks dan fase kebutuhannya lebih jelas.</li>
             </ul>
           </div>
         </article>

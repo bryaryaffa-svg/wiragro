@@ -41,7 +41,7 @@ export function GrowthBundleCard({
           <div className="growth-bundle-card__stats">
             <span>{pricingPreview.skuCount} SKU tetap</span>
             <span>{pricingPreview.itemCount} item</span>
-            <span>{bundle.pricing?.priceStatus === "mock" ? "Harga pilot" : "Harga aktif"}</span>
+            <span>{bundle.pricing?.priceStatus === "mock" ? "Estimasi awal" : "Harga aktif"}</span>
           </div>
 
           <div className="growth-bundle-card__price">

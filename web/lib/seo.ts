@@ -3,24 +3,30 @@ import type { Metadata } from "next";
 import type {
   ContentPagePayload,
   ProductDetailPayload,
+  ProductReviewFeedPayload,
   StoreProfile,
 } from "@/lib/api";
 import { getSiteUrl } from "@/lib/config";
 
 export const SITE_NAME = "Wiragro";
-export const DEFAULT_SITE_TITLE = "Wiragro | Edukasi, Solusi, dan Toko Pertanian";
-export const DEFAULT_DESCRIPTION =
-  "Wiragro menggabungkan edukasi pertanian modern, solusi kebutuhan lapangan, katalog produk, checkout, dan layanan toko dalam satu pengalaman yang lebih rapi.";
+export const BRAND_TAGLINE = "Platform Solusi Pertanian Digital";
+export const BRAND_SUBTAGLINE =
+  "Cari solusi masalah tanaman, pelajari cara terbaik, dan beli produk pertanian yang tepat dalam satu tempat.";
+export const DEFAULT_SITE_TITLE = `Wiragro | ${BRAND_TAGLINE}`;
+export const DEFAULT_DESCRIPTION = BRAND_SUBTAGLINE;
 export const DEFAULT_OG_IMAGE = "/category-photos/pupuk.png";
 
 const DEFAULT_AUTHOR_NAME = "Tim Wiragro";
 const DEFAULT_KEYWORDS = [
   "wiragro",
-  "pertanian modern",
+  "platform pertanian digital",
   "solusi pertanian",
+  "solusi masalah tanaman",
+  "ai pertanian premium",
   "toko pertanian online",
   "edukasi pertanian",
   "produk pertanian",
+  "b2b pertanian",
   "pupuk",
   "benih",
   "pestisida",
@@ -58,12 +64,13 @@ type JsonLdBreadcrumbItem = {
 const SECTION_KEYWORDS: Record<SeoSection, string[]> = {
   home: [
     "homepage wiragro",
+    "platform solusi pertanian digital",
     "belanja pertanian",
-    "katalog pertanian",
-    "edukasi dan belanja pertanian",
+    "edukasi dan solusi pertanian",
   ],
   catalog: [
     "katalog produk pertanian",
+    "produk pertanian online",
     "belanja pupuk",
     "belanja benih",
     "belanja pestisida",
@@ -86,11 +93,11 @@ const SECTION_KEYWORDS: Record<SeoSection, string[]> = {
   ],
   static: [
     "informasi wiragro",
-    "halaman informasi toko",
+    "platform pertanian digital",
   ],
   utility: [
-    "halaman utilitas",
-    "customer storefront",
+    "layanan wiragro",
+    "akun wiragro",
   ],
 };
 
@@ -271,17 +278,17 @@ export function buildPageMetadata({
 
 export function buildHomepageMetadata() {
   return buildPageMetadata({
-    title: "Wiragro | Edukasi, Solusi, dan Toko Pertanian",
+    title: `Wiragro | ${BRAND_TAGLINE}`,
     description:
-      "Belajar pertanian modern, temukan solusi kebutuhan lapangan, lalu belanja pupuk, benih, pestisida, dan kebutuhan kios dalam satu storefront Wiragro.",
+      "Wiragro menghadirkan solusi tanaman, edukasi, produk pertanian, AI premium, dan layanan B2C maupun B2B dalam satu platform digital.",
     path: "/",
     section: "home",
     keywords: [
       "homepage wiragro",
-      "sidomakmur",
-      "toko pupuk online",
-      "artikel pertanian",
-      "katalog pertanian",
+      "platform solusi pertanian digital",
+      "produk pertanian online",
+      "ai pertanian premium",
+      "edukasi pertanian",
     ],
   });
 }
@@ -459,6 +466,7 @@ export function buildOrganizationJsonLd() {
     "@type": "Organization",
     "@id": getOrganizationId(),
     name: SITE_NAME,
+    description: BRAND_SUBTAGLINE,
     url: absoluteUrl("/"),
     logo: {
       "@type": "ImageObject",
@@ -473,6 +481,7 @@ export function buildWebsiteJsonLd() {
     "@type": "WebSite",
     "@id": getWebsiteId(),
     name: SITE_NAME,
+    description: BRAND_SUBTAGLINE,
     url: absoluteUrl("/"),
     publisher: {
       "@id": getOrganizationId(),
@@ -480,7 +489,7 @@ export function buildWebsiteJsonLd() {
     inLanguage: "id-ID",
     potentialAction: {
       "@type": "SearchAction",
-      target: `${absoluteUrl("/produk")}?q={search_term_string}`,
+      target: `${absoluteUrl("/cari")}?q={search_term_string}`,
       "query-input": "required name=search_term_string",
     },
   };
@@ -489,9 +498,10 @@ export function buildWebsiteJsonLd() {
 export function buildStoreJsonLd(store?: StoreProfile | null) {
   return {
     "@context": "https://schema.org",
-    "@type": "Store",
+    "@type": "OnlineStore",
     "@id": `${absoluteUrl("/")}#store`,
-    name: store?.name || SITE_NAME,
+    name: SITE_NAME,
+    description: BRAND_SUBTAGLINE,
     url: absoluteUrl("/"),
     image: absoluteImageUrl(DEFAULT_OG_IMAGE),
     parentOrganization: {
@@ -538,7 +548,10 @@ export function buildCollectionJsonLd(input: {
   };
 }
 
-export function buildProductJsonLd(product: ProductDetailPayload) {
+export function buildProductJsonLd(
+  product: ProductDetailPayload,
+  reviewFeed?: ProductReviewFeedPayload | null,
+) {
   const imageUrls = product.images.map((item) => absoluteImageUrl(item.url));
   const productUrl = absoluteUrl(`/produk/${product.slug}`);
   const availability =
@@ -547,6 +560,30 @@ export function buildProductJsonLd(product: ProductDetailPayload) {
       : product.availability.state === "low_stock"
         ? "https://schema.org/LimitedAvailability"
         : "https://schema.org/InStock";
+  const totalReviews =
+    reviewFeed?.summary.total_reviews ?? product.review_summary?.total_reviews ?? 0;
+  const averageRating =
+    reviewFeed?.summary.average_rating ?? product.review_summary?.average_rating ?? null;
+  const structuredReviews =
+    reviewFeed?.items.slice(0, 5).map((item) => ({
+      "@type": "Review",
+      author: {
+        "@type": "Person",
+        name: cleanText(item.reviewer_name, 80),
+      },
+      datePublished: item.approved_at ?? item.submitted_at ?? undefined,
+      name: cleanText(item.title || `Review untuk ${product.name}`, 110),
+      reviewBody: cleanText(
+        item.body || item.usage_context || `${item.rating} dari 5 bintang untuk ${product.name}`,
+        500,
+      ),
+      reviewRating: {
+        "@type": "Rating",
+        ratingValue: item.rating,
+        bestRating: 5,
+        worstRating: 1,
+      },
+    })) ?? [];
 
   return {
     "@context": "https://schema.org",
@@ -562,6 +599,18 @@ export function buildProductJsonLd(product: ProductDetailPayload) {
       name: SITE_NAME,
     },
     mainEntityOfPage: productUrl,
+    aggregateRating:
+      totalReviews > 0 && averageRating !== null
+        ? {
+            "@type": "AggregateRating",
+            ratingValue: averageRating,
+            reviewCount: totalReviews,
+            ratingCount: totalReviews,
+            bestRating: 5,
+            worstRating: 1,
+          }
+        : undefined,
+    review: structuredReviews.length ? structuredReviews : undefined,
     offers: {
       "@type": "Offer",
       "@id": `${productUrl}#offer`,

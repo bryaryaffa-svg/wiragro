@@ -68,7 +68,7 @@ function WiragroMark() {
 
 export function WiragroLockup({
   className,
-  contextLabel = "Sidomakmur Storefront",
+  contextLabel = "Platform Solusi Pertanian Digital",
   tone = "dark",
   variant = "header",
 }: WiragroLockupProps) {

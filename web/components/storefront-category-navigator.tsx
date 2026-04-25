@@ -38,11 +38,11 @@ export function StorefrontCategoryNavigator({
     <section className="catalog-category-navigator">
       <div className="catalog-category-navigator__header">
         <div>
-          <span className="eyebrow-label">Kategori storefront</span>
-          <h2>Belanja per kategori utama</h2>
+          <span className="eyebrow-label">Kategori produk</span>
+          <h2>Jelajahi produk per kategori utama</h2>
           <p>
-            Telusuri kategori foto-led untuk masuk ke kelompok belanja yang tepat, lalu lanjut ke
-            subcategory dengan chip yang tetap ringkas.
+            Telusuri kategori utama untuk masuk ke kelompok produk yang paling relevan, lalu
+            lanjutkan ke subkategori dengan chip yang tetap ringkas di mobile maupun desktop.
           </p>
         </div>
         <div className="catalog-category-navigator__clusters" aria-label="Kelompok kategori">

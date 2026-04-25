@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { ArticleCard } from "@/components/article-card";
+import { B2BInquiryForm } from "@/components/b2b-inquiry-form";
 import { CampaignSpotlightCard } from "@/components/campaign-spotlight-card";
 import { CommerceIntentGrid } from "@/components/commerce-intent-grid";
 import { ContentRelationAlert } from "@/components/content-relation-alert";
@@ -60,12 +61,12 @@ export async function generateMetadata({
     description: campaign.description,
     path: `/kampanye/${campaign.slug}`,
     canonicalPath: `/kampanye/${campaign.slug}`,
-    keywords: [
-      campaign.title,
-      campaign.focusLabel,
-      campaign.seasonLabel,
-      "landing komersial pertanian",
-    ],
+      keywords: [
+        campaign.title,
+        campaign.focusLabel,
+        campaign.seasonLabel,
+        "program pertanian musiman",
+      ],
   });
 }
 
@@ -106,14 +107,18 @@ export default async function CampaignDetailPage({
     ...solutionRelations.missing,
   ];
   const relatedProducts = productRelations.items.slice(0, 8);
+  const primaryCampaignProduct =
+    campaign.productSlugs.length === 1 ? productRelations.items[0] ?? null : null;
   const moreCampaigns = getFeaturedCampaignLandings(3).filter((item) => item.slug !== campaign.slug);
   const intentCards = buildCommerceIntentCards({
     phone: store.whatsapp_number,
     storeName: store.name,
-    bundleTitle: campaign.title,
+    sourcePath: `/kampanye/${campaign.slug}`,
+    surface: "campaign-detail",
+    campaignSlug: campaign.slug,
+    campaignTitle: campaign.title,
     commodityLabel: campaign.focusLabel,
-    includeCampaign: true,
-  }).filter((item) => item.title !== "Minta campaign landing");
+  });
 
   return (
     <section className="page-stack">
@@ -159,14 +164,14 @@ export default async function CampaignDetailPage({
             <Link className="btn btn-primary" href={campaign.catalogHref}>
               Lihat produk yang relevan
             </Link>
-            <Link className="btn btn-secondary" href="/b2b">
-              Buka inquiry B2B
+            <Link className="btn btn-secondary" href="#b2b-quote-form">
+              Ajukan penawaran program ini
             </Link>
           </div>
         </div>
 
         <aside className="campaign-hero__aside">
-          <span className="eyebrow-label">Target intent</span>
+          <span className="eyebrow-label">Fokus kebutuhan</span>
           <strong>{campaign.audience}</strong>
           <p>{campaign.summary}</p>
         </aside>
@@ -175,8 +180,8 @@ export default async function CampaignDetailPage({
       <section className="section-block">
         <div className="section-heading">
           <div>
-            <span className="eyebrow-label">Kenapa landing ini penting</span>
-            <h2>Campaign dipakai sebagai halaman intent komersial, bukan sekadar halaman promo.</h2>
+            <span className="eyebrow-label">Kenapa program ini relevan</span>
+            <h2>Program ini merangkum kebutuhan musiman dalam satu halaman yang lebih fokus.</h2>
           </div>
         </div>
         <div className="bundle-outcome-grid">
@@ -189,10 +194,10 @@ export default async function CampaignDetailPage({
       </section>
 
       <ContentRelationAlert
-        actionLabel="Buka semua campaign"
+        actionLabel="Buka semua program"
         href="/kampanye"
         items={missingRelations}
-        title="Sebagian relasi campaign belum lengkap"
+        title="Sebagian relasi program belum lengkap"
       />
 
       {relatedBundles.length ? (
@@ -200,7 +205,7 @@ export default async function CampaignDetailPage({
           <div className="section-heading">
             <div>
               <span className="eyebrow-label">Bundle utama</span>
-              <h2>Bundle yang menjadi mesin monetisasi utama untuk campaign ini.</h2>
+              <h2>Paket utama yang paling relevan untuk program ini.</h2>
             </div>
             <Link href="/belanja/paket">Semua bundle</Link>
           </div>
@@ -212,14 +217,41 @@ export default async function CampaignDetailPage({
         </section>
       ) : null}
 
+      <section className="section-block">
+        <div className="section-heading">
+          <div>
+            <span className="eyebrow-label">Penawaran awal dari program ini</span>
+            <h2>Ajukan inquiry tanpa kehilangan konteks program ini.</h2>
+            <p>
+              Anda tidak perlu pindah ke halaman B2B umum. Konteks program dan fokus komoditas
+              ikut tersimpan agar tim Wiragro lebih cepat menyiapkan tindak lanjut.
+            </p>
+          </div>
+          <Link href="/b2b">Halaman B2B penuh</Link>
+        </div>
+        <B2BInquiryForm
+          campaignSlug={campaign.slug}
+          campaignTitle={campaign.title}
+          productSlug={primaryCampaignProduct?.slug}
+          productName={primaryCampaignProduct?.name}
+          defaultCommodityFocus={campaign.focusLabel}
+          description="Gunakan jalur ini saat Anda datang dari momentum program, tetapi membutuhkan estimasi volume, opsi pengiriman, atau kombinasi item sebelum memutuskan pembelian."
+          heading="Ajukan penawaran awal dari program ini."
+          eyebrowLabel="Inquiry campaign"
+          sourcePage={`/kampanye/${campaign.slug}`}
+          submitLabel="Ajukan penawaran program"
+          summaryPlaceholder="Jelaskan volume kebutuhan dari program ini, target pembelian, area kirim, atau item yang ingin dibandingkan sebelum mengambil keputusan."
+        />
+      </section>
+
       {intentCards.length ? (
         <section className="section-block">
           <div className="section-heading">
             <div>
-              <span className="eyebrow-label">WhatsApp commerce</span>
-              <h2>Assisted sales tetap dekat untuk user yang butuh bantuan sebelum checkout.</h2>
+              <span className="eyebrow-label">Bantuan WhatsApp</span>
+              <h2>Masih perlu arahan sebelum memilih produk atau bundle?</h2>
             </div>
-            <Link href="/kontak">Kontak toko</Link>
+            <Link href="/kontak">Kontak tim</Link>
           </div>
           <CommerceIntentGrid items={intentCards} />
         </section>
@@ -230,7 +262,7 @@ export default async function CampaignDetailPage({
           <div className="section-heading">
             <div>
               <span className="eyebrow-label">Solusi pendukung</span>
-              <h2>Problem-solving yang menjaga campaign tetap relevan dan tidak terasa hard sell.</h2>
+              <h2>Solusi pendukung yang membantu pembeli memahami konteks kebutuhannya.</h2>
             </div>
             <Link href="/solusi">Cari solusi</Link>
           </div>
@@ -247,7 +279,7 @@ export default async function CampaignDetailPage({
           <div className="section-heading">
             <div>
               <span className="eyebrow-label">Artikel pendukung</span>
-              <h2>Konten yang membantu user paham kenapa campaign ini relevan.</h2>
+              <h2>Konten yang membantu pembeli memahami kenapa program ini relevan.</h2>
             </div>
             <Link href="/artikel">Semua artikel</Link>
           </div>
@@ -264,7 +296,7 @@ export default async function CampaignDetailPage({
           <div className="section-heading">
             <div>
               <span className="eyebrow-label">Produk relevan</span>
-              <h2>Produk tampil setelah user punya konteks campaign yang cukup.</h2>
+              <h2>Produk tampil setelah pembeli punya konteks program yang cukup.</h2>
             </div>
             <Link href={campaign.catalogHref}>Buka hasil katalog</Link>
           </div>

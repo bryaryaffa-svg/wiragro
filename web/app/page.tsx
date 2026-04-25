@@ -3,6 +3,7 @@ import Link from "next/link";
 
 import { ArticleCard } from "@/components/article-card";
 import { CampaignSpotlightCard } from "@/components/campaign-spotlight-card";
+import { CommerceIntentLink } from "@/components/commerce-intent-link";
 import { CommerceIntentGrid } from "@/components/commerce-intent-grid";
 import { JsonLd } from "@/components/json-ld";
 import { PathwaySection } from "@/components/pathway-section";
@@ -20,12 +21,20 @@ import {
   HOMEPAGE_COMMODITY_CARDS,
   HOMEPAGE_PROBLEM_CARDS,
   HOMEPAGE_TRUST_POINTS,
-  buildWhatsAppConsultationUrl,
 } from "@/lib/homepage-content";
-import { buildCommerceIntentCards } from "@/lib/growth-commerce";
-import { HOMEPAGE_ENTRY_CARDS, PRIMARY_PILLAR_LINKS } from "@/lib/hybrid-navigation";
+import {
+  buildCommerceIntentCards,
+  buildCommerceWhatsAppLink,
+} from "@/lib/growth-commerce";
+import {
+  HOMEPAGE_COMMERCIAL_ENTRY_CARDS,
+  HOMEPAGE_ENTRY_CARDS,
+  PLATFORM_ENTRY_LINKS,
+} from "@/lib/hybrid-navigation";
 import { buildGoogleMapsStoreSearchUrl } from "@/lib/maps";
 import {
+  BRAND_SUBTAGLINE,
+  BRAND_TAGLINE,
   buildCollectionJsonLd,
   buildHomepageMetadata,
   buildStoreJsonLd,
@@ -54,14 +63,14 @@ const fallbackArticles: ArticleFallback[] = [
     slug: "dasar-memilih-benih",
     title: "Cara membaca kualitas benih sebelum menyiapkan lahan",
     excerpt:
-      "Pahami mutu benih, varietas, dan kebutuhan awal agar user tidak langsung belanja tanpa konteks.",
+      "Pahami mutu benih, varietas, dan kebutuhan awal agar Anda tidak langsung belanja tanpa konteks.",
     published_at: null,
   },
   {
     slug: "manajemen-belanja-toko",
-    title: "Menyusun kebutuhan tani dan operasional kios dalam satu ritme belanja",
+    title: "Menyusun kebutuhan tani dalam satu ritme belanja yang lebih rapi",
     excerpt:
-      "Gabungkan kebutuhan budidaya dan operasional agar pembelian terasa lebih rapi dan tidak reaktif.",
+      "Gabungkan kebutuhan budidaya, solusi, dan produk agar keputusan pembelian terasa lebih terarah dan tidak reaktif.",
     published_at: null,
   },
 ];
@@ -103,16 +112,20 @@ export default async function HomePage() {
   );
   const hasLiveArticles = articleFeed.items.length > 0;
   const operationalHours = home.store.operational_hours || "Senin - Sabtu, 08:00 - 17:00";
-  const consultationUrl = buildWhatsAppConsultationUrl(
-    home.store.whatsapp_number,
-    home.store.name || "Wiragro",
-  );
+  const consultationLink = buildCommerceWhatsAppLink({
+    phone: home.store.whatsapp_number,
+    storeName: home.store.name || "Wiragro",
+    intent: "consultation",
+    sourcePath: "/",
+    surface: "homepage",
+    funnelStage: "discover",
+  });
   const commerceIntentCards = buildCommerceIntentCards({
     phone: home.store.whatsapp_number,
     storeName: home.store.name || "Wiragro",
-    bundleTitle: "paket pertanian",
-    includeCampaign: true,
-  }).filter((item) => item.title !== "Repeat order via WA");
+    sourcePath: "/",
+    surface: "homepage",
+  });
   const featuredCampaigns = getFeaturedCampaignLandings(3);
   const mapsUrl = home.store.address
     ? buildGoogleMapsStoreSearchUrl(home.store.name, home.store.address)
@@ -123,16 +136,15 @@ export default async function HomePage() {
       <JsonLd
         data={[
           buildWebPageJsonLd({
-            title: "Wiragro | Edukasi, Solusi, dan Toko Pertanian",
-            description:
-              "Belajar pertanian modern, temukan solusi kebutuhan lapangan, lalu belanja pupuk, benih, pestisida, dan kebutuhan kios dalam satu storefront Wiragro.",
+            title: `Wiragro | ${BRAND_TAGLINE}`,
+            description: BRAND_SUBTAGLINE,
             path: "/",
           }),
           buildStoreJsonLd(home.store),
           buildCollectionJsonLd({
             title: "Produk unggulan Wiragro",
             description:
-              "Pilihan produk unggulan dari katalog pertanian Wiragro untuk membantu user bergerak dari insight ke transaksi.",
+              "Pilihan produk unggulan dari katalog pertanian Wiragro untuk membantu pengunjung bergerak dari pemahaman ke pembelian.",
             path: "/",
             itemUrls: featuredProducts.map((product) => `/produk/${product.slug}`),
           }),
@@ -143,11 +155,11 @@ export default async function HomePage() {
       {storefrontUnavailable ? (
         <section className="storefront-alert">
           <div>
-            <strong>Katalog sedang dimuat ulang.</strong>
-            <p>Homepage tetap aktif. User masih bisa mulai dari jalur belajar dan solusi.</p>
+            <strong>Data produk sedang dimuat ulang.</strong>
+            <p>Anda tetap bisa mulai dari solusi tanaman, edukasi, dan layanan utama Wiragro.</p>
           </div>
-          <Link className="btn btn-primary" href="/belanja">
-            Buka hub Belanja
+          <Link className="btn btn-primary" href="/produk">
+            Jelajahi produk
           </Link>
         </section>
       ) : null}
@@ -155,33 +167,36 @@ export default async function HomePage() {
       <section className="storefront-hero storefront-hero--hybrid">
         <div className="storefront-hero__main storefront-hero__main--hybrid">
           <div className="storefront-hero__copy">
-            <span className="storefront-eyebrow">{home.store.name || "Wiragro"}</span>
-            <h1>Tempat belajar, cari solusi, dan belanja kebutuhan pertanian dalam satu alur.</h1>
+            <span className="storefront-eyebrow">{BRAND_TAGLINE}</span>
+            <h1>{BRAND_SUBTAGLINE}</h1>
             <p>
-              Homepage baru ini membantu user memilih jalur yang tepat lebih dulu: belajar
-              saat masih butuh konteks, masuk ke solusi saat ada gejala, lalu turun ke katalog
-              saat kebutuhan sudah jelas.
+              Wiragro dirancang sebagai platform digital pertanian yang membantu Anda
+              bergerak dari masalah tanaman ke tindakan, pembelajaran, pembelian, dan
+              layanan premium dengan alur yang lebih jelas.
             </p>
 
             <div className="storefront-hero__actions storefront-hero__actions--hybrid">
               <Link className="btn btn-primary" href="/solusi">
                 Cari solusi tanaman
               </Link>
-              <Link className="btn btn-secondary" href="/belajar">
-                Mulai belajar
+              <Link className="btn btn-secondary" href="/produk">
+                Jelajahi produk
+              </Link>
+              <Link className="btn btn-secondary" href="/ai-chat">
+                Buka AI Chat
               </Link>
             </div>
 
-            <Link className="storefront-hero__text-link" href="/belanja">
-              Belanja kebutuhan yang sudah Anda tahu
+            <Link className="storefront-hero__text-link" href="/belajar">
+              Masuk ke edukasi pertanian
             </Link>
 
             <div className="storefront-hero__spotlight storefront-hero__spotlight--hybrid">
-              <span>Kenapa flow ini lebih sehat</span>
-              <strong>User tidak harus langsung masuk ke mode belanja.</strong>
-              <em>Masuk dari problem, insight, atau kebutuhan beli yang paling relevan.</em>
+              <span>Satu platform, banyak jalur masuk</span>
+              <strong>Solusi, edukasi, produk, AI premium, dan B2C/B2B saling terhubung.</strong>
+              <em>Pilih jalur yang paling relevan tanpa terasa dilempar ke katalog terlalu cepat.</em>
               <div className="storefront-hero__spotlight-hours">
-                <small>Jam operasional</small>
+                <small>Jam layanan</small>
                 <b>{operationalHours}</b>
               </div>
             </div>
@@ -248,7 +263,7 @@ export default async function HomePage() {
           </div>
 
           <div className="storefront-hero__utility-grid storefront-hero__utility-grid--hybrid">
-            {PRIMARY_PILLAR_LINKS.map((pillar) => (
+            {PLATFORM_ENTRY_LINKS.map((pillar) => (
               <Link className="storefront-utility-card" href={pillar.href} key={pillar.href}>
                 <span>{pillar.label}</span>
                 <strong>{pillar.description}</strong>
@@ -259,28 +274,36 @@ export default async function HomePage() {
       </section>
 
       <PathwaySection
-        action={{ href: "/solusi", label: "Mulai dari problem user" }}
+        action={{ href: "/solusi", label: "Mulai dari masalah tanaman" }}
         cards={HOMEPAGE_ENTRY_CARDS}
-        description="Tiga entry point ini menjadi fondasi homepage hybrid: masing-masing jelas, tetapi tetap mengalir satu sama lain."
+        description="Tiga jalur inti ini membantu pengunjung memilih mode yang paling tepat sebelum masuk lebih jauh ke platform."
         eyebrow="Pilih jalur"
-        title="Homepage membantu user masuk ke mode yang tepat, bukan langsung dilempar ke katalog."
+        title="Homepage membantu pengunjung masuk ke mode yang tepat, bukan langsung dilempar ke katalog."
+      />
+
+      <PathwaySection
+        action={{ href: "/produk", label: "Buka semua jalur belanja" }}
+        cards={HOMEPAGE_COMMERCIAL_ENTRY_CARDS}
+        description="Paket, program musiman, dan B2B hadir sebagai lini penawaran resmi Wiragro yang mendukung kebutuhan retail maupun bisnis."
+        eyebrow="Lini penawaran resmi"
+        title="Jalur penawaran Wiragro tidak berhenti di satu katalog saja."
       />
 
       <PathwaySection
         action={{ href: "/solusi", label: "Buka semua solusi" }}
         cards={HOMEPAGE_PROBLEM_CARDS}
-        description="Section ini ditempatkan tinggi karena banyak user pertanian datang dengan masalah, bukan dengan daftar belanja yang sudah matang."
+        description="Bagian ini ditempatkan tinggi karena banyak pengunjung pertanian datang dengan masalah, bukan dengan daftar belanja yang sudah matang."
         eyebrow="Masalah tanaman populer"
-        title="Mulai dari problem lapangan yang paling sering dirasakan user."
+        title="Mulai dari masalah lapangan yang paling sering dirasakan petani."
       />
 
       <section className="section-block homepage-commodity-section">
         <div className="section-heading">
           <div>
             <span className="eyebrow-label">Komoditas populer</span>
-            <h2>Pilih komoditas yang paling dekat dengan konteks user.</h2>
+            <h2>Pilih komoditas yang paling dekat dengan kebutuhan Anda.</h2>
             <p>
-              Entry point berbasis komoditas membantu user yang tidak datang dengan nama
+              Jalur berbasis komoditas membantu pengunjung yang tidak datang dengan nama
               produk, tetapi datang dengan kebutuhan tanaman atau usaha taninya.
             </p>
           </div>
@@ -316,14 +339,14 @@ export default async function HomePage() {
       <section className="section-block homepage-article-section">
         <div className="section-heading">
           <div>
-            <span className="eyebrow-label">Artikel / Insight terbaru</span>
-            <h2>Bangun trust dengan insight, bukan hanya listing produk.</h2>
+            <span className="eyebrow-label">Edukasi terbaru</span>
+            <h2>Bangun kepercayaan lewat edukasi, bukan hanya lewat listing produk.</h2>
             <p>
-              Section ini menjaga brand terasa seperti partner belajar sekaligus tetap
-              mendorong user menuju solusi atau pembelian yang lebih yakin.
+              Konten edukasi membantu Wiragro terasa seperti partner belajar yang
+              terpercaya sekaligus tetap relevan untuk keputusan lapangan.
             </p>
           </div>
-          <Link href="/artikel">Lihat semua insight</Link>
+          <Link href="/artikel">Lihat semua artikel</Link>
         </div>
 
         <div className="article-grid article-grid--editorial homepage-article-grid">
@@ -341,13 +364,13 @@ export default async function HomePage() {
         <div className="storefront-section__header storefront-section__header--hybrid">
           <div>
             <span className="storefront-eyebrow">Produk unggulan</span>
-            <h2>Produk unggulan yang siap mengonversi saat user sudah siap belanja.</h2>
+            <h2>Produk unggulan yang siap dipilih saat kebutuhan Anda sudah lebih jelas.</h2>
             <p>
-              Katalog tetap penting, tetapi sekarang muncul setelah user diberi konteks,
-              problem framing, dan pilihan jalur yang lebih jelas.
+              Katalog tetap penting, tetapi kini hadir sebagai bagian dari alur yang
+              lebih utuh bersama solusi, edukasi, dan pendampingan.
             </p>
           </div>
-          <Link href="/belanja">Masuk ke hub Belanja</Link>
+          <Link href="/produk">Jelajahi produk</Link>
         </div>
 
         {featuredProducts.length ? (
@@ -367,19 +390,19 @@ export default async function HomePage() {
       <PathwaySection
         action={{ href: "/belanja/paket", label: "Lihat semua paket" }}
         cards={HOMEPAGE_BUNDLE_CARDS}
-        description="Bundling membantu user yang ingin bergerak cepat tanpa kehilangan konteks belajar atau problem-solving di belakangnya."
-        eyebrow="Bundling"
-        title="Kurasi kebutuhan yang lebih siap untuk mendorong conversion."
+        description="Bundle resmi membantu Anda bergerak cepat tanpa kehilangan konteks belajar atau solusi yang dibutuhkan."
+        eyebrow="Bundle resmi"
+        title="Kurasi kebutuhan yang lebih siap dipilih dan dibeli."
       />
 
       <section className="section-block">
         <div className="section-heading">
           <div>
-            <span className="eyebrow-label">Campaign landing</span>
-            <h2>Halaman musiman dan problem-first untuk intent yang sudah lebih komersial.</h2>
+            <span className="eyebrow-label">Campaign resmi</span>
+            <h2>Halaman musiman dan problem-first untuk kebutuhan yang sudah dekat ke keputusan beli.</h2>
             <p>
-              Campaign landing membantu Wiragro menangkap momentum musim, komoditas, atau
-              masalah prioritas tanpa memutus jalur bundle, solusi, dan assisted sales.
+              Program musiman membantu Wiragro menangkap momentum musim, komoditas, atau
+              masalah prioritas tanpa memutus jalur bundle, solusi, dan bantuan tim.
             </p>
           </div>
           <Link href="/kampanye">Semua campaign</Link>
@@ -394,11 +417,11 @@ export default async function HomePage() {
       <section className="section-block homepage-trust-section">
         <div className="section-heading">
           <div>
-            <span className="eyebrow-label">Trust block</span>
-            <h2>Proof yang menjelaskan kenapa homepage ini lebih meyakinkan.</h2>
+            <span className="eyebrow-label">Kepercayaan</span>
+            <h2>Alasan kenapa Wiragro terasa lebih meyakinkan sejak halaman pertama.</h2>
             <p>
-              Trust dibangun dari kombinasi edukasi, jalur solusi, dukungan toko, dan
-              struktur belanja yang terasa lebih rapi.
+              Kepercayaan dibangun dari kombinasi edukasi, solusi, layanan yang jelas,
+              dan pengalaman belanja yang terasa lebih rapi.
             </p>
           </div>
           <Link href="/lacak-pesanan">Lacak pesanan</Link>
@@ -418,20 +441,20 @@ export default async function HomePage() {
           </div>
 
           <aside className="homepage-trust-panel">
-            <span className="eyebrow-label">Toko & layanan</span>
+            <span className="eyebrow-label">Layanan Wiragro</span>
             <h3>{home.store.name || "Wiragro"}</h3>
             <p>
-              Jalur belajar, solusi, dan belanja semuanya tetap terhubung ke layanan toko,
-              jam operasional, dan support yang bisa dihubungi langsung.
+              Semua jalur di platform ini tetap terhubung ke layanan, jam operasional,
+              dan tim yang bisa dihubungi langsung saat Anda butuh bantuan.
             </p>
             <div className="homepage-trust-panel__meta">
               <div>
-                <span>Jam operasional</span>
+                <span>Jam layanan</span>
                 <strong>{operationalHours}</strong>
               </div>
               <div>
-                <span>Alamat</span>
-                <strong>{home.store.address || "Alamat toko sedang diperbarui."}</strong>
+                <span>Alamat layanan</span>
+                <strong>{home.store.address || "Alamat layanan sedang diperbarui."}</strong>
               </div>
               <div>
                 <span>WhatsApp</span>
@@ -439,13 +462,19 @@ export default async function HomePage() {
               </div>
             </div>
             <div className="homepage-trust-panel__actions">
-              {consultationUrl ? (
-                <a className="btn btn-primary" href={consultationUrl} rel="noreferrer" target="_blank">
+              {consultationLink ? (
+                <CommerceIntentLink
+                  className="btn btn-primary"
+                  href={consultationLink.href}
+                  leadRef={consultationLink.leadRef}
+                  leadSummary={consultationLink.leadSummary}
+                  tracking={consultationLink.tracking}
+                >
                   Konsultasi WhatsApp
-                </a>
+                </CommerceIntentLink>
               ) : (
                 <Link className="btn btn-primary" href="/kontak">
-                  Hubungi toko
+                  Hubungi tim
                 </Link>
               )}
               {mapsUrl ? (
@@ -472,21 +501,27 @@ export default async function HomePage() {
         <div className="homepage-wa-band">
           <div>
             <span className="eyebrow-label">Konsultasi WA</span>
-            <h2>Masih bingung harus mulai dari bundle, konsultasi, atau inquiry partai?</h2>
+            <h2>Pilih jalur WA yang paling masuk akal setelah visitor paham konteksnya.</h2>
             <p>
-              Fase 3 memperkuat WhatsApp menjadi jalur commerce yang lebih jelas: konsultasi,
-              rekomendasi bundle, sampai inquiry B2B. Ini menjaga conversion untuk user yang
-              tidak nyaman menavigasi sendiri seluruh flow.
+              Homepage tidak lagi menampilkan semua intent sekaligus. Konsultasi tetap ada
+              di panel trust, sementara section ini fokus ke rekomendasi kebutuhan dan jalur
+              inquiry partai yang lebih mudah dibaca tim layanan.
             </p>
           </div>
           {commerceIntentCards.length ? (
             <CommerceIntentGrid items={commerceIntentCards} />
           ) : (
             <div className="homepage-wa-band__actions">
-              {consultationUrl ? (
-                <a className="btn btn-primary" href={consultationUrl} rel="noreferrer" target="_blank">
+              {consultationLink ? (
+                <CommerceIntentLink
+                  className="btn btn-primary"
+                  href={consultationLink.href}
+                  leadRef={consultationLink.leadRef}
+                  leadSummary={consultationLink.leadSummary}
+                  tracking={consultationLink.tracking}
+                >
                   Konsultasi via WhatsApp
-                </a>
+                </CommerceIntentLink>
               ) : (
                 <Link className="btn btn-primary" href="/kontak">
                   Hubungi lewat kontak

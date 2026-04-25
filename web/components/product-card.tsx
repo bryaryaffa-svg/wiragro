@@ -52,6 +52,9 @@ export function ProductCard({ product }: { product: ProductSummary }) {
       : product.availability.state === "out_of_stock"
         ? "Stok habis"
         : null;
+  const totalReviews = product.review_summary?.total_reviews ?? 0;
+  const averageRating = product.review_summary?.average_rating ?? null;
+  const hasReviewSummary = totalReviews > 0 && averageRating !== null;
 
   return (
     <article className="product-card">
@@ -105,8 +108,19 @@ export function ProductCard({ product }: { product: ProductSummary }) {
           {product.name}
         </Link>
 
+        {hasReviewSummary ? (
+          <div
+            aria-label={`Rating ${averageRating.toFixed(1)} dari ${totalReviews} review terverifikasi`}
+            className="product-card__rating"
+          >
+            <strong>{averageRating.toFixed(1)}</strong>
+            <span className="product-card__rating-stars">{`\u2605`}</span>
+            <small className="product-card__rating-count">{totalReviews} review</small>
+          </div>
+        ) : null}
+
         <p className="product-card__summary">
-          {product.summary || "Produk aktif dari katalog Sidomakmur dan siap diproses."}
+          {product.summary || "Produk pertanian aktif dari Wiragro yang siap dipilih sesuai kebutuhan Anda."}
         </p>
 
         <div className="product-card__price-block">
@@ -120,7 +134,7 @@ export function ProductCard({ product }: { product: ProductSummary }) {
           </div>
           {availabilityText ? <small className="price-caption">{availabilityText}</small> : null}
           <small className="price-caption price-caption--secondary">
-            {product.price.is_promo ? "Harga promo aktif" : "Harga toko saat ini"}
+            {product.price.is_promo ? "Harga promo aktif" : "Harga aktif saat ini"}
           </small>
         </div>
 

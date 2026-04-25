@@ -41,7 +41,7 @@ export async function StaticPageView({ slug }: { slug: string }) {
         <h1>{page.title}</h1>
         <p>
           {page.excerpt ??
-            "Halaman informasi ini ditampilkan dari konten pusat dan dirapikan agar tetap konsisten dengan storefront utama."}
+            "Halaman informasi ini membantu Anda memahami layanan utama Wiragro dengan bahasa yang lebih ringkas dan jelas."}
         </p>
       </div>
       <div
@@ -59,11 +59,11 @@ export async function StaticPageView({ slug }: { slug: string }) {
         <Link className="btn btn-secondary" href="/">
           Kembali ke beranda
         </Link>
-        <Link className="btn btn-primary" href="/belanja">
-          Masuk ke Belanja
+        <Link className="btn btn-primary" href="/produk">
+          Jelajahi produk
         </Link>
         <Link className="btn btn-secondary" href="/belajar">
-          Masuk ke Belajar
+          Masuk ke Edukasi
         </Link>
       </div>
     </article>

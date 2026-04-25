@@ -135,7 +135,7 @@ export default async function ArticleDetailPage({ params }: { params: Params }) 
 
         <aside className="article-detail-hero__aside">
           <span className="eyebrow-label">Inti artikel</span>
-          <strong>Apa yang akan user dapatkan dari halaman ini</strong>
+          <strong>Apa yang akan Anda dapatkan dari halaman ini</strong>
           {article.key_takeaways?.length ? (
             <ul className="plain-list">
               {article.key_takeaways.map((item) => (
@@ -173,9 +173,9 @@ export default async function ArticleDetailPage({ params }: { params: Params }) 
 
           <article className="article-detail-sidebar__card">
             <span className="eyebrow-label">CTA konsultasi</span>
-            <strong>Konsultasi langsung bila user masih ragu.</strong>
+            <strong>Konsultasi langsung bila Anda masih ragu.</strong>
             <p>
-              Konten edukasi yang sehat tetap memberi jalan cepat ke toko saat user butuh
+              Konten edukasi yang sehat tetap memberi jalan cepat ke tim Wiragro saat Anda butuh
               bantuan memilih langkah berikutnya.
             </p>
             {consultationUrl ? (
@@ -184,7 +184,7 @@ export default async function ArticleDetailPage({ params }: { params: Params }) 
               </a>
             ) : (
               <Link className="btn btn-primary" href="/kontak">
-                Hubungi toko
+                Hubungi tim
               </Link>
             )}
           </article>
@@ -213,9 +213,9 @@ export default async function ArticleDetailPage({ params }: { params: Params }) 
           <div className="section-heading">
             <div>
               <span className="eyebrow-label">Produk terkait</span>
-              <h2>Produk yang paling masuk akal setelah user memahami konteksnya.</h2>
+              <h2>Produk yang paling masuk akal setelah konteksnya dipahami dengan baik.</h2>
             </div>
-            <Link href="/belanja">Masuk ke hub Belanja</Link>
+            <Link href="/produk">Lihat semua produk</Link>
           </div>
           <div className="product-grid product-grid--catalog">
             {relatedProducts.map((product) => (

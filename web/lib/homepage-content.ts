@@ -28,7 +28,7 @@ export const HOMEPAGE_PROBLEM_CARDS: PathwayCard[] = [
     bullets: ["Cek nutrisi dasar", "Baca gejala akar", "Bandingkan solusi awal"],
     supportingLinks: [
       { href: "/produk?q=pupuk", label: "Lihat pupuk" },
-      { href: "/belajar", label: "Masuk ke Belajar" },
+      { href: "/belajar", label: "Masuk ke Edukasi" },
     ],
   },
   {
@@ -36,13 +36,13 @@ export const HOMEPAGE_PROBLEM_CARDS: PathwayCard[] = [
     eyebrow: "Masalah populer",
     title: "Hama mulai menyerang dan daun rusak.",
     description:
-      "Arahkan user untuk mengenali gejala lebih dulu, lalu baru pertimbangkan proteksi yang paling relevan untuk kondisi lapangan.",
+      "Arahkan pengunjung untuk mengenali gejala lebih dulu, lalu baru pertimbangkan proteksi yang paling relevan untuk kondisi lapangan.",
     href: "/solusi/masalah/hama-daun",
     actionLabel: "Lihat langkah awal",
     bullets: ["Kenali jenis serangan", "Pisahkan hama vs penyakit", "Pilih proteksi yang masuk akal"],
     supportingLinks: [
       { href: "/produk?q=pestisida", label: "Produk proteksi" },
-      { href: "/kontak", label: "Tanya toko" },
+      { href: "/kontak", label: "Tanya tim" },
     ],
   },
   {
@@ -92,7 +92,7 @@ export const HOMEPAGE_COMMODITY_CARDS: HomeCommodityCard[] = [
     title: "Jagung",
     description: "Masuk dari kebutuhan benih, nutrisi awal, dan ritme aplikasi yang lebih terarah.",
     href: "/komoditas/jagung",
-    actionLabel: "Belajar untuk jagung",
+    actionLabel: "Edukasi untuk jagung",
     supportingLinks: [
       { href: "/produk?q=benih jagung", label: "Benih jagung" },
       { href: "/produk?q=nutrisi", label: "Nutrisi" },
@@ -126,7 +126,7 @@ export const HOMEPAGE_COMMODITY_CARDS: HomeCommodityCard[] = [
     theme: "homegarden",
     eyebrow: "Komoditas populer",
     title: "Kebun rumah",
-    description: "Untuk user yang ingin mulai sederhana: belajar, pilih input dasar, lalu belanja seperlunya.",
+    description: "Untuk Anda yang ingin mulai sederhana: belajar, pilih input dasar, lalu belanja seperlunya.",
     href: "/komoditas/kebun-rumah",
     actionLabel: "Belanja kebutuhan awal",
     supportingLinks: [
@@ -142,7 +142,7 @@ export const HOMEPAGE_BUNDLE_CARDS: PathwayCard[] = [
     eyebrow: "Bundling",
     title: "Paket mulai tanam",
     description:
-      "Jalur cepat untuk user yang baru mulai dan ingin menyiapkan kebutuhan awal tanpa menyusun item satu per satu.",
+      "Jalur cepat untuk pengguna yang baru mulai dan ingin menyiapkan kebutuhan awal tanpa menyusun item satu per satu.",
     href: "/belanja/paket/mulai-tanam",
     actionLabel: "Lihat kebutuhan awal",
     bullets: ["Benih", "Media tanam", "Nutrisi tahap awal"],
@@ -156,13 +156,13 @@ export const HOMEPAGE_BUNDLE_CARDS: PathwayCard[] = [
     eyebrow: "Bundling",
     title: "Paket proteksi dasar",
     description:
-      "Untuk user yang sudah melihat gejala dan ingin membandingkan proteksi serta alat aplikasi yang relevan.",
+      "Untuk pengguna yang sudah melihat gejala dan ingin membandingkan proteksi serta alat aplikasi yang relevan.",
     href: "/belanja/paket/proteksi-dasar",
     actionLabel: "Lihat produk proteksi",
     bullets: ["Proteksi hama", "Proteksi penyakit", "Sprayer dan alat aplikasi"],
     supportingLinks: [
       { href: "/solusi", label: "Mulai dari gejala" },
-      { href: "/kontak", label: "Konsultasi toko" },
+      { href: "/kontak", label: "Konsultasi tim" },
     ],
   },
   {
@@ -170,12 +170,12 @@ export const HOMEPAGE_BUNDLE_CARDS: PathwayCard[] = [
     eyebrow: "Bundling",
     title: "Paket belanja kios",
     description:
-      "Untuk toko atau user rutin yang ingin belanja lebih efisien, dari input utama sampai pelengkap operasional.",
+      "Untuk kios atau pembeli rutin yang ingin belanja lebih efisien, dari input utama sampai pelengkap operasional.",
     href: "/belanja/paket/belanja-kios",
     actionLabel: "Lihat kebutuhan kios",
     bullets: ["Produk inti", "Pelengkap operasional", "Belanja lebih tertata"],
     supportingLinks: [
-      { href: "/belanja", label: "Buka hub Belanja" },
+      { href: "/produk", label: "Jelajahi produk" },
       { href: "/b2b", label: "B2B inquiry" },
     ],
   },
@@ -184,22 +184,22 @@ export const HOMEPAGE_BUNDLE_CARDS: PathwayCard[] = [
 export const HOMEPAGE_TRUST_POINTS: HomeTrustPoint[] = [
   {
     title: "Produk aktif lebih mudah dipindai",
-    body: "Katalog, harga, dan status stok tampil lebih jelas agar user tidak menebak-nebak sebelum checkout.",
+    body: "Katalog, harga, dan status stok tampil lebih jelas agar pembeli tidak menebak-nebak sebelum checkout.",
     icon: "/wiragro-illustrations/wiragro_feature_produk_berkualitas_transparent.png",
   },
   {
     title: "Masalah lapangan punya jalur tersendiri",
-    body: "Homepage tidak lagi memaksa semua user langsung belanja ketika sebenarnya mereka datang dengan problem tertentu.",
+    body: "Homepage tidak lagi memaksa semua pengunjung langsung belanja ketika sebenarnya mereka datang dengan masalah tertentu.",
     icon: "/wiragro-illustrations/wiragro_feature_layanan_terpercaya_transparent.png",
   },
   {
-    title: "Belajar dan belanja tetap tersambung",
+    title: "Edukasi dan produk tetap tersambung",
     body: "Artikel, solusi, dan produk sekarang dibingkai sebagai satu alur, bukan tiga ruang yang terputus.",
     icon: "/wiragro-illustrations/wiragro_feature_petani_indonesia_transparent.png",
   },
   {
     title: "Konsultasi dan pelacakan tetap dekat",
-    body: "Ada jalur cepat untuk konsultasi WhatsApp, cek jam operasional, dan melacak pesanan tanpa keluar dari flow utama.",
+    body: "Ada jalur cepat untuk konsultasi WhatsApp, cek jam operasional, dan melacak pesanan tanpa keluar dari alur utama.",
     icon: "/wiragro-illustrations/wiragro_feature_harga_bersahabat_transparent.png",
   },
 ];

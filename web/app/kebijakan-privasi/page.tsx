@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 export async function generateMetadata(): Promise<Metadata> {
   return generateStaticPageMetadata("kebijakan-privasi", "/kebijakan-privasi", {
     title: "Kebijakan Privasi Wiragro",
-    description: "Kebijakan privasi Wiragro terkait data pengguna, toko, dan aktivitas belanja.",
+    description: "Kebijakan privasi Wiragro terkait data pengguna, layanan, dan aktivitas belanja.",
   });
 }
 

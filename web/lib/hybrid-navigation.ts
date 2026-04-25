@@ -29,29 +29,64 @@ type FooterLinkGroup = {
 
 const PILLAR_ROUTE_ALIASES: Record<string, string[]> = {
   "/belajar": ["/artikel"],
-  "/belanja": ["/produk"],
+  "/produk": ["/belanja", "/belanja/paket", "/kampanye", "/b2b", "/cari"],
 };
 
-export const PRIMARY_PILLAR_LINKS: NavLink[] = [
-  {
-    href: "/belajar",
-    label: "Belajar",
-    description: "Masuk dari panduan dasar, konteks budidaya, dan cara memilih input.",
-  },
+export const GLOBAL_SEARCH_HREF = "/cari";
+
+export const PLATFORM_ENTRY_LINKS: NavLink[] = [
   {
     href: "/solusi",
-    label: "Cari Solusi",
-    description: "Mulai dari gejala lapangan, tindakan awal, lalu keputusan yang lebih tepat.",
+    label: "Solusi",
+    description: "Mulai dari gejala lapangan, kebutuhan tanaman, dan tindakan awal yang lebih tepat.",
   },
   {
-    href: "/belanja",
-    label: "Belanja",
-    description: "Masuk ke katalog, kategori, promo, dan produk aktif saat siap membeli.",
+    href: "/produk",
+    label: "Produk",
+    description: "Jelajahi produk pertanian, paket pilihan, dan kebutuhan budidaya dari satu katalog yang rapi.",
+  },
+  {
+    href: "/belajar",
+    label: "Edukasi",
+    description:
+      "Pelajari budidaya, input pertanian, dan keputusan lapangan dengan bahasa yang lebih mudah dipahami.",
+  },
+  {
+    href: "/ai-chat",
+    label: "AI Chat",
+    description:
+      "Akses pendamping AI pertanian premium untuk mempercepat tanya jawab, rangkuman, dan arahan awal.",
+  },
+];
+
+export const HEADER_NAV_LINKS: NavLink[] = [
+  ...PLATFORM_ENTRY_LINKS,
+  {
+    href: "/lacak-pesanan",
+    label: "Lacak Pesanan",
+    description: "Pantau status pesanan dengan cepat tanpa harus menebak progresnya.",
+  },
+];
+
+export const COMMERCIAL_ENTRY_LINKS: NavLink[] = [
+  {
+    href: "/belanja/paket",
+    label: "Bundle",
+    description: "Paket pilihan untuk kebutuhan tanam, proteksi, atau belanja rutin.",
+  },
+  {
+    href: "/kampanye",
+    label: "Campaign",
+    description: "Halaman tematik musiman agar kebutuhan yang paling mendesak lebih cepat ditemukan.",
+  },
+  {
+    href: "/b2b",
+    label: "B2B",
+    description: "Jalur pembelian bisnis untuk kios, usaha tani, proyek, dan kebutuhan partai.",
   },
 ];
 
 export const UTILITY_NAV_LINKS: NavLink[] = [
-  { href: "/lacak-pesanan", label: "Lacak Pesanan" },
   { href: "/kontak", label: "Kontak" },
   { href: "/faq", label: "FAQ" },
   { href: "/tentang-kami", label: "Tentang Kami" },
@@ -59,31 +94,33 @@ export const UTILITY_NAV_LINKS: NavLink[] = [
 
 export const FOOTER_LINK_GROUPS: FooterLinkGroup[] = [
   {
-    title: "Belajar",
+    title: "Platform",
     links: [
-      { href: "/belajar", label: "Hub Belajar" },
+      { href: "/solusi", label: "Solusi Tanaman" },
+      { href: "/produk", label: "Produk Pertanian" },
+      { href: "/belajar", label: "Edukasi" },
+      { href: "/ai-chat", label: "AI Chat Premium" },
       { href: "/komoditas", label: "Komoditas" },
-      { href: "/artikel", label: "Semua Artikel" },
-      { href: "/faq", label: "FAQ Dasar" },
+      { href: "/artikel", label: "Artikel" },
     ],
   },
   {
-    title: "Cari Solusi",
+    title: "Belanja & Layanan",
     links: [
-      { href: "/solusi", label: "Hub Solusi" },
-      { href: "/artikel", label: "Panduan Lapangan" },
-      { href: "/kontak", label: "Butuh Bantuan" },
-    ],
-  },
-  {
-    title: "Belanja",
-    links: [
-      { href: "/belanja", label: "Hub Belanja" },
-      { href: "/belanja/paket", label: "Paket & Bundle" },
-      { href: "/kampanye", label: "Campaign Landing" },
-      { href: "/produk", label: "Semua Produk" },
+      { href: "/belanja/paket", label: "Bundle" },
+      { href: "/kampanye", label: "Campaign" },
       { href: "/b2b", label: "B2B Inquiry" },
-      { href: "/lacak-pesanan", label: "Status Pesanan" },
+      { href: "/lacak-pesanan", label: "Lacak Pesanan" },
+      { href: "/pengiriman-pembayaran", label: "Pengiriman & Pembayaran" },
+    ],
+  },
+  {
+    title: "Akun",
+    links: [
+      { href: "/masuk", label: "Masuk" },
+      { href: "/akun", label: "Akun" },
+      { href: "/wishlist", label: "Wishlist" },
+      { href: "/keranjang", label: "Keranjang" },
     ],
   },
   {
@@ -101,12 +138,12 @@ export const FOOTER_LINK_GROUPS: FooterLinkGroup[] = [
 export const HOMEPAGE_ENTRY_CARDS: PathwayCard[] = [
   {
     pillar: "learn",
-    eyebrow: "Belajar",
-    title: "Mulai dari pemahaman, bukan tebakan.",
+    eyebrow: "Edukasi",
+    title: "Mulai dari pemahaman, bukan dari tebak-tebakan.",
     description:
-      "Pelajari dasar budidaya, input utama, dan konteks pembelian sebelum masuk ke katalog.",
+      "Pelajari dasar budidaya, pilihan input, dan konteks penggunaan sebelum masuk ke keputusan belanja.",
     href: "/belajar",
-    actionLabel: "Masuk ke Belajar",
+    actionLabel: "Buka edukasi",
     bullets: ["Panduan dasar", "Input pertanian", "Artikel yang siap dibaca"],
     supportingLinks: [
       { href: "/artikel", label: "Semua artikel" },
@@ -115,30 +152,75 @@ export const HOMEPAGE_ENTRY_CARDS: PathwayCard[] = [
   },
   {
     pillar: "solve",
-    eyebrow: "Cari Solusi",
+    eyebrow: "Solusi",
     title: "Mulai dari gejala yang terjadi di lapangan.",
     description:
       "Gunakan layer solusi untuk menyaring masalah, menemukan tindakan awal, lalu menuju produk yang relevan.",
     href: "/solusi",
-    actionLabel: "Buka Cari Solusi",
+    actionLabel: "Buka solusi",
     bullets: ["Daun menguning", "Hama dan penyakit", "Tindakan awal yang aman"],
     supportingLinks: [
       { href: "/artikel", label: "Lihat panduan" },
-      { href: "/kontak", label: "Hubungi toko" },
+      { href: "/kontak", label: "Hubungi tim" },
     ],
   },
   {
     pillar: "shop",
-    eyebrow: "Belanja",
-    title: "Masuk ke katalog saat kebutuhan sudah jelas.",
+    eyebrow: "Produk",
+    title: "Masuk ke produk saat kebutuhan Anda sudah lebih jelas.",
     description:
-      "Jelajahi kategori, promo, dan produk aktif tanpa kehilangan konteks belajar atau solusi yang dibutuhkan.",
-    href: "/belanja",
-    actionLabel: "Masuk ke Belanja",
-    bullets: ["Kategori utama", "Promo aktif", "Produk pilihan toko"],
+      "Jelajahi katalog, paket pilihan, campaign, dan jalur B2B tanpa kehilangan konteks belajar atau solusi yang dibutuhkan.",
+    href: "/produk",
+    actionLabel: "Jelajahi produk",
+    bullets: ["Kategori utama", "Bundle resmi", "Campaign aktif"],
     supportingLinks: [
-      { href: "/produk", label: "Semua produk" },
-      { href: "/lacak-pesanan", label: "Lacak pesanan" },
+      { href: "/belanja/paket", label: "Paket & bundle" },
+      { href: "/kampanye", label: "Campaign" },
+    ],
+  },
+];
+
+export const HOMEPAGE_COMMERCIAL_ENTRY_CARDS: PathwayCard[] = [
+  {
+    pillar: "shop",
+    eyebrow: "Bundle",
+    title: "Bundle hadir sebagai paket pilihan yang lebih mudah dipahami dan dipilih.",
+    description:
+      "Bundle membantu kebutuhan fase tanam, komoditas, dan belanja rutin terasa lebih ringkas sejak awal.",
+    href: "/belanja/paket",
+    actionLabel: "Buka semua bundle",
+    bullets: ["Paket fase tanam", "Komoditas prioritas", "Belanja ulang lebih ringkas"],
+    supportingLinks: [
+      { href: "/produk", label: "Katalog produk" },
+      { href: "/produk", label: "Katalog produk" },
+    ],
+  },
+  {
+    pillar: "shop",
+    eyebrow: "Campaign",
+    title: "Campaign membantu kebutuhan musiman tampil lebih fokus tanpa kehilangan konteks.",
+    description:
+      "Halaman campaign menghubungkan bundle, solusi, dan bantuan tim saat pengguna datang dari musim, komoditas, atau masalah prioritas.",
+    href: "/kampanye",
+    actionLabel: "Lihat campaign",
+    bullets: ["Musim hujan", "Awal tanam", "Masalah prioritas"],
+    supportingLinks: [
+      { href: "/solusi", label: "Cari solusi" },
+      { href: "/belanja/paket", label: "Bundle terkait" },
+    ],
+  },
+  {
+    pillar: "shop",
+    eyebrow: "B2B",
+    title: "B2B menjadi jalur resmi untuk kebutuhan bisnis dan pembelian partai.",
+    description:
+      "B2B membantu kios, reseller, proyek, dan kebutuhan rutin dibahas lebih rapi bersama tim Wiragro.",
+    href: "/b2b",
+    actionLabel: "Ajukan inquiry B2B",
+    bullets: ["Permintaan lebih rapi", "Status penawaran awal", "Mudah ditindaklanjuti"],
+    supportingLinks: [
+      { href: "/belanja/paket", label: "Mulai dari bundle" },
+      { href: "/kampanye", label: "Masuk dari campaign" },
     ],
   },
 ];
@@ -146,7 +228,7 @@ export const HOMEPAGE_ENTRY_CARDS: PathwayCard[] = [
 const LEARNING_HUB_CARDS: PathwayCard[] = [
   {
     pillar: "learn",
-    eyebrow: "Jalur belajar",
+    eyebrow: "Jalur edukasi",
     title: "Mulai dari dasar input dan ritme budidaya.",
     description:
       "Gunakan halaman ini untuk memahami pupuk, benih, proteksi tanaman, dan ritme belanja yang lebih terarah.",
@@ -161,7 +243,7 @@ const LEARNING_HUB_CARDS: PathwayCard[] = [
     description:
       "Masuk ke layer solusi untuk mencocokkan gejala lapangan dengan tindakan awal yang lebih praktis.",
     href: "/solusi",
-    actionLabel: "Masuk ke Cari Solusi",
+    actionLabel: "Masuk ke Solusi",
     supportingLinks: [
       { href: "/solusi", label: "Gejala umum" },
       { href: "/kontak", label: "Butuh bantuan" },
@@ -169,12 +251,12 @@ const LEARNING_HUB_CARDS: PathwayCard[] = [
   },
   {
     pillar: "shop",
-    eyebrow: "Belanja terarah",
+    eyebrow: "Produk terarah",
     title: "Bawa wawasan tadi ke katalog aktif.",
     description:
       "Setelah tahu kebutuhan utama, lanjutkan ke kategori dan produk aktif agar keputusan belanja lebih percaya diri.",
-    href: "/belanja",
-    actionLabel: "Buka hub Belanja",
+    href: "/produk",
+    actionLabel: "Buka produk",
     supportingLinks: [
       { href: "/produk", label: "Semua produk" },
       { href: "/produk?sort=promo", label: "Promo aktif" },
@@ -213,15 +295,15 @@ const SOLUTION_HUB_CARDS: PathwayCard[] = [
   },
   {
     pillar: "shop",
-    eyebrow: "Lanjut ke produk",
+    eyebrow: "Produk",
     title: "Masuk ke katalog setelah masalahnya lebih jelas.",
     description:
-      "Hub solusi ini sengaja tetap terhubung ke katalog lama agar tim bisa transisi tanpa rebuild total.",
-    href: "/belanja",
-    actionLabel: "Masuk ke hub Belanja",
+      "Sesudah konteks masalahnya lebih terang, pengguna bisa lanjut ke produk yang paling relevan tanpa kehilangan arah.",
+    href: "/produk",
+    actionLabel: "Jelajahi produk",
     supportingLinks: [
       { href: "/produk", label: "Semua produk" },
-      { href: "/lacak-pesanan", label: "Pesanan berjalan" },
+      { href: "/lacak-pesanan", label: "Lacak pesanan" },
     ],
   },
 ];
@@ -229,33 +311,43 @@ const SOLUTION_HUB_CARDS: PathwayCard[] = [
 const SHOPPING_HUB_CARDS: PathwayCard[] = [
   {
     pillar: "shop",
-    eyebrow: "Masuk dari kategori",
-    title: "Jelajahi kebutuhan utama tanpa tenggelam di listing panjang.",
+    eyebrow: "Bundle resmi",
+    title: "Paket dan bundle membantu kebutuhan yang sudah jelas terasa lebih ringkas.",
     description:
-      "Hub belanja dipakai sebagai pintu masuk sebelum user turun ke katalog lama yang sudah aktif.",
-    href: "/produk",
-    actionLabel: "Buka semua produk",
-    bullets: ["Kategori utama", "Produk baru", "Promo aktif"],
+      "Gunakan bundle saat kebutuhan sudah cukup jelas dan Anda ingin memilih paket yang lebih praktis.",
+    href: "/belanja/paket",
+    actionLabel: "Buka hub bundle",
+    bullets: ["Paket kebutuhan", "Belanja lebih praktis", "Mudah untuk belanja ulang"],
+    supportingLinks: [
+      { href: "/produk", label: "Katalog produk" },
+      { href: "/b2b", label: "Inquiry partai" },
+    ],
   },
   {
-    pillar: "learn",
-    eyebrow: "Belajar sebelum beli",
-    title: "Butuh konteks lebih dulu sebelum checkout?",
+    pillar: "shop",
+    eyebrow: "Campaign resmi",
+    title: "Campaign membantu kebutuhan musiman atau kebutuhan mendesak tampil lebih jelas.",
     description:
-      "Kembali ke jalur belajar untuk memahami input, istilah produk, dan perbedaan pilihan sebelum membeli.",
-    href: "/belajar",
-    actionLabel: "Masuk ke Belajar",
-    supportingLinks: [{ href: "/artikel", label: "Baca artikel" }],
+      "Halaman campaign cocok saat Anda datang dari momentum musim, komoditas, atau masalah prioritas yang sudah dekat ke pembelian.",
+    href: "/kampanye",
+    actionLabel: "Lihat campaign aktif",
+    supportingLinks: [
+      { href: "/solusi", label: "Cari solusi" },
+      { href: "/belanja/paket", label: "Bundle terkait" },
+    ],
   },
   {
-    pillar: "solve",
-    eyebrow: "Belanja dari masalah",
-    title: "Kalau kebutuhan belum jelas, pindah dulu ke layer solusi.",
+    pillar: "shop",
+    eyebrow: "B2B inquiry",
+    title: "Permintaan penawaran membantu kebutuhan partai dibahas lebih rapi.",
     description:
-      "Cari dari gejala lapangan lebih dulu supaya katalog tidak terasa seperti toko yang memaksa jualan.",
-    href: "/solusi",
-    actionLabel: "Cari solusi dulu",
-    supportingLinks: [{ href: "/kontak", label: "Butuh bantuan toko" }],
+      "B2B membantu kios, reseller, proyek, dan kebutuhan rutin dibahas bersama tim tanpa mengganggu alur belanja utama.",
+    href: "/b2b",
+    actionLabel: "Masuk ke B2B inquiry",
+    supportingLinks: [
+      { href: "/belajar", label: "Butuh konteks dulu" },
+      { href: "/solusi", label: "Masuk dari gejala" },
+    ],
   },
 ];
 
@@ -275,33 +367,33 @@ export function getArticleRelationCards(articleTitle?: string): PathwayCard[] {
   return [
     {
       pillar: "learn",
-      eyebrow: "Belajar",
-      title: "Lanjutkan pemahaman dari jalur belajar.",
+      eyebrow: "Edukasi",
+      title: "Lanjutkan pemahaman dari jalur edukasi.",
       description: articleTitle
-        ? `Setelah membaca "${articleTitle}", Anda bisa melanjutkan ke hub belajar untuk topik yang lebih luas.`
-        : "Masuk ke hub belajar untuk menyusun pemahaman yang lebih runtut sebelum mengambil keputusan berikutnya.",
+        ? `Setelah membaca "${articleTitle}", Anda bisa melanjutkan ke hub edukasi untuk topik yang lebih luas.`
+        : "Masuk ke hub edukasi untuk menyusun pemahaman yang lebih runtut sebelum mengambil keputusan berikutnya.",
       href: "/belajar",
-      actionLabel: "Masuk ke Belajar",
+      actionLabel: "Masuk ke Edukasi",
       supportingLinks: [{ href: "/artikel", label: "Artikel lain" }],
     },
     {
       pillar: "solve",
-      eyebrow: "Cari Solusi",
+      eyebrow: "Solusi",
       title: "Pindah dari insight ke gejala lapangan.",
       description:
-        "Kalau user sudah paham teorinya, arahkan ke jalur solusi untuk memetakan masalah yang benar-benar sedang terjadi.",
+        "Kalau pembaca sudah paham teorinya, arahkan ke jalur solusi untuk memetakan masalah yang benar-benar sedang terjadi.",
       href: "/solusi",
-      actionLabel: "Buka Cari Solusi",
+      actionLabel: "Buka Solusi",
       supportingLinks: [{ href: "/kontak", label: "Konsultasi cepat" }],
     },
     {
       pillar: "shop",
-      eyebrow: "Belanja",
+      eyebrow: "Produk",
       title: "Bawa konteks ini ke katalog aktif.",
       description:
-        "Belanja tetap menjadi ujung flow, tetapi datang setelah user merasa lebih yakin dengan kebutuhannya.",
-      href: "/belanja",
-      actionLabel: "Masuk ke Belanja",
+        "Belanja tetap menjadi langkah lanjut, tetapi datang setelah pengguna merasa lebih yakin dengan kebutuhannya.",
+      href: "/produk",
+      actionLabel: "Jelajahi produk",
       supportingLinks: [{ href: "/produk", label: "Semua produk" }],
     },
   ];
@@ -316,33 +408,33 @@ export function getProductRelationCards(
   return [
     {
       pillar: "learn",
-      eyebrow: "Belajar",
+      eyebrow: "Edukasi",
       title: "Pelajari konteks pemakaian sebelum checkout.",
       description: productName
-        ? `Gunakan jalur belajar untuk memahami kapan "${productName}" lebih relevan dipakai dan apa alternatif pertimbangannya.`
-        : "Masuk ke hub belajar untuk memahami cara pakai, peran input, dan konteks pembelian yang lebih sehat.",
+        ? `Gunakan jalur edukasi untuk memahami kapan "${productName}" lebih relevan dipakai dan apa alternatif pertimbangannya.`
+        : "Masuk ke hub edukasi untuk memahami cara pakai, peran input, dan konteks pembelian yang lebih sehat.",
       href: "/belajar",
-      actionLabel: "Masuk ke Belajar",
+      actionLabel: "Masuk ke Edukasi",
       supportingLinks: [{ href: "/artikel", label: "Baca panduan" }],
     },
     {
       pillar: "solve",
-      eyebrow: "Cari Solusi",
+      eyebrow: "Solusi",
       title: "Pastikan produk ini cocok dengan masalah yang dihadapi.",
       description:
-        "Arahkan user ke jalur solusi jika kebutuhan masih dipicu gejala lapangan, bukan daftar belanja yang sudah pasti.",
+        "Arahkan pengguna ke jalur solusi jika kebutuhan masih dipicu gejala lapangan, bukan daftar belanja yang sudah pasti.",
       href: "/solusi",
       actionLabel: "Cari solusi dulu",
-      supportingLinks: [{ href: "/kontak", label: "Butuh bantuan toko" }],
+      supportingLinks: [{ href: "/kontak", label: "Butuh bantuan tim" }],
     },
     {
       pillar: "shop",
-      eyebrow: "Belanja",
+      eyebrow: "Produk",
       title: "Bandingkan opsi lain dalam alur belanja yang sama.",
       description:
-        "Jaga conversion tetap sehat dengan memberi jalur kembali ke kategori dan hub belanja, bukan membuat user buntu di satu PDP.",
-      href: "/belanja",
-      actionLabel: "Buka hub Belanja",
+        "Beri jalur kembali ke kategori dan halaman produk agar pengguna bisa membandingkan dengan lebih tenang.",
+      href: "/produk",
+      actionLabel: "Buka produk",
       supportingLinks: [
         { href: categoryHref, label: category?.name ? `Kategori ${category.name}` : "Lihat kategori" },
         { href: "/produk?sort=promo", label: "Promo aktif" },
@@ -355,34 +447,34 @@ export function getStaticRelationCards(pageTitle?: string): PathwayCard[] {
   return [
     {
       pillar: "learn",
-      eyebrow: "Belajar",
-      title: "Masuk ke jalur belajar yang lebih terstruktur.",
+      eyebrow: "Edukasi",
+      title: "Masuk ke jalur edukasi yang lebih terstruktur.",
       description: pageTitle
-        ? `Setelah membaca ${pageTitle.toLowerCase()}, user bisa masuk ke hub belajar untuk memperdalam konteks.`
-        : "Masuk ke hub belajar untuk memperdalam konteks sebelum mengambil langkah berikutnya.",
+        ? `Setelah membaca ${pageTitle.toLowerCase()}, pembaca bisa masuk ke hub edukasi untuk memperdalam konteks.`
+        : "Masuk ke hub edukasi untuk memperdalam konteks sebelum mengambil langkah berikutnya.",
       href: "/belajar",
-      actionLabel: "Buka Belajar",
+      actionLabel: "Buka Edukasi",
       supportingLinks: [{ href: "/artikel", label: "Artikel terbaru" }],
     },
     {
       pillar: "solve",
-      eyebrow: "Cari Solusi",
+      eyebrow: "Solusi",
       title: "Pakai jalur solusi saat kebutuhan sudah spesifik.",
       description:
-        "Layer solusi membantu user yang datang dengan masalah nyata, bukan hanya ingin membaca informasi umum.",
+        "Jalur solusi membantu pengguna yang datang dengan masalah nyata, bukan hanya ingin membaca informasi umum.",
       href: "/solusi",
-      actionLabel: "Masuk ke Cari Solusi",
-      supportingLinks: [{ href: "/kontak", label: "Hubungi toko" }],
+      actionLabel: "Masuk ke Solusi",
+      supportingLinks: [{ href: "/kontak", label: "Hubungi tim" }],
     },
     {
       pillar: "shop",
-      eyebrow: "Belanja",
+      eyebrow: "Produk",
       title: "Lanjutkan ke produk saat kebutuhan sudah jelas.",
       description:
-        "Hub belanja menjaga jalur komersial tetap kuat tanpa membingungkan user yang sedang berada di halaman informasi.",
-      href: "/belanja",
-      actionLabel: "Masuk ke Belanja",
-      supportingLinks: [{ href: "/produk", label: "Buka katalog" }],
+        "Halaman produk menjaga jalur belanja tetap jelas tanpa membingungkan pembaca yang sedang berada di halaman informasi.",
+      href: "/produk",
+      actionLabel: "Buka produk",
+      supportingLinks: [{ href: "/produk", label: "Lihat semua produk" }],
     },
   ];
 }

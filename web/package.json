@@ -9,7 +9,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "validate:commercial-content": "tsc --noEmit && next build"
   },
   "dependencies": {
     "next": "16.2.0",

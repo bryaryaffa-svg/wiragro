@@ -55,10 +55,10 @@ export async function generateMetadata({
   );
 
   return buildArticleListingMetadata({
-    title: hasFilter ? "Hasil eksplorasi artikel pertanian" : "Ruang Belajar & Artikel Pertanian",
+    title: hasFilter ? "Hasil eksplorasi artikel pertanian" : "Ruang Edukasi & Artikel Pertanian",
     description: hasFilter
-      ? "Eksplorasi artikel pertanian Wiragro berdasarkan komoditas, topik, gejala, fase tanam, atau tujuan user."
-      : "Pusat edukasi Wiragro untuk membantu user belajar, memahami gejala, memilih produk, dan bergerak ke solusi dengan lebih yakin.",
+      ? "Eksplorasi artikel pertanian Wiragro berdasarkan komoditas, topik, gejala, fase tanam, atau tujuan pembaca."
+      : "Pusat edukasi Wiragro untuk membantu pembaca belajar, memahami gejala, memilih produk, dan bergerak ke solusi dengan lebih yakin.",
     path: "/artikel",
     canonicalPath: "/artikel",
     noIndex: hasFilter,
@@ -100,9 +100,9 @@ export default async function ArticlesPage({
       <JsonLd
         data={[
           buildCollectionJsonLd({
-            title: "Ruang Belajar Wiragro",
+            title: "Ruang Edukasi Wiragro",
             description:
-              "Kumpulan artikel dan insight pertanian yang bisa dijelajahi berdasarkan komoditas, topik, gejala, fase tanam, dan tujuan user.",
+              "Kumpulan artikel dan insight pertanian yang bisa dijelajahi berdasarkan komoditas, topik, gejala, fase tanam, dan tujuan pembaca.",
             path: "/artikel",
             itemUrls: filteredArticles.slice(0, 12).map((article) => `/artikel/${article.slug}`),
           }),
@@ -116,10 +116,10 @@ export default async function ArticlesPage({
 
       <div className="page-intro page-intro--compact">
         <span className="eyebrow-label">Mesin edukasi</span>
-        <h1>Ruang belajar yang benar-benar bisa dijelajahi, bukan sekadar daftar artikel tipis.</h1>
+        <h1>Ruang edukasi yang benar-benar bisa dijelajahi, bukan sekadar daftar artikel tipis.</h1>
         <p>
           Gunakan pencarian bila Anda sudah tahu topiknya, atau masuk lewat komoditas, gejala,
-          fase tanam, dan tujuan user agar konten terasa lebih relevan sejak awal.
+          fase tanam, dan tujuan pembaca agar konten terasa lebih relevan sejak awal.
         </p>
       </div>
 
@@ -127,7 +127,7 @@ export default async function ArticlesPage({
         <input
           defaultValue={filters.q}
           name="q"
-          placeholder="Cari pupuk, benih, gejala, fase tanam, atau kebutuhan user..."
+          placeholder="Cari pupuk, benih, gejala, fase tanam, atau kebutuhan tanaman..."
         />
         {filters.komoditas ? <input name="komoditas" type="hidden" value={filters.komoditas} /> : null}
         {filters.topik ? <input name="topik" type="hidden" value={filters.topik} /> : null}
@@ -147,7 +147,7 @@ export default async function ArticlesPage({
             <span className="eyebrow-label">Hasil eksplorasi</span>
             <h2>{filteredArticles.length} artikel siap dibaca</h2>
             <p>
-              Kombinasikan pencarian dan taxonomy untuk mempersempit konten dari niat user,
+              Kombinasikan pencarian dan taxonomy untuk mempersempit konten dari kebutuhan,
               bukan hanya dari judul artikel.
             </p>
           </div>
@@ -224,7 +224,7 @@ export default async function ArticlesPage({
 
       <PathwaySection
         cards={getArticleRelationCards(featuredArticle?.title)}
-        description="Begitu user mendapatkan konteks dari edukasi, selalu beri jalan jelas ke solusi atau ke produk."
+        description="Begitu pembaca mendapatkan konteks dari edukasi, selalu beri jalan jelas ke solusi atau ke produk."
         eyebrow="Relasi silang"
         title="Konten edukasi harus mendorong langkah berikutnya, bukan berhenti di bacaan."
       />

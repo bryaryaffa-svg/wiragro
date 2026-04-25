@@ -42,11 +42,11 @@ export function ContentRelationAlert({
 
   return (
     <article className="content-relation-alert">
-      <span className="eyebrow-label">Fallback relasi</span>
+      <span className="eyebrow-label">Info konten terkait</span>
       <strong>{title}</strong>
       <p>
-        Referensi berikut belum tersambung ke registry aktif: {summary}. Halaman ini tetap
-        tampil, tetapi tim konten perlu melengkapi mapping tersebut.
+        Beberapa referensi pendukung belum siap ditampilkan: {summary}. Halaman utama ini tetap
+        bisa dipakai, dan tautan terkait akan dilengkapi bertahap.
       </p>
       {href && actionLabel ? (
         <Link className="content-relation-alert__action" href={href}>

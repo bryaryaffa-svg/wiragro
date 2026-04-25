@@ -6,8 +6,8 @@ import { buildUtilityMetadata } from "@/lib/seo";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = buildUtilityMetadata(
-  "Akun Customer",
-  "Halaman akun customer Wiragro untuk login dan mengelola akses belanja.",
+  "Akun Wiragro",
+  "Halaman akun Wiragro untuk login, menyimpan wishlist, dan mengelola aktivitas belanja Anda.",
   "/akun",
 );
 

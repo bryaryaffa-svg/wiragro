@@ -6,9 +6,11 @@ import { useState } from "react";
 
 import { AddToCartButton } from "@/components/cart/add-to-cart-button";
 import { BuyNowButton } from "@/components/cart/buy-now-button";
+import { CommerceIntentLink } from "@/components/commerce-intent-link";
 import { WishlistButton } from "@/components/wishlist-button";
 import type { ProductDetailPayload } from "@/lib/api";
 import { formatCurrency } from "@/lib/format";
+import type { CommerceWhatsAppLink } from "@/lib/growth-commerce";
 import type { ProductPageEnrichment } from "@/lib/product-content";
 
 function clampQty(value: number) {
@@ -36,11 +38,15 @@ const PRODUCT_SHOWCASE_WISHLIST_SLOT_STYLE = {
 export function ProductDetailView({
   product,
   enrichment,
-  consultationUrl,
+  consultationLink,
+  b2bInquiryHref,
+  b2bInquiryLabel,
 }: {
   product: ProductDetailPayload;
   enrichment: ProductPageEnrichment;
-  consultationUrl?: string | null;
+  consultationLink?: CommerceWhatsAppLink | null;
+  b2bInquiryHref?: string;
+  b2bInquiryLabel?: string;
 }) {
   const defaultImage = product.images.find((image) => image.is_primary) ?? product.images[0] ?? null;
   const [selectedImageId, setSelectedImageId] = useState<string | null>(defaultImage?.id ?? null);
@@ -111,7 +117,7 @@ export function ProductDetailView({
             {product.badges.best_seller ? <span>Terlaris</span> : null}
           </div>
           <span className="eyebrow-label">
-            {enrichment.useCaseLabel} · {product.category?.name || product.product_type}
+            {enrichment.useCaseLabel} - {product.category?.name || product.product_type}
           </span>
           <h1>{product.name}</h1>
           <p>{product.description || product.summary}</p>
@@ -195,15 +201,26 @@ export function ProductDetailView({
               productId={product.id}
               qty={qty}
             />
-            {consultationUrl ? (
-              <a className="btn btn-secondary btn-block" href={consultationUrl} rel="noreferrer" target="_blank">
+            {consultationLink ? (
+              <CommerceIntentLink
+                className="btn btn-secondary btn-block"
+                href={consultationLink.href}
+                leadRef={consultationLink.leadRef}
+                leadSummary={consultationLink.leadSummary}
+                tracking={consultationLink.tracking}
+              >
                 Konsultasi sebelum beli
-              </a>
+              </CommerceIntentLink>
             ) : (
               <Link className="btn btn-secondary btn-block" href="/kontak">
-                Tanya ke toko
+                Tanya tim Wiragro
               </Link>
             )}
+            {b2bInquiryHref ? (
+              <Link className="btn btn-secondary btn-block" href={b2bInquiryHref}>
+                {b2bInquiryLabel || "Ajukan inquiry B2B"}
+              </Link>
+            ) : null}
             <Link className="btn btn-secondary btn-block" href="/keranjang">
               Buka keranjang
             </Link>

@@ -95,7 +95,7 @@ function getLearningLabel(queryKey: Exclude<keyof SolutionFilterState, "q">) {
     return "Buka edukasi per fase";
   }
 
-  return "Masuk ke Belajar";
+  return "Buka Edukasi";
 }
 
 export async function generateMetadata({
@@ -237,7 +237,7 @@ export default async function SolutionTaxonomyDetailPage({
         <h1>{term.label}</h1>
         <p>
           {term.description} Halaman ini menyatukan gejala, tindakan, artikel, produk,
-          dan konsultasi ke dalam satu entry point yang lebih jelas untuk user pertanian.
+          dan konsultasi ke dalam satu jalur yang lebih jelas untuk kebutuhan pertanian.
         </p>
       </div>
 
@@ -264,7 +264,7 @@ export default async function SolutionTaxonomyDetailPage({
             <span className="eyebrow-label">Halaman solusi</span>
             <h2>{filteredSolutions.length} solusi di cluster ini</h2>
             <p>
-              Semua halaman di sini membawa user dari problem nyata ke verifikasi,
+              Semua halaman di sini membawa pengunjung dari masalah nyata ke verifikasi,
               tindakan, edukasi, dan produk yang lebih relevan.
             </p>
           </div>
@@ -293,7 +293,7 @@ export default async function SolutionTaxonomyDetailPage({
             </div>
             <div className="solution-list-highlight__aside">
               <span className="eyebrow-label">Cara pakai cluster ini</span>
-              <strong>Gunakan cluster ini saat user datang dengan intent yang sudah cukup spesifik.</strong>
+              <strong>Gunakan cluster ini saat kebutuhan yang dicari sudah cukup spesifik.</strong>
               <ul className="plain-list">
                 <li>Mulai dari halaman solusi yang gejalanya paling dekat.</li>
                 <li>Baca verifikasi dan tindakan sebelum membandingkan produk.</li>
@@ -317,7 +317,7 @@ export default async function SolutionTaxonomyDetailPage({
           <div className="section-heading">
             <div>
               <span className="eyebrow-label">Edukasi terkait</span>
-              <h2>Artikel yang membantu user memahami cluster ini lebih dalam.</h2>
+              <h2>Artikel yang membantu pengunjung memahami cluster ini lebih dalam.</h2>
             </div>
             <Link href={learningHref}>{getLearningLabel(section.queryKey)}</Link>
           </div>
@@ -334,9 +334,9 @@ export default async function SolutionTaxonomyDetailPage({
           <div className="section-heading">
             <div>
               <span className="eyebrow-label">Produk relevan</span>
-              <h2>Produk tampil setelah user punya cukup konteks dari cluster masalah ini.</h2>
+              <h2>Produk tampil setelah pengunjung punya cukup konteks dari cluster masalah ini.</h2>
             </div>
-            <Link href="/belanja">Masuk ke Belanja</Link>
+            <Link href="/produk">Jelajahi produk</Link>
           </div>
           <div className="product-grid product-grid--catalog">
             {relatedProducts.map((product) => (
@@ -350,11 +350,11 @@ export default async function SolutionTaxonomyDetailPage({
         <article className="solution-list-highlight">
           <div className="solution-list-highlight__copy">
             <span className="eyebrow-label">Langkah berikutnya</span>
-            <h2>Jaga flow user tetap utuh dari masalah ke keputusan.</h2>
+            <h2>Jaga alur dari masalah ke keputusan tetap utuh.</h2>
             <p>
               Cluster solusi ini sengaja dihubungkan ke belajar, komoditas, produk,
-              dan konsultasi agar problem-solving terasa nyata, meyakinkan, dan siap
-              mengarah ke conversion.
+              dan konsultasi agar proses mencari solusi terasa nyata, meyakinkan, dan mudah
+              diteruskan ke keputusan belanja.
             </p>
             <div className="article-list-highlight__actions">
               <Link className="btn btn-primary" href={learningHref}>
@@ -369,18 +369,18 @@ export default async function SolutionTaxonomyDetailPage({
                 </a>
               ) : (
                 <Link className="btn btn-secondary" href="/kontak">
-                  Hubungi toko
+                  Hubungi tim
                 </Link>
               )}
             </div>
           </div>
           <div className="solution-list-highlight__aside">
             <span className="eyebrow-label">Bridge</span>
-            <strong>Semua jalan dari cluster ini seharusnya terasa logis untuk user.</strong>
+            <strong>Semua jalan dari cluster ini seharusnya terasa logis untuk pengunjung.</strong>
             <ul className="plain-list">
-              <li>Belajar memberi konteks sebelum keputusan belanja.</li>
+              <li>Edukasi memberi konteks sebelum keputusan belanja.</li>
               <li>Komoditas menyatukan solusi, artikel, bundle, dan produk per tanaman.</li>
-              <li>WhatsApp menjadi safety net saat user ingin validasi cepat.</li>
+              <li>WhatsApp menjadi jalur bantuan saat pengunjung ingin validasi cepat.</li>
             </ul>
           </div>
         </article>

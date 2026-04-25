@@ -3,8 +3,11 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
+import { B2BInquiryStatusPanel } from "@/components/b2b-inquiry-status-panel";
+import { OrderReviewActionGroup } from "@/components/order-review-action-group";
 import { ReorderOrderButton } from "@/components/reorder-order-button";
 import type {
+  CustomerB2BInquiryPayload,
   CustomerAddressInput,
   CustomerAccountPayload,
   CustomerOrderSummaryPayload,
@@ -14,6 +17,7 @@ import {
   createCustomerAddress,
   deleteCustomerAddress,
   getCustomerAccount,
+  getCustomerB2BInquiries,
   getCustomerOrders,
   updateCustomerAddress,
 } from "@/lib/api";
@@ -66,9 +70,52 @@ function addressSummary(address: CustomerAccountPayload["addresses"][number]) {
     .join(", ");
 }
 
-export function AccountDashboard({ session }: { session: CustomerSession }) {
+function formatAccountModeLabel(mode?: string | null) {
+  const normalized = (mode ?? "").trim().toLowerCase();
+
+  switch (normalized) {
+    case "customer":
+    case "retail":
+      return "Akun retail";
+    case "b2b":
+      return "Akun B2B";
+    case "distributor":
+      return "Akun distributor";
+    case "reseller":
+      return "Akun reseller";
+    default:
+      return mode?.trim() || "Pengguna";
+  }
+}
+
+function formatAccountRoleLabel(role?: string | null) {
+  const normalized = (role ?? "").trim().toLowerCase();
+
+  switch (normalized) {
+    case "customer":
+      return "Pembeli";
+    case "distributor":
+      return "Distributor";
+    case "reseller":
+      return "Reseller";
+    case "b2b":
+      return "Buyer B2B";
+    default:
+      return role?.trim() || "Akun ini aktif untuk wishlist, pelacakan, dan pembelian ulang.";
+  }
+}
+
+export function AccountDashboard({
+  session,
+  reviewOrderNumber,
+}: {
+  session: CustomerSession;
+  reviewOrderNumber?: string | null;
+}) {
+  const orderHistoryLimit = reviewOrderNumber ? 50 : 8;
   const [account, setAccount] = useState<CustomerAccountPayload | null>(null);
   const [orders, setOrders] = useState<CustomerOrderSummaryPayload[]>([]);
+  const [b2bInquiries, setB2BInquiries] = useState<CustomerB2BInquiryPayload[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [form, setForm] = useState<CustomerAddressInput>(() => buildAddressForm(session.customer));
@@ -80,19 +127,21 @@ export function AccountDashboard({ session }: { session: CustomerSession }) {
   async function refreshDashboard() {
     setIsLoading(true);
     try {
-      const [nextAccount, nextOrders] = await Promise.all([
+      const [nextAccount, nextOrders, nextB2BInquiries] = await Promise.all([
         getCustomerAccount(session.access_token),
-        getCustomerOrders(session.access_token, 8),
+        getCustomerOrders(session.access_token, orderHistoryLimit),
+        getCustomerB2BInquiries(session.access_token),
       ]);
 
       setAccount(nextAccount);
       setOrders(nextOrders.items);
+      setB2BInquiries(nextB2BInquiries.items);
       setError(null);
     } catch (fetchError) {
       setError(
         fetchError instanceof Error
           ? fetchError.message
-          : "Data akun customer belum berhasil dimuat.",
+          : "Data akun belum berhasil dimuat.",
       );
     } finally {
       setIsLoading(false);
@@ -102,22 +151,54 @@ export function AccountDashboard({ session }: { session: CustomerSession }) {
   useEffect(() => {
     void refreshDashboard();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [session.access_token]);
+  }, [orderHistoryLimit, session.access_token]);
 
   const defaultAddress = useMemo(
     () => account?.addresses.find((item) => item.is_default) ?? null,
     [account?.addresses],
+  );
+  const reviewReadyCount = useMemo(
+    () =>
+      orders.reduce(
+        (total, order) => total + (order.review_summary?.ready_item_count ?? 0),
+        0,
+      ),
+    [orders],
+  );
+  const reviewPendingCount = useMemo(
+    () =>
+      orders.reduce(
+        (total, order) => total + (order.review_summary?.pending_item_count ?? 0),
+        0,
+      ),
+    [orders],
+  );
+  const focusedReviewOrder = useMemo(
+    () =>
+      reviewOrderNumber
+        ? orders.find((order) => order.order_number === reviewOrderNumber) ?? null
+        : null,
+    [orders, reviewOrderNumber],
+  );
+  const activeB2BCount = useMemo(
+    () =>
+      b2bInquiries.filter((item) => !["won", "closed"].includes(item.status)).length,
+    [b2bInquiries],
+  );
+  const quotedB2BCount = useMemo(
+    () => b2bInquiries.filter((item) => item.quote.has_estimate).length,
+    [b2bInquiries],
   );
 
   return (
     <section className="account-dashboard">
       <div className="section-heading">
         <div>
-          <span className="eyebrow-label">Retention layer</span>
-          <h2>Akun sekarang membantu order ulang, bukan hanya menyimpan login.</h2>
+          <span className="eyebrow-label">Akun</span>
+          <h2>Akun membantu order ulang, alamat tersimpan, dan status inquiry dalam satu tempat.</h2>
           <p>
-            Fase ini mengaktifkan alamat tersimpan dan riwayat pesanan agar belanja berikutnya
-            terasa lebih singkat dan lebih percaya diri.
+            Semua kebutuhan sesudah login dirapikan di sini agar belanja berikutnya terasa lebih
+            singkat, lebih jelas, dan lebih nyaman dipantau.
           </p>
         </div>
         <div className="homepage-trust-panel__actions">
@@ -144,13 +225,47 @@ export function AccountDashboard({ session }: { session: CustomerSession }) {
           <p>
             {orders.length
               ? "Gunakan order history sebagai referensi repeat order dan validasi ritme belanja."
-              : "Order history akan muncul di sini setelah customer menyelesaikan transaksi."}
+              : "Riwayat pesanan akan muncul di sini setelah Anda menyelesaikan transaksi."}
+          </p>
+        </article>
+        <article className="panel-card">
+          <span className="eyebrow-label">Review terverifikasi</span>
+          <strong>
+            {reviewReadyCount
+              ? `${reviewReadyCount} produk siap direview`
+              : reviewPendingCount
+                ? `${reviewPendingCount} review menunggu moderasi`
+                : "Belum ada review yang perlu ditindak"}
+          </strong>
+          <p>
+            {reviewReadyCount
+              ? "Buka order yang sudah lunas untuk menulis review dari pengalaman pakai Anda."
+              : reviewPendingCount
+                ? "Review yang sudah dikirim tetap bisa dipantau status moderasinya dari order history."
+                : "Saat ada order paid yang belum direview, CTA review akan muncul di sini."}
           </p>
         </article>
         <article className="panel-card">
           <span className="eyebrow-label">Mode akun</span>
-          <strong>{account?.pricing_mode || session.pricing_mode || "Customer"}</strong>
-          <p>{account?.role || session.role || "Akun ini aktif untuk wishlist, pelacakan, dan pembelian ulang."}</p>
+          <strong>{formatAccountModeLabel(account?.pricing_mode || session.pricing_mode)}</strong>
+          <p>{formatAccountRoleLabel(account?.role || session.role)}</p>
+        </article>
+        <article className="panel-card">
+          <span className="eyebrow-label">Inquiry B2B</span>
+          <strong>
+            {quotedB2BCount
+              ? `${quotedB2BCount} inquiry sudah punya estimasi`
+              : activeB2BCount
+                ? `${activeB2BCount} inquiry sedang berjalan`
+                : "Belum ada inquiry B2B"}
+          </strong>
+          <p>
+            {quotedB2BCount
+              ? "Pantau estimasi kebutuhan, catatan tim Wiragro, dan status tindak lanjut tanpa keluar dari akun."
+              : activeB2BCount
+                ? "Tim Wiragro masih memproses inquiry yang sudah Anda kirim."
+                : "Saat Anda mengirim inquiry B2B sambil login, statusnya akan muncul di dashboard ini."}
+          </p>
         </article>
       </div>
 
@@ -158,7 +273,7 @@ export function AccountDashboard({ session }: { session: CustomerSession }) {
         <section className="panel-card account-panel-section">
           <div className="account-panel-section__header">
             <div>
-              <span className="eyebrow-label">Saved address</span>
+              <span className="eyebrow-label">Alamat tersimpan</span>
               <h3>Alamat pengiriman tersimpan</h3>
             </div>
             <button
@@ -174,7 +289,7 @@ export function AccountDashboard({ session }: { session: CustomerSession }) {
             </button>
           </div>
 
-          {isLoading && !account ? <p className="inline-note">Memuat alamat customer...</p> : null}
+          {isLoading && !account ? <p className="inline-note">Memuat alamat tersimpan...</p> : null}
 
           <div className="account-address-grid">
             {account?.addresses.length ? (
@@ -298,7 +413,7 @@ export function AccountDashboard({ session }: { session: CustomerSession }) {
                 onChange={(event) =>
                   setForm((current) => ({ ...current, label: event.target.value }))
                 }
-                placeholder="Rumah, kebun, gudang, atau kantor"
+                placeholder="Rumah, kebun, toko, atau kantor"
               />
             </label>
             <label>
@@ -428,6 +543,24 @@ export function AccountDashboard({ session }: { session: CustomerSession }) {
             </Link>
           </div>
 
+          {focusedReviewOrder ? (
+            <OrderReviewActionGroup
+              compact
+              highlight
+              orderNumber={focusedReviewOrder.order_number}
+              reviewSummary={focusedReviewOrder.review_summary}
+            />
+          ) : null}
+          {reviewOrderNumber && !focusedReviewOrder && !isLoading ? (
+            <div className="panel-card panel-card--inline">
+              <strong>Order {reviewOrderNumber} belum ditemukan di akun ini.</strong>
+              <p>
+                Masuk dengan akun yang sama seperti saat checkout atau cek ulang nomor
+                order lewat halaman tracking jika pembeliannya masih baru.
+              </p>
+            </div>
+          ) : null}
+
           {isLoading && !orders.length ? <p className="inline-note">Memuat riwayat pesanan...</p> : null}
 
           <div className="account-order-grid">
@@ -459,6 +592,11 @@ export function AccountDashboard({ session }: { session: CustomerSession }) {
                       <strong>{[order.shipping_method, order.payment_method].filter(Boolean).join(" / ") || "-"}</strong>
                     </div>
                   </div>
+                  <OrderReviewActionGroup
+                    compact
+                    orderNumber={order.order_number}
+                    reviewSummary={order.review_summary}
+                  />
                   <div className="account-order-card__actions">
                     <ReorderOrderButton orderId={order.id} />
                     <Link
@@ -472,12 +610,14 @@ export function AccountDashboard({ session }: { session: CustomerSession }) {
               ))
             ) : (
               <div className="panel-card panel-card--inline">
-                Belum ada riwayat pesanan. Setelah checkout pertama selesai, order history akan
+                Belum ada riwayat pesanan. Setelah checkout pertama selesai, riwayat pesanan akan
                 menjadi pintu paling cepat untuk repeat order.
               </div>
             )}
           </div>
         </section>
+
+        <B2BInquiryStatusPanel isLoading={isLoading} items={b2bInquiries} />
       </div>
     </section>
   );

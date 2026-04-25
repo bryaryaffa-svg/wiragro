@@ -46,7 +46,7 @@ export function CartPageClient() {
         <article className="panel-card panel-card--loading">
           <span className="eyebrow-label">Keranjang</span>
           <h1>Menyiapkan keranjang Anda...</h1>
-          <p>Data belanja terakhir sedang dimuat dari browser dan backend storefront.</p>
+          <p>Data belanja terakhir sedang dimuat dari browser dan layanan Wiragro.</p>
         </article>
       </section>
     );
@@ -80,8 +80,8 @@ export function CartPageClient() {
           <span className="eyebrow-label">Keranjang</span>
           <h1>Tinjau produk sebelum masuk ke checkout.</h1>
           <p>
-            Keranjang Anda disimpan di browser ini dan disinkronkan ke backend, jadi
-            perubahan jumlah item akan langsung memengaruhi total pesanan.
+            Keranjang Anda disimpan di browser ini dan disinkronkan ke akun atau sesi aktif,
+            jadi perubahan jumlah item akan langsung memengaruhi total pesanan.
           </p>
         </div>
         <div className="cart-overview__stats">
@@ -143,8 +143,8 @@ export function CartPageClient() {
                       <strong>{item.product_name || "Produk"}</strong>
                     )}
                     <div className="cart-line__meta">
-                      <span>{item.product_unit || "Unit toko"}</span>
-                      <span>{item.price_snapshot.price_type ?? "Harga toko"}</span>
+                      <span>{item.product_unit || "Unit"}</span>
+                      <span>{item.price_snapshot.price_type ?? "Harga aktif"}</span>
                       <span>{formatCurrency(item.price_snapshot.amount)}</span>
                     </div>
                   </div>

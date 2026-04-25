@@ -24,12 +24,12 @@ import {
 
 export const dynamic = "force-dynamic";
 export const metadata = buildCatalogMetadata({
-  title: "Belanja Produk Pertanian di Wiragro",
+  title: "Jalur Produk Pertanian di Wiragro",
   description:
-    "Masuk ke hub belanja Wiragro untuk menjelajahi kategori, produk pilihan, dan jalur beli yang tetap terhubung ke belajar dan solusi.",
+    "Jelajahi kategori, produk pilihan, bundle, dan campaign resmi Wiragro dari satu jalur produk yang lebih rapi.",
   path: "/belanja",
   canonicalPath: "/belanja",
-  keywords: ["belanja produk pertanian", "hub belanja wiragro", "kategori produk pertanian"],
+  keywords: ["produk pertanian wiragro", "jalur produk pertanian", "bundle dan campaign pertanian"],
 });
 
 export default async function BelanjaPage() {
@@ -48,23 +48,24 @@ export default async function BelanjaPage() {
   const intentCards = buildCommerceIntentCards({
     phone: store.whatsapp_number,
     storeName: store.name,
-    bundleTitle: "paket belanja pertanian",
-  }).filter((item) => item.title !== "Repeat order via WA");
+    sourcePath: "/belanja",
+    surface: "shopping-hub",
+  });
 
   return (
     <section className="page-stack">
       <JsonLd
         data={[
           buildWebPageJsonLd({
-            title: "Belanja Produk Pertanian di Wiragro",
+            title: "Jalur Produk Pertanian di Wiragro",
             description:
-              "Hub belanja yang tetap menjaga konteks belajar dan solusi sebelum user turun ke katalog lama.",
+              "Halaman produk yang menjaga konteks edukasi dan solusi sebelum Anda turun ke katalog.",
             path: "/belanja",
           }),
           buildCollectionJsonLd({
-            title: "Hub Belanja Wiragro",
+            title: "Produk Wiragro",
             description:
-              "Pintu masuk komersial yang lebih rapi sebelum user turun ke katalog produk aktif.",
+              "Pintu masuk produk, bundle, dan campaign resmi sebelum Anda turun ke katalog produk aktif.",
             path: "/belanja",
             itemUrls: featuredProducts.items.slice(0, 8).map((product) => `/produk/${product.slug}`),
           }),
@@ -78,11 +79,11 @@ export default async function BelanjaPage() {
 
       <section className="hub-hero hub-hero--shop">
         <div className="hub-hero__copy">
-          <span className="eyebrow-label">Belanja</span>
-          <h1>Katalog tetap jadi mesin conversion, tetapi sekarang punya pintu masuk yang lebih jelas.</h1>
+          <span className="eyebrow-label">Produk</span>
+          <h1>Produk, bundle, dan campaign resmi kini hadir dalam satu jalur yang lebih jelas.</h1>
           <p>
-            Hub belanja memisahkan intent beli dari intent belajar atau menyelesaikan masalah,
-            sambil tetap mengalirkan user ke katalog lama yang sudah siap dipakai.
+            Halaman ini membantu Anda masuk dari kategori, bundle, campaign, atau katalog produk
+            tanpa kehilangan konteks solusi dan edukasi yang sudah dibangun di website.
           </p>
           <div className="hub-hero__actions">
             <Link className="btn btn-primary" href="/produk">
@@ -97,15 +98,15 @@ export default async function BelanjaPage() {
         <div className="hub-hero__meta">
           <div>
             <span>Masuk dari</span>
-            <strong>Kebutuhan yang sudah jelas dan siap dibeli</strong>
+            <strong>Kebutuhan yang sudah jelas, ingin cepat, atau siap dibeli</strong>
           </div>
           <div>
             <span>Tujuan</span>
-            <strong>Mempercepat pencarian kategori, promo, dan produk aktif</strong>
+            <strong>Mempercepat pencarian kategori, penawaran resmi, dan produk aktif</strong>
           </div>
           <div>
-            <span>Jaga conversion</span>
-            <strong>Route katalog lama tetap hidup agar transisi tidak merusak UX</strong>
+            <span>Jaga keputusan</span>
+            <strong>Semua jalur tetap terhubung ke solusi, edukasi, dan katalog aktif</strong>
           </div>
         </div>
       </section>
@@ -113,19 +114,19 @@ export default async function BelanjaPage() {
       <PathwaySection
         action={{ href: "/produk", label: "Masuk ke katalog" }}
         cards={getShoppingHubCards()}
-        description="Belanja tetap kuat, tetapi tidak lagi menjadi satu-satunya wajah situs. User bisa selalu kembali ke belajar atau solusi saat konteksnya belum cukup."
-        eyebrow="Hub belanja"
-        title="Masuk ke jalur komersial tanpa memutus konteks yang dibangun di dua pilar lainnya."
+        description="Jalur produk tetap kuat, tetapi tidak lagi menjadi satu-satunya wajah situs. User bisa selalu kembali ke edukasi atau solusi saat konteksnya belum cukup."
+        eyebrow="Jalur produk"
+        title="Masuk ke penawaran resmi tanpa memutus konteks yang dibangun di dua pilar lainnya."
       />
 
       <section className="section-block">
         <div className="section-heading">
           <div>
             <span className="eyebrow-label">Paket & bundle</span>
-            <h2>Landing komersial yang lebih siap untuk assisted conversion.</h2>
+            <h2>Paket pilihan yang memudahkan pembeli menentukan kebutuhan.</h2>
             <p>
-              Bundle hub dipakai untuk menaikkan AOV, memudahkan user memilih paket yang
-              sudah dikurasi, dan membuka jalur masuk ke pembelian partai atau repeat order.
+              Bundle membantu pembeli memilih paket yang sudah dikurasi, lalu membuka jalur
+              ke pembelian partai atau belanja ulang bila dibutuhkan.
             </p>
           </div>
           <Link href="/belanja/paket">Lihat semua paket</Link>
@@ -143,10 +144,10 @@ export default async function BelanjaPage() {
         <div className="section-heading">
           <div>
             <span className="eyebrow-label">Produk pilihan</span>
-            <h2>Pilihan awal untuk user yang sudah siap bertransaksi.</h2>
+            <h2>Pilihan awal untuk pembeli yang sudah siap bertransaksi.</h2>
             <p>
               Hub ini sengaja tidak menggantikan katalog lama. Ia hanya merapikan pintu
-              masuk sebelum user turun ke listing produk yang lebih dalam.
+              masuk sebelum Anda turun ke listing produk yang lebih dalam.
             </p>
           </div>
           <Link href="/produk">Lihat semua produk</Link>
@@ -161,7 +162,7 @@ export default async function BelanjaPage() {
         ) : (
           <article className="empty-state empty-state--shopping">
             <span className="eyebrow-label">Produk belum tampil</span>
-            <h2>Hub belanja aktif, tetapi data katalog sedang tidak berhasil dimuat.</h2>
+            <h2>Halaman produk aktif, tetapi data katalog sedang tidak berhasil dimuat.</h2>
             <p>
               Route lama tetap tersedia dan bisa dipakai ulang begitu data produk kembali aktif.
             </p>
@@ -179,7 +180,7 @@ export default async function BelanjaPage() {
           <div className="section-heading">
             <div>
               <span className="eyebrow-label">Growth entry</span>
-              <h2>Belanja sekarang punya jalur assisted selling yang lebih siap dipakai.</h2>
+              <h2>Belanja sekarang punya jalur bantuan yang lebih siap dipakai.</h2>
             </div>
             <Link href="/b2b">B2B inquiry</Link>
           </div>

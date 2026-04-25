@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 export async function generateMetadata(): Promise<Metadata> {
   return generateStaticPageMetadata("faq", "/faq", {
     title: "FAQ Wiragro",
-    description: "Pertanyaan umum tentang belanja, layanan, dan penggunaan storefront pertanian Wiragro.",
+    description: "Pertanyaan umum tentang solusi tanaman, layanan, akun, dan belanja di Wiragro.",
   });
 }
 

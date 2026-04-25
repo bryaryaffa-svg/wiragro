@@ -7,7 +7,7 @@ import { useAuth } from "@/components/auth-provider";
 import { useCart } from "@/components/cart/cart-provider";
 import { isHybridNavActive } from "@/lib/hybrid-navigation";
 
-type MobileNavIconKind = "learn" | "solve" | "shop" | "cart" | "user";
+type MobileNavIconKind = "home" | "solve" | "shop" | "learn" | "account";
 
 function isActivePath(pathname: string, href: string) {
   if (href === "/") {
@@ -19,6 +19,17 @@ function isActivePath(pathname: string, href: string) {
 
 function MobileNavIcon({ kind }: { kind: MobileNavIconKind }) {
   switch (kind) {
+    case "home":
+      return (
+        <svg aria-hidden="true" fill="none" viewBox="0 0 24 24">
+          <path
+            d="M4.5 10.5 12 4l7.5 6.5V19a1 1 0 0 1-1 1h-4.8v-5.2H10.3V20H5.5a1 1 0 0 1-1-1v-8.5Z"
+            stroke="currentColor"
+            strokeLinejoin="round"
+            strokeWidth="1.8"
+          />
+        </svg>
+      );
     case "learn":
       return (
         <svg aria-hidden="true" fill="none" viewBox="0 0 24 24">
@@ -52,21 +63,7 @@ function MobileNavIcon({ kind }: { kind: MobileNavIconKind }) {
           <path d="M8 7a4 4 0 1 1 8 0" stroke="currentColor" strokeWidth="1.8" />
         </svg>
       );
-    case "cart":
-      return (
-        <svg aria-hidden="true" fill="none" viewBox="0 0 24 24">
-          <path
-            d="M4 6h2l1.5 8.2a1 1 0 0 0 1 .8h7.9a1 1 0 0 0 1-.8L19 8H7"
-            stroke="currentColor"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="1.8"
-          />
-          <circle cx="10" cy="19" fill="currentColor" r="1.5" />
-          <circle cx="17" cy="19" fill="currentColor" r="1.5" />
-        </svg>
-      );
-    case "user":
+    case "account":
       return (
         <svg aria-hidden="true" fill="none" viewBox="0 0 24 24">
           <circle cx="12" cy="8" r="3.2" stroke="currentColor" strokeWidth="1.8" />
@@ -86,45 +83,52 @@ export function MobileBottomNav() {
   const { cart } = useCart();
   const { session } = useAuth();
   const cartCount = cart?.items.reduce((total, item) => total + item.qty, 0) ?? 0;
+  const accountOrCartHref =
+    pathname === "/keranjang" || cartCount > 0 ? "/keranjang" : session ? "/akun" : "/masuk";
+  const accountOrCartLabel =
+    pathname === "/keranjang" || cartCount > 0 ? "Keranjang" : session ? "Akun" : "Akun";
   const mobileLinks = [
     {
-      href: "/belajar",
-      label: "Belajar",
+      href: "/",
+      label: "Beranda",
       badge: null,
-      icon: "learn" as const,
+      icon: "home" as const,
+      hybrid: false,
     },
     {
       href: "/solusi",
       label: "Solusi",
       badge: null,
       icon: "solve" as const,
+      hybrid: true,
     },
     {
-      href: "/belanja",
-      label: "Belanja",
+      href: "/produk",
+      label: "Produk",
       badge: null,
       icon: "shop" as const,
+      hybrid: true,
     },
     {
-      href: "/keranjang",
-      label: "Keranjang",
-      badge: cartCount > 0 ? String(cartCount) : null,
-      icon: "cart" as const,
-    },
-    {
-      href: session ? "/akun" : "/masuk",
-      label: session ? "Akun" : "Masuk",
+      href: "/belajar",
+      label: "Edukasi",
       badge: null,
-      icon: "user" as const,
+      icon: "learn" as const,
+      hybrid: true,
+    },
+    {
+      href: accountOrCartHref,
+      label: accountOrCartLabel,
+      badge: cartCount > 0 ? String(cartCount) : null,
+      icon: "account" as const,
+      hybrid: false,
     },
   ];
 
   return (
     <nav className="mobile-nav" aria-label="Navigasi mobile">
       {mobileLinks.map((link) => {
-        const isHybridLink =
-          link.href === "/belajar" || link.href === "/solusi" || link.href === "/belanja";
-        const isActive = isHybridLink
+        const isActive = link.hybrid
           ? isHybridNavActive(pathname, link.href)
           : isActivePath(pathname, link.href);
         return (

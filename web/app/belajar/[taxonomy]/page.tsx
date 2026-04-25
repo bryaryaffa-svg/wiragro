@@ -49,8 +49,8 @@ export async function generateMetadata({
 
   if (!section) {
     return buildArticleListingMetadata({
-      title: "Jalur belajar tidak tersedia",
-      description: "Taxonomy belajar yang Anda cari belum tersedia di Wiragro.",
+      title: "Jalur edukasi tidak tersedia",
+      description: "Taxonomy edukasi yang Anda cari belum tersedia di Wiragro.",
       path: `/belajar/${taxonomy}`,
       canonicalPath: "/belajar",
       noIndex: true,
@@ -62,8 +62,8 @@ export async function generateMetadata({
 
   if (!availableSlugs.length) {
     return buildArticleListingMetadata({
-      title: "Jalur belajar sedang disiapkan",
-      description: "Taxonomy belajar ini belum memiliki materi yang siap ditampilkan.",
+      title: "Jalur edukasi sedang disiapkan",
+      description: "Taxonomy edukasi ini belum memiliki materi yang siap ditampilkan.",
       path: `/belajar/${taxonomy}`,
       canonicalPath: "/belajar",
       noIndex: true,
@@ -71,13 +71,13 @@ export async function generateMetadata({
   }
 
   return buildArticleListingMetadata({
-    title: `Belajar Pertanian Berdasarkan ${getSectionTitle(section.title)}`,
-    description: `Masuk ke jalur belajar Wiragro berdasarkan ${getSectionTitle(section.title).toLowerCase()} agar konten terasa lebih relevan sejak awal.`,
+    title: `Edukasi Pertanian Berdasarkan ${getSectionTitle(section.title)}`,
+    description: `Masuk ke jalur edukasi Wiragro berdasarkan ${getSectionTitle(section.title).toLowerCase()} agar konten terasa lebih relevan sejak awal.`,
     path: `/belajar/${taxonomy}`,
     canonicalPath: `/belajar/${taxonomy}`,
     keywords: [
-      `belajar ${getSectionTitle(section.title).toLowerCase()}`,
-      "taxonomy belajar pertanian",
+      `edukasi ${getSectionTitle(section.title).toLowerCase()}`,
+      "taxonomy edukasi pertanian",
       ...section.items.slice(0, 4).map((item) => item.label),
     ],
   });
@@ -128,19 +128,19 @@ export default async function LearningTaxonomyIndexPage({
       <JsonLd
         data={[
           buildWebPageJsonLd({
-            title: `Belajar Pertanian Berdasarkan ${getSectionTitle(section.title)}`,
+            title: `Edukasi Pertanian Berdasarkan ${getSectionTitle(section.title)}`,
             description: section.description,
             path: `/belajar/${taxonomy}`,
           }),
           buildCollectionJsonLd({
-            title: `Cluster Belajar ${getSectionTitle(section.title)}`,
+            title: `Cluster Edukasi ${getSectionTitle(section.title)}`,
             description: section.description,
             path: `/belajar/${taxonomy}`,
             itemUrls: cards.map((item) => item.href),
           }),
           buildBreadcrumbJsonLd([
             { name: "Beranda", path: "/" },
-            { name: "Belajar", path: "/belajar" },
+            { name: "Edukasi", path: "/belajar" },
             { name: getSectionTitle(section.title), path: `/belajar/${taxonomy}` },
           ]),
         ]}
@@ -150,17 +150,17 @@ export default async function LearningTaxonomyIndexPage({
       <div className="breadcrumbs">
         <Link href="/">Beranda</Link>
         <span>/</span>
-        <Link href="/belajar">Belajar</Link>
+        <Link href="/belajar">Edukasi</Link>
         <span>/</span>
         <span>{getSectionTitle(section.title)}</span>
       </div>
 
       <div className="page-intro page-intro--compact">
-        <span className="eyebrow-label">Belajar</span>
-        <h1>Masuk dari {getSectionTitle(section.title).toLowerCase()} agar user tidak perlu mulai dari daftar artikel yang datar.</h1>
+        <span className="eyebrow-label">Edukasi</span>
+        <h1>Masuk dari {getSectionTitle(section.title).toLowerCase()} agar pembaca tidak perlu mulai dari daftar artikel yang datar.</h1>
         <p>
           Cluster ini dipakai untuk mengubah mesin edukasi menjadi jalur yang lebih
-          operasional. User bisa memilih konteks yang paling dekat, lalu turun ke
+          operasional. Pembaca bisa memilih konteks yang paling dekat, lalu turun ke
           artikel yang benar-benar relevan.
         </p>
       </div>
@@ -187,7 +187,7 @@ export default async function LearningTaxonomyIndexPage({
               <span className="eyebrow-label">Materi aktif</span>
               <h2>Artikel yang sudah mengisi cluster ini sekarang.</h2>
             </div>
-            <Link href="/belajar">Kembali ke hub Belajar</Link>
+            <Link href="/belajar">Kembali ke pusat edukasi</Link>
           </div>
           <div className="article-grid article-grid--editorial">
             {axisArticles.map((article) => (

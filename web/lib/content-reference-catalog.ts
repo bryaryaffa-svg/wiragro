@@ -151,7 +151,7 @@ export const PRODUCT_SOLUTION_REFERENCE_MAP: Record<
     label: "Daun menguning",
     href: `/solusi/masalah/${SOLUTION_REFERENCE_SLUGS.yellowLeaves}`,
     description:
-      "Bantu user memetakan masalah nutrisi, akar, dan pola air sebelum belanja reaktif.",
+      "Bantu pengunjung memetakan masalah nutrisi, akar, dan pola air sebelum belanja reaktif.",
   },
   [SOLUTION_REFERENCE_SLUGS.leafPests]: {
     slug: SOLUTION_REFERENCE_SLUGS.leafPests,
@@ -172,14 +172,14 @@ export const PRODUCT_SOLUTION_REFERENCE_MAP: Record<
     label: "Pertumbuhan lambat",
     href: `/solusi/masalah/${SOLUTION_REFERENCE_SLUGS.slowGrowth}`,
     description:
-      "Bantu user memeriksa fondasi fase awal sebelum membeli booster tambahan.",
+      "Bantu pengunjung memeriksa fondasi fase awal sebelum membeli booster tambahan.",
   },
   [SOLUTION_REFERENCE_SLUGS.blossomDrop]: {
     slug: SOLUTION_REFERENCE_SLUGS.blossomDrop,
     label: "Bunga rontok / buah tidak jadi",
     href: `/solusi/masalah/${SOLUTION_REFERENCE_SLUGS.blossomDrop}`,
     description:
-      "Gunakan saat fase generatif terganggu dan user butuh konteks yang lebih tepat.",
+      "Gunakan saat fase generatif terganggu dan pengunjung butuh konteks yang lebih tepat.",
   },
   [SOLUTION_REFERENCE_SLUGS.leafSpot]: {
     slug: SOLUTION_REFERENCE_SLUGS.leafSpot,

@@ -16,6 +16,7 @@ import {
   getFallbackArticleSummaries,
 } from "@/lib/article-content";
 import { getProductImageOverride } from "@/lib/product-image-overrides";
+import { BRAND_SUBTAGLINE, SITE_NAME } from "@/lib/seo";
 
 export interface StorefrontSeo {
   title?: string | null;
@@ -71,6 +72,7 @@ export interface ProductSummary {
   created_at?: string | null;
   updated_at?: string | null;
   seo?: StorefrontSeo;
+  review_summary?: ProductReviewSummaryPayload | null;
 }
 
 export interface HomePayload {
@@ -248,6 +250,32 @@ export interface CustomerAccountPayload {
   addresses: CustomerAddressPayload[];
 }
 
+export type CustomerOrderReviewState =
+  | "awaiting_payment"
+  | "ready"
+  | "pending"
+  | "approved"
+  | "needs_update";
+
+export interface CustomerOrderReviewItemPayload {
+  product_id: string;
+  product_name?: string | null;
+  product_slug?: string | null;
+  eligible: boolean;
+  state: CustomerOrderReviewState;
+  can_write_review: boolean;
+  existing_review?: CustomerProductReviewPayload | null;
+}
+
+export interface CustomerOrderReviewSummaryPayload {
+  order_eligible: boolean;
+  ready_item_count: number;
+  pending_item_count: number;
+  approved_item_count: number;
+  needs_update_item_count: number;
+  items: CustomerOrderReviewItemPayload[];
+}
+
 export interface CustomerOrderSummaryPayload {
   id: string;
   order_number: string;
@@ -260,6 +288,7 @@ export interface CustomerOrderSummaryPayload {
   payment_method?: string | null;
   invoice_source?: string | null;
   customer_role?: string | null;
+  review_summary?: CustomerOrderReviewSummaryPayload | null;
 }
 
 export interface CustomerOrderItemPayload {
@@ -272,6 +301,7 @@ export interface CustomerOrderItemPayload {
   discount_total: string;
   line_total: string;
   price_snapshot?: Record<string, unknown>;
+  review_status?: CustomerOrderReviewItemPayload | null;
 }
 
 export interface CustomerOrderDetailPayload extends CustomerOrderSummaryPayload {
@@ -347,9 +377,12 @@ export interface TrackOrderPayload {
   }>;
 }
 
-export interface PublicProductReviewSummaryPayload {
+export interface ProductReviewSummaryPayload {
   average_rating: number | null;
   total_reviews: number;
+}
+
+export interface PublicProductReviewSummaryPayload extends ProductReviewSummaryPayload {
   rating_breakdown: Array<{
     rating: number;
     count: number;
@@ -403,22 +436,88 @@ export interface B2BInquiryInput {
   phone: string;
   email?: string;
   commodityFocus?: string;
+  commoditySlug?: string;
   bundleSlug?: string;
   campaignSlug?: string;
+  productSlug?: string;
+  productName?: string;
   monthlyVolume?: string;
   fulfillmentType?: "pickup" | "delivery" | "mixed";
   preferredFollowUp: "whatsapp" | "phone" | "email";
   budgetHint?: string;
   needSummary: string;
+  requestedItems: B2BInquiryRequestedItemInput[];
   notes?: string;
   sourcePage?: string;
   storeCode?: string;
 }
 
+export interface B2BInquiryRequestedItemInput {
+  label: string;
+  qty?: string;
+  unit?: string;
+  notes?: string;
+}
+
+export interface B2BInquiryRequestedItemPayload {
+  label: string;
+  qty?: string | null;
+  unit?: string | null;
+  notes?: string | null;
+}
+
+export interface B2BQuoteItemPayload extends B2BInquiryRequestedItemPayload {
+  unit_estimate_amount?: string | null;
+  line_estimate_amount?: string | null;
+}
+
 export interface B2BInquiryResponsePayload {
   id: string;
+  inquiry_number: string;
   status: string;
+  status_label: string;
   preferred_follow_up: string;
+}
+
+export interface CustomerB2BInquiryPayload {
+  id: string;
+  inquiry_number: string;
+  status: "new" | "contacted" | "quoted" | "won" | "closed";
+  status_label: string;
+  status_description: string;
+  buyer_type: B2BInquiryInput["buyerType"];
+  buyer_type_label: string;
+  business_name?: string | null;
+  contact_name: string;
+  phone: string;
+  email?: string | null;
+  commodity_focus?: string | null;
+  commodity_slug?: string | null;
+  bundle_slug?: string | null;
+  campaign_slug?: string | null;
+  product_slug?: string | null;
+  product_name?: string | null;
+  monthly_volume?: string | null;
+  fulfillment_type?: B2BInquiryInput["fulfillmentType"] | null;
+  preferred_follow_up: B2BInquiryInput["preferredFollowUp"];
+  budget_hint?: string | null;
+  need_summary: string;
+  requested_items: B2BInquiryRequestedItemPayload[];
+  notes?: string | null;
+  source_page?: string | null;
+  quote: {
+    has_estimate: boolean;
+    items: B2BQuoteItemPayload[];
+    subtotal_amount?: string | null;
+    shipping_amount?: string | null;
+    total_amount?: string | null;
+    sales_note?: string | null;
+    quoted_at?: string | null;
+  };
+  contacted_at?: string | null;
+  quoted_at?: string | null;
+  created_at?: string | null;
+  updated_at?: string | null;
 }
 
 export interface SyncManifestPayload {
@@ -559,6 +658,10 @@ interface LaravelProductDto {
   images?: LaravelProductImageDto[];
   created_at?: string | null;
   updated_at?: string | null;
+  review_summary?: {
+    average_rating?: number | string | null;
+    total_reviews?: number | string | null;
+  } | null;
 }
 
 interface LaravelBannerDto {
@@ -638,7 +741,17 @@ async function parseCustomerResponse<T>(response: Response): Promise<T> {
     throw new ApiRequestError(message || "Request API customer gagal", response.status);
   }
 
-  return response.json() as Promise<T>;
+  const payload = (await response.json().catch(() => null)) as LaravelEnvelope<T> | T | null;
+
+  if (payload && typeof payload === "object" && "data" in payload && "success" in payload) {
+    return payload.data;
+  }
+
+  if (payload === null) {
+    throw new ApiRequestError("Response API customer tidak valid", response.status || 500);
+  }
+
+  return payload as T;
 }
 
 async function fetchJsonWithTimeout(
@@ -745,6 +858,39 @@ function mapCategory(dto: LaravelCategoryDto): CategoryItem {
     name: dto.name,
     slug: dto.slug,
     parent_id: null,
+  };
+}
+
+function mapProductReviewSummary(
+  summary?: LaravelProductDto["review_summary"],
+): ProductReviewSummaryPayload | null {
+  if (!summary) {
+    return null;
+  }
+
+  const totalReviewsValue =
+    typeof summary.total_reviews === "number"
+      ? summary.total_reviews
+      : Number.parseInt(String(summary.total_reviews ?? "0"), 10);
+  const totalReviews = Number.isFinite(totalReviewsValue) ? Math.max(0, totalReviewsValue) : 0;
+
+  if (totalReviews <= 0) {
+    return {
+      average_rating: null,
+      total_reviews: 0,
+    };
+  }
+
+  const averageRatingValue =
+    typeof summary.average_rating === "number"
+      ? summary.average_rating
+      : Number.parseFloat(String(summary.average_rating ?? ""));
+
+  return {
+    average_rating: Number.isFinite(averageRatingValue)
+      ? Number(averageRatingValue.toFixed(1))
+      : null,
+    total_reviews: totalReviews,
   };
 }
 
@@ -860,6 +1006,7 @@ function mapProductSummary(dto: LaravelProductDto): ProductSummary {
     videos: [],
     created_at: dto.created_at ?? null,
     updated_at: dto.updated_at ?? dto.created_at ?? null,
+    review_summary: mapProductReviewSummary(dto.review_summary),
     seo: {
       title: dto.name,
       description: description ? truncate(description, 155) : `${dto.name} - ${getStoreCode()}`,
@@ -933,7 +1080,7 @@ async function fetchStoreProfile(): Promise<StoreProfile> {
 
   return {
     code: dto.store_code,
-    name: dto.store_name,
+    name: SITE_NAME,
     address: dto.store_address ?? null,
     whatsapp_number: dto.whatsapp_number ?? null,
     operational_hours: dto.operational_hours ?? null,
@@ -954,66 +1101,69 @@ function buildStaticPageContent(
   store: StoreProfile,
 ): ContentPagePayload {
   const defaultDescription =
-    "Halaman informasi storefront ini ditampilkan dengan struktur baru yang siap dipindahkan sepenuhnya ke SiGe Manager.";
+    "Halaman informasi resmi Wiragro untuk membantu Anda memahami layanan, belanja, dan dukungan platform secara lebih jelas.";
 
   const pages: Record<string, ContentPagePayload> = {
     "tentang-kami": {
       slug,
-      title: `Tentang ${store.name}`,
-      excerpt: `${store.name} adalah storefront resmi yang menampilkan katalog dan informasi toko dari backend terpusat SiGe Manager.`,
+      title: `Tentang ${SITE_NAME}`,
+      excerpt: `${SITE_NAME} adalah platform solusi pertanian digital yang menyatukan solusi tanaman, edukasi, belanja produk, dan layanan B2C maupun B2B dalam satu tempat.`,
       body_html: `
-        <p>${store.name} hadir untuk memudahkan customer melihat produk aktif, harga terbaru, dan informasi toko dari satu sumber data yang sama.</p>
-        <p>Semua katalog publik di website ini sekarang disiapkan untuk membaca API terpusat, sehingga perubahan produk, harga, stok, dan banner tidak perlu lagi dikelola terpisah.</p>
-        <p><strong>Alamat toko:</strong> ${store.address ?? "-"}</p>
-        <p><strong>Jam operasional:</strong> ${store.operational_hours ?? "-"}</p>
+        <p><strong>${SITE_NAME}</strong> hadir sebagai platform solusi pertanian digital untuk membantu petani, pehobi, kios, dan buyer bisnis bergerak dari masalah ke keputusan yang lebih tepat.</p>
+        <p>Di satu tempat, Anda bisa mencari solusi masalah tanaman, mempelajari praktik budidaya, menemukan produk pertanian yang relevan, dan membuka jalur layanan B2C maupun B2B secara lebih rapi.</p>
+        <p>Kami membangun pengalaman yang ramah, modern, dan mudah dipahami agar proses belajar sampai belanja terasa lebih tenang.</p>
+        <p><strong>Alamat layanan:</strong> ${store.address ?? "-"}</p>
+        <p><strong>Jam layanan:</strong> ${store.operational_hours ?? "-"}</p>
       `,
       seo: {
-        title: `Tentang Kami | ${store.name}`,
+        title: `Tentang Kami | ${SITE_NAME}`,
         description: defaultDescription,
       },
     },
     kontak: {
       slug,
-      title: "Kontak Toko",
-      excerpt: `Hubungi ${store.name} melalui alamat dan WhatsApp resmi yang dikelola dari sistem pusat.`,
+      title: "Kontak Wiragro",
+      excerpt: `Hubungi tim ${SITE_NAME} untuk bantuan produk, konsultasi, pesanan, dan layanan platform.`,
       body_html: `
-        <p><strong>Nama toko:</strong> ${store.name}</p>
+        <p><strong>Nama layanan:</strong> ${SITE_NAME}</p>
         <p><strong>Alamat:</strong> ${store.address ?? "-"}</p>
         <p><strong>WhatsApp:</strong> ${store.whatsapp_number ?? "-"}</p>
-        <p><strong>Jam operasional:</strong> ${store.operational_hours ?? "-"}</p>
+        <p><strong>Jam layanan:</strong> ${store.operational_hours ?? "-"}</p>
         ${
           store.address
-            ? `<p><a href="${buildGoogleMapsStoreSearchUrl(store.name, store.address)}" target="_blank" rel="noreferrer">Buka lokasi di Google Maps</a></p>
+            ? `<p><a href="${buildGoogleMapsStoreSearchUrl(SITE_NAME, store.address)}" target="_blank" rel="noreferrer">Buka lokasi di Google Maps</a></p>
                <div class="map-embed-card">
                  <iframe
-                   src="${buildGoogleMapsStoreEmbedUrl(store.name, store.address)}"
+                   src="${buildGoogleMapsStoreEmbedUrl(SITE_NAME, store.address)}"
                    loading="lazy"
                    referrerpolicy="no-referrer-when-downgrade"
-                   title="Peta lokasi ${store.name}">
+                   title="Peta lokasi ${SITE_NAME}">
                  </iframe>
                </div>`
             : ""
         }
       `,
       seo: {
-        title: `Kontak | ${store.name}`,
+        title: `Kontak | ${SITE_NAME}`,
         description: defaultDescription,
       },
     },
     faq: {
       slug,
       title: "FAQ",
-      excerpt: "Jawaban singkat untuk pertanyaan yang paling sering muncul saat menggunakan storefront.",
+      excerpt: "Jawaban singkat untuk pertanyaan yang paling sering muncul saat menggunakan layanan Wiragro.",
       body_html: `
-        <h2>Apakah harga di website selalu terbaru?</h2>
-        <p>Website membaca data dari backend terpusat, sehingga harga dan status produk mengikuti data yang dikelola admin.</p>
-        <h2>Bagaimana cara menghubungi toko?</h2>
-        <p>Anda bisa menghubungi toko melalui WhatsApp resmi: ${store.whatsapp_number ?? "-"}</p>
+        <h2>Apa yang bisa saya lakukan di Wiragro?</h2>
+        <p>Anda bisa mencari solusi masalah tanaman, membaca edukasi pertanian, membeli produk, melacak pesanan, dan membuka kebutuhan B2B dari satu platform.</p>
+        <h2>Bagaimana cara menghubungi tim Wiragro?</h2>
+        <p>Anda bisa menghubungi WhatsApp resmi di ${store.whatsapp_number ?? "-"} atau membuka halaman kontak untuk detail layanan.</p>
+        <h2>Apakah AI Chat sudah tersedia?</h2>
+        <p>AI Chat pertanian premium sedang dibuka bertahap. Halaman AI Chat akan memberi tahu jalur akses yang paling relevan saat ini.</p>
         <h2>Apakah semua produk selalu tersedia?</h2>
-        <p>Ketersediaan mengikuti stok yang dicatat di sistem admin. Produk yang nonaktif tidak akan ditampilkan di katalog publik.</p>
+        <p>Daftar produk aktif, harga, dan opsi pembelian akan terus diperbarui agar Anda mendapat pilihan yang paling relevan saat berbelanja.</p>
       `,
       seo: {
-        title: `FAQ | ${store.name}`,
+        title: `FAQ | ${SITE_NAME}`,
         description: defaultDescription,
       },
     },
@@ -1021,21 +1171,21 @@ function buildStaticPageContent(
       slug,
       title: "Pengiriman dan Pembayaran",
       excerpt:
-        "Ringkasan pengiriman, pickup, pembayaran, dan langkah checkout yang berlaku di storefront Wiragro.",
+        "Ringkasan pengiriman, pickup, pembayaran, dan langkah checkout yang berlaku di Wiragro.",
       body_html: `
         <h2>Metode pengiriman</h2>
-        <p>Website saat ini mendukung <strong>delivery</strong> dan <strong>pickup toko</strong>. Untuk delivery, biaya ongkir mengikuti layanan kurir yang tersedia saat checkout.</p>
-        <h2>Pickup toko</h2>
-        <p>Pickup dapat dilakukan di <strong>${store.name}</strong> pada jam operasional: ${store.operational_hours ?? "-"}. Alamat toko: ${store.address ?? "-"}</p>
+        <p>${SITE_NAME} mendukung <strong>delivery</strong> dan <strong>pickup</strong>. Untuk delivery, biaya ongkir mengikuti layanan kirim yang tersedia saat checkout.</p>
+        <h2>Pickup</h2>
+        <p>Pickup dapat dilakukan pada jam layanan: ${store.operational_hours ?? "-"}. Alamat pengambilan: ${store.address ?? "-"}</p>
         <h2>Metode pembayaran</h2>
-        <p>Pembayaran yang didukung di fase ini adalah <strong>Duitku VA</strong> dan <strong>COD / nota merah</strong> sesuai pilihan yang muncul saat checkout.</p>
+        <p>Pembayaran yang didukung saat ini adalah <strong>Duitku VA</strong> dan <strong>COD / nota merah</strong> sesuai pilihan yang muncul saat checkout.</p>
         <h2>Catatan penting</h2>
-        <p>Pastikan data penerima, alamat, dan nomor WhatsApp aktif sudah benar sebelum menyelesaikan order agar proses konfirmasi dan pengiriman tidak tertunda.</p>
+        <p>Pastikan data penerima, alamat, dan nomor WhatsApp aktif sudah benar sebelum menyelesaikan pesanan agar proses konfirmasi dan pengiriman berjalan lancar.</p>
       `,
       seo: {
-        title: `Pengiriman dan Pembayaran | ${store.name}`,
+        title: `Pengiriman dan Pembayaran | ${SITE_NAME}`,
         description:
-          "Informasi pengiriman, pickup toko, dan metode pembayaran yang berlaku di storefront Wiragro.",
+          "Informasi pengiriman, pickup, dan metode pembayaran yang berlaku di Wiragro.",
       },
     },
     "garansi-retur": {
@@ -1045,43 +1195,43 @@ function buildStaticPageContent(
         "Penjelasan ringkas tentang validasi order, penanganan kendala, dan jalur bantuan jika produk atau pengiriman bermasalah.",
       body_html: `
         <h2>Validasi sebelum retur</h2>
-        <p>Jika ada kendala pada pesanan, customer dianjurkan mengecek nomor order, kondisi barang, dan bukti penerimaan lebih dulu sebelum mengajukan komplain.</p>
+        <p>Jika ada kendala pada pesanan, pembeli dianjurkan mengecek nomor order, kondisi barang, dan bukti penerimaan lebih dulu sebelum mengajukan komplain.</p>
         <h2>Jalur bantuan</h2>
-        <p>Hubungi WhatsApp resmi toko di <strong>${store.whatsapp_number ?? "-"}</strong> dengan menyertakan nomor order, foto produk, dan ringkasan masalah agar tim toko bisa memberi arahan yang tepat.</p>
+        <p>Hubungi WhatsApp resmi di <strong>${store.whatsapp_number ?? "-"}</strong> dengan menyertakan nomor order, foto produk, dan ringkasan masalah agar tim Wiragro bisa memberi arahan yang tepat.</p>
         <h2>Garansi operasional</h2>
-        <p>Toko akan membantu meninjau masalah yang terkait pesanan aktif, kesalahan item, atau kebutuhan verifikasi pengiriman sesuai data order yang tersimpan di sistem.</p>
+        <p>Kami akan membantu meninjau masalah yang terkait pesanan aktif, kesalahan item, atau kebutuhan verifikasi pengiriman sesuai data transaksi yang tersedia.</p>
         <h2>Batasan</h2>
-        <p>Retur atau penukaran tidak diproses otomatis tanpa verifikasi. Keputusan tindak lanjut mengikuti hasil pengecekan toko terhadap kondisi produk, status pengiriman, dan bukti transaksi.</p>
+        <p>Retur atau penukaran tidak diproses otomatis tanpa verifikasi. Keputusan tindak lanjut mengikuti hasil pengecekan terhadap kondisi produk, status pengiriman, dan bukti transaksi.</p>
       `,
       seo: {
-        title: `Garansi dan Retur | ${store.name}`,
+        title: `Garansi dan Retur | ${SITE_NAME}`,
         description:
-          "Informasi garansi operasional, bantuan komplain, dan alur retur yang berlaku di storefront Wiragro.",
+          "Informasi bantuan komplain, garansi operasional, dan alur retur yang berlaku di Wiragro.",
       },
     },
     "kebijakan-privasi": {
       slug,
       title: "Kebijakan Privasi",
-      excerpt: "Ringkasan kebijakan privasi storefront Kios Sidomakmur.",
+      excerpt: `Ringkasan kebijakan privasi ${SITE_NAME}.`,
       body_html: `
-        <p>Data yang ditampilkan di website ini digunakan untuk kebutuhan informasi produk, kontak toko, dan proses transaksi sesuai kebutuhan operasional toko.</p>
-        <p>Data customer hanya dipakai untuk menjalankan layanan yang diminta, seperti proses checkout, pelacakan pesanan, dan komunikasi terkait transaksi.</p>
+        <p>Data yang ditampilkan di website ini digunakan untuk kebutuhan informasi produk, layanan platform, dan proses transaksi sesuai kebutuhan layanan ${SITE_NAME}.</p>
+        <p>Data pengguna hanya dipakai untuk menjalankan layanan yang diminta, seperti checkout, pelacakan pesanan, login, dan komunikasi terkait transaksi atau bantuan layanan.</p>
       `,
       seo: {
-        title: `Kebijakan Privasi | ${store.name}`,
+        title: `Kebijakan Privasi | ${SITE_NAME}`,
         description: defaultDescription,
       },
     },
     "syarat-dan-ketentuan": {
       slug,
       title: "Syarat dan Ketentuan",
-      excerpt: "Ketentuan dasar penggunaan storefront dan pemesanan produk.",
+      excerpt: `Ketentuan dasar penggunaan platform dan pemesanan produk di ${SITE_NAME}.`,
       body_html: `
-        <p>Seluruh informasi produk, harga, dan ketersediaan dapat berubah mengikuti data yang dikelola toko melalui sistem admin.</p>
-        <p>Pemesanan dianggap sah setelah data order diterima sistem dan diverifikasi sesuai metode pembayaran yang dipilih.</p>
+        <p>Seluruh informasi produk, harga, ketersediaan, dan layanan dapat berubah mengikuti pembaruan yang berlaku di platform.</p>
+        <p>Pemesanan dianggap sah setelah data pesanan diterima dan diverifikasi sesuai metode pembayaran yang dipilih.</p>
       `,
       seo: {
-        title: `Syarat dan Ketentuan | ${store.name}`,
+        title: `Syarat dan Ketentuan | ${SITE_NAME}`,
         description: defaultDescription,
       },
     },
@@ -1098,7 +1248,7 @@ function buildStaticPageContent(
 export function getFallbackStoreProfile() {
   return {
     code: getStoreCode(),
-    name: "Kios Sidomakmur",
+    name: SITE_NAME,
     address: "RT 04 RW 13, Desa Panjerejo, Kecamatan Rejotangan, Kabupaten Tulungagung, Jawa Timur 66293",
     whatsapp_number: "6281234567890",
     operational_hours: "Senin - Sabtu, 08:00 - 17:00",
@@ -1120,8 +1270,8 @@ export function getFallbackHomeData(): HomePayload {
     best_sellers: [],
     category_highlights: [],
     seo: {
-      title: `${store.name} | Katalog Produk`,
-      description: "Katalog sedang dimuat ulang. Silakan coba lagi beberapa saat lagi.",
+      title: `${SITE_NAME} | Produk Pertanian`,
+      description: "Data produk sedang dimuat ulang. Silakan coba lagi beberapa saat lagi.",
     },
   };
 }
@@ -1146,10 +1296,10 @@ export function getFallbackProductList(
       sort,
     },
     seo: {
-      title: categorySlug ? `Kategori ${categorySlug}` : "Katalog Produk",
+      title: categorySlug ? `Produk ${categorySlug}` : "Produk Pertanian",
       description: search
-        ? `Katalog sedang dimuat ulang untuk pencarian ${search}.`
-        : "Katalog sedang dimuat ulang. Silakan coba lagi beberapa saat lagi.",
+        ? `Hasil pencarian "${search}" sedang dimuat ulang.`
+        : "Daftar produk sedang dimuat ulang. Silakan coba lagi beberapa saat lagi.",
     },
   };
 }
@@ -1184,8 +1334,9 @@ export async function getHomeData(): Promise<HomePayload> {
       slug: item.slug,
     })),
     seo: {
-      title: `${store.name} | Katalog Produk`,
-      description: `Lihat katalog aktif ${store.name}, termasuk produk pertanian, kebutuhan toko, dan promo terbaru.`,
+      title: `${SITE_NAME} | Produk Pertanian`,
+      description:
+        "Jelajahi produk pertanian aktif, rekomendasi kebutuhan lapangan, dan penawaran terbaru dari Wiragro.",
     },
   };
 }
@@ -1247,10 +1398,10 @@ export async function getProducts(query?: Record<string, string | number | undef
       sort: sort ?? "latest",
     },
     seo: {
-      title: categorySlug ? `Kategori ${categorySlug}` : "Katalog Produk",
+      title: categorySlug ? `Produk ${categorySlug}` : "Produk Pertanian",
       description: search
         ? `Hasil pencarian produk untuk kata kunci ${search}.`
-        : "Daftar produk aktif dari SiGe Manager.",
+        : "Daftar produk pertanian aktif dari Wiragro.",
     },
   } satisfies ProductListPayload;
 }
@@ -1426,8 +1577,8 @@ export async function getSeo(path: string) {
   const store = await fetchStoreProfile().catch(() => getFallbackStoreProfile());
 
   return {
-    title: `${store.name} | ${path === "/" ? "Beranda" : path.replace(/\//g, " ").trim()}`,
-    description: `Storefront ${store.name} menampilkan produk aktif, banner, dan informasi toko dari backend SiGe Manager.`,
+    title: `${SITE_NAME} | ${path === "/" ? "Beranda" : path.replace(/\//g, " ").trim()}`,
+    description: BRAND_SUBTAGLINE,
     canonical_url: `${getSiteUrl()}${path}`,
   };
 }
@@ -1679,9 +1830,25 @@ export async function submitProductReview(
   });
 }
 
-export async function submitB2BInquiry(payload: B2BInquiryInput) {
-  return fetchCustomerClientJson<B2BInquiryResponsePayload>("/customer/b2b-inquiries", {
+export async function submitB2BInquiry(
+  payload: B2BInquiryInput,
+  options?: { accessToken?: string },
+) {
+  const path = options?.accessToken
+    ? "/customer/b2b-inquiries/me"
+    : "/customer/b2b-inquiries";
+  const requestedItems = payload.requestedItems
+    .map((item) => ({
+      label: item.label.trim(),
+      qty: item.qty?.trim() || null,
+      unit: item.unit?.trim() || null,
+      notes: item.notes?.trim() || null,
+    }))
+    .filter((item) => item.label.length > 0);
+
+  return fetchCustomerClientJson<B2BInquiryResponsePayload>(path, {
     method: "POST",
+    headers: options?.accessToken ? buildCustomerAuthHeaders(options.accessToken) : undefined,
     body: JSON.stringify({
       store_code: payload.storeCode ?? getStoreCode(),
       buyer_type: payload.buyerType,
@@ -1690,17 +1857,39 @@ export async function submitB2BInquiry(payload: B2BInquiryInput) {
       phone: payload.phone.trim(),
       email: payload.email?.trim() || null,
       commodity_focus: payload.commodityFocus?.trim() || null,
+      commodity_slug: payload.commoditySlug?.trim() || null,
       bundle_slug: payload.bundleSlug?.trim() || null,
       campaign_slug: payload.campaignSlug?.trim() || null,
+      product_slug: payload.productSlug?.trim() || null,
+      product_name: payload.productName?.trim() || null,
       monthly_volume: payload.monthlyVolume?.trim() || null,
       fulfillment_type: payload.fulfillmentType ?? null,
       preferred_follow_up: payload.preferredFollowUp,
       budget_hint: payload.budgetHint?.trim() || null,
       need_summary: payload.needSummary.trim(),
+      requested_items: requestedItems,
       notes: payload.notes?.trim() || null,
       source_page: payload.sourcePage?.trim() || null,
     }),
   });
+}
+
+export async function getCustomerB2BInquiries(accessToken: string) {
+  return fetchCustomerClientJson<{ items: CustomerB2BInquiryPayload[] }>(
+    "/customer/b2b-inquiries/me",
+    {
+      headers: buildCustomerAuthHeaders(accessToken),
+    },
+  );
+}
+
+export async function getCustomerB2BInquiry(accessToken: string, inquiryId: string) {
+  return fetchCustomerClientJson<CustomerB2BInquiryPayload>(
+    `/customer/b2b-inquiries/me/${inquiryId}`,
+    {
+      headers: buildCustomerAuthHeaders(accessToken),
+    },
+  );
 }
 
 export async function getCustomerAccount(accessToken: string) {

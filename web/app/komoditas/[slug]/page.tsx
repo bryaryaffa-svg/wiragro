@@ -188,16 +188,16 @@ export default async function CommodityDetailPage({
       </section>
 
       <section className="section-block">
-        <div className="section-heading">
-          <div>
-            <span className="eyebrow-label">Bundle rekomendasi</span>
-            <h2>Bundle berbasis komoditas, fase, dan problem yang paling sering muncul.</h2>
-            <p>
-              Model bundle ini sengaja ringan: cukup kuat untuk jadi jembatan conversion,
-              tetapi belum memaksa tim membangun sistem bundling kompleks lebih dulu.
-            </p>
+          <div className="section-heading">
+            <div>
+              <span className="eyebrow-label">Bundle rekomendasi</span>
+              <h2>Bundle berbasis komoditas, fase, dan problem yang paling sering muncul.</h2>
+              <p>
+              Model bundle ini sengaja dibuat ringan: cukup kuat untuk menjadi jembatan ke
+              pembelian, tanpa membuat alurnya terasa rumit.
+              </p>
+            </div>
           </div>
-        </div>
         <div className="growth-bundle-grid">
           {commodity.bundles.map((bundle) => (
             <GrowthBundleCard bundle={bundle} key={`${commodity.slug}-${bundle.title}`} />
@@ -209,7 +209,7 @@ export default async function CommodityDetailPage({
         <section className="section-block">
           <div className="section-heading">
             <div>
-              <span className="eyebrow-label">Belajar</span>
+              <span className="eyebrow-label">Edukasi</span>
               <h2>Artikel edukasi untuk {commodity.label}.</h2>
             </div>
             <Link href={`/belajar/komoditas/${commodity.slug}`}>Semua artikel {commodity.label}</Link>
@@ -261,10 +261,10 @@ export default async function CommodityDetailPage({
           <div className="section-heading">
             <div>
               <span className="eyebrow-label">Campaign musiman</span>
-              <h2>Landing komersial yang paling dekat dengan komoditas {commodity.label.toLowerCase()}.</h2>
+              <h2>Program musiman yang paling dekat dengan komoditas {commodity.label.toLowerCase()}.</h2>
               <p>
-                Campaign ini bisa dipakai untuk ads, promo musiman, atau follow-up WhatsApp
-                tanpa melepaskan konteks komoditas yang sedang dijelajahi user.
+                Program ini bisa dipakai untuk promosi musiman atau tindak lanjut WhatsApp
+                tanpa melepaskan konteks komoditas yang sedang dijelajahi.
               </p>
             </div>
             <Link href="/kampanye">Semua campaign</Link>
@@ -283,8 +283,9 @@ export default async function CommodityDetailPage({
             <span className="eyebrow-label">Konsultasi</span>
             <h2>Masih belum yakin harus mulai dari artikel, solusi, atau produk?</h2>
             <p>
-              Jalur komoditas ini dibuat untuk menyederhanakan keputusan. Kalau user tetap ragu,
-              arahkan ke WhatsApp agar trust dan conversion tetap berjalan dalam satu flow.
+              Jalur komoditas ini dibuat untuk menyederhanakan keputusan. Kalau masih ragu,
+              lanjutkan ke WhatsApp agar penjelasan dan keputusan belanja tetap berjalan dalam
+              satu alur.
             </p>
           </div>
           <div className="commodity-bridge-band__actions">
@@ -294,7 +295,7 @@ export default async function CommodityDetailPage({
               </a>
             ) : (
               <Link className="btn btn-primary" href="/kontak">
-                Hubungi toko
+                Hubungi tim
               </Link>
             )}
             <Link className="btn btn-secondary" href="/belanja/paket">

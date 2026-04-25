@@ -39,7 +39,7 @@ export default function CommodityIndexPage() {
           buildCollectionJsonLd({
             title: "Hub Komoditas Wiragro",
             description:
-              "Kumpulan halaman komoditas untuk membantu user masuk dari tanaman yang sedang dibudidayakan.",
+              "Kumpulan halaman komoditas untuk membantu pengguna masuk dari tanaman yang sedang dibudidayakan.",
             path: "/komoditas",
             itemUrls: commodities.map((commodity) => `/komoditas/${commodity.slug}`),
           }),
@@ -77,11 +77,11 @@ export default function CommodityIndexPage() {
       </section>
 
       <PathwaySection
-        action={{ href: "/belajar", label: "Mulai dari Belajar" }}
+        action={{ href: "/belajar", label: "Mulai dari Edukasi" }}
         cards={getLearningHubCards()}
-        description="Komoditas hanyalah pintu masuk konteks. Setelah itu, user tetap harus bisa bergerak ke edukasi, solusi, dan belanja tanpa kehilangan arah."
+        description="Komoditas hanyalah pintu masuk konteks. Setelah itu, pengguna tetap harus bisa bergerak ke edukasi, solusi, dan belanja tanpa kehilangan arah."
         eyebrow="Ekosistem"
-        title="Hub komoditas membantu semua dunia di website bertemu dalam satu flow."
+        title="Hub komoditas membantu semua bagian website bertemu dalam satu alur."
       />
     </section>
   );
