@@ -1,0 +1,191 @@
+"use client";
+
+import Image from "next/image";
+import Link from "next/link";
+import { useMemo, useState } from "react";
+
+import { AgriIcon, type AgriIconName } from "@/components/ui/agri-icon";
+import { RoleAwarePrice } from "@/components/ui/role-aware-price";
+import type { GlobalSearchResults, GlobalSearchTab } from "@/lib/global-search";
+
+const SEARCH_TABS: Array<{
+  id: GlobalSearchTab;
+  label: string;
+}> = [
+  { id: "all", label: "Semua" },
+  { id: "solutions", label: "Solusi" },
+  { id: "products", label: "Produk" },
+  { id: "education", label: "Edukasi" },
+  { id: "videos", label: "Video" },
+];
+
+function SearchResultItem({
+  item,
+  onResultClick,
+}: {
+  item: GlobalSearchResults["groups"]["all"][number];
+  onResultClick?: (href: string) => void;
+}) {
+  if (item.kind === "solution") {
+    return (
+      <Link
+        className="search-result-item search-result-item--solution"
+        href={item.href}
+        onClick={() => onResultClick?.(item.href)}
+      >
+        <span className="search-result-item__icon">
+          <AgriIcon name={item.icon as AgriIconName} />
+        </span>
+        <div className="search-result-item__body">
+          <span className="search-result-item__eyebrow">Solusi</span>
+          <strong>{item.title}</strong>
+          <p>{item.summary}</p>
+          <small>{item.tags.join(" · ")}</small>
+        </div>
+      </Link>
+    );
+  }
+
+  if (item.kind === "product") {
+    return (
+      <Link
+        className="search-result-item search-result-item--product"
+        href={item.href}
+        onClick={() => onResultClick?.(item.href)}
+      >
+        <div className="search-result-item__media">
+          {item.imageUrl ? (
+            <Image
+              alt={item.title}
+              fill
+              sizes="72px"
+              src={item.imageUrl}
+              unoptimized={item.imageUrl.startsWith("/")}
+            />
+          ) : (
+            <span className="search-result-item__placeholder">
+              <AgriIcon name="product" />
+            </span>
+          )}
+        </div>
+        <div className="search-result-item__body">
+          <span className="search-result-item__eyebrow">{item.category}</span>
+          <strong>{item.title}</strong>
+          <p>{item.summary}</p>
+          <RoleAwarePrice compact price={item.product.price} />
+        </div>
+      </Link>
+    );
+  }
+
+  if (item.kind === "article") {
+    return (
+      <Link
+        className="search-result-item search-result-item--article"
+        href={item.href}
+        onClick={() => onResultClick?.(item.href)}
+      >
+        <span className="search-result-item__icon">
+          <AgriIcon name="article" />
+        </span>
+        <div className="search-result-item__body">
+          <span className="search-result-item__eyebrow">Edukasi</span>
+          <strong>{item.title}</strong>
+          <p>{item.summary}</p>
+          <small>{item.tags.join(" · ")}</small>
+        </div>
+      </Link>
+    );
+  }
+
+  return (
+    <Link
+      className="search-result-item search-result-item--video"
+      href={item.href}
+      onClick={() => onResultClick?.(item.href)}
+    >
+      <div className="search-result-item__media">
+        {item.thumbnail ? (
+          <Image
+            alt={item.title}
+            fill
+            sizes="72px"
+            src={item.thumbnail}
+            unoptimized={item.thumbnail.startsWith("/")}
+          />
+        ) : (
+          <span className="search-result-item__placeholder">
+            <AgriIcon name="video" />
+          </span>
+        )}
+      </div>
+      <div className="search-result-item__body">
+        <span className="search-result-item__eyebrow">{item.category}</span>
+        <strong>{item.title}</strong>
+        <p>{item.summary}</p>
+        <small>{item.tags.join(" · ")}</small>
+      </div>
+    </Link>
+  );
+}
+
+export function SearchResultTabs({
+  compact = false,
+  defaultTab = "all",
+  onResultClick,
+  results,
+}: {
+  compact?: boolean;
+  defaultTab?: GlobalSearchTab;
+  onResultClick?: (href: string) => void;
+  results: GlobalSearchResults;
+}) {
+  const [activeTab, setActiveTab] = useState<GlobalSearchTab>(defaultTab);
+  const activeItems = useMemo(() => {
+    return results.groups[activeTab];
+  }, [activeTab, results.groups]);
+
+  return (
+    <div className={`search-result-tabs${compact ? " search-result-tabs--compact" : ""}`}>
+      <div className="search-result-tabs__header" role="tablist" aria-label="Kategori hasil pencarian">
+        {SEARCH_TABS.map((tab) => (
+          <button
+            aria-selected={activeTab === tab.id}
+            className={activeTab === tab.id ? "is-active" : undefined}
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            role="tab"
+            type="button"
+          >
+            {tab.label}
+            <span>{results.counts[tab.id]}</span>
+          </button>
+        ))}
+      </div>
+
+      {activeItems.length ? (
+        <div className="search-result-tabs__list">
+          {activeItems.map((item) => (
+            <SearchResultItem item={item} key={`${item.kind}-${item.id}`} onResultClick={onResultClick} />
+          ))}
+        </div>
+      ) : (
+        <div className="search-result-tabs__empty">
+          <strong>Belum ada hasil untuk pencarian ini</strong>
+          <p>Coba buka solusi tanaman, lihat semua produk, atau lanjutkan ke AI untuk arahan awal.</p>
+          <div className="search-result-tabs__empty-actions">
+            <Link className="btn btn-primary" href="/ai-chat">
+              Tanya AI
+            </Link>
+            <Link className="btn btn-secondary" href="/produk">
+              Lihat semua produk
+            </Link>
+            <Link className="btn btn-secondary" href="/solusi">
+              Buka halaman Solusi
+            </Link>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

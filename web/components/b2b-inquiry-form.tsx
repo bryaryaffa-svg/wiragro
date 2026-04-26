@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useEffect, useState, useTransition } from "react";
 
 import { useAuth } from "@/components/auth-provider";
+import { PermissionCodeInput } from "@/components/ui/permission-code-input";
+import { StepWizard } from "@/components/ui/step-wizard";
 import {
   type B2BInquiryInput,
   type B2BInquiryRequestedItemInput,
@@ -148,6 +150,7 @@ export function B2BInquiryForm({
   const [submittedInquiryNumber, setSubmittedInquiryNumber] = useState<string | null>(null);
   const [isSuccess, setIsSuccess] = useState(false);
   const [isPending, startTransition] = useTransition();
+  const [permissionCode, setPermissionCode] = useState("");
 
   useEffect(() => {
     setForm((current) => ({
@@ -257,6 +260,25 @@ export function B2BInquiryForm({
         <span className="eyebrow-label">{eyebrowLabel}</span>
         <h2>{heading}</h2>
         <p>{description}</p>
+        <StepWizard
+          steps={[
+            {
+              description: "Isi komoditas, volume, dan item utama.",
+              label: "Jelaskan kebutuhan",
+              status: "current",
+            },
+            {
+              description: "Wiragro membaca konteks dan kebutuhan pembelian.",
+              label: "Tim review",
+              status: "upcoming",
+            },
+            {
+              description: "Lanjut ke penawaran, WhatsApp, atau akun khusus.",
+              label: "Tindak lanjut",
+              status: "upcoming",
+            },
+          ]}
+        />
         {contextBadges.length ? (
           <div className="b2b-inquiry-context">
             <strong>Konteks yang ikut terkirim</strong>
@@ -279,9 +301,22 @@ export function B2BInquiryForm({
 
           startTransition(async () => {
             try {
-              const response = await submitB2BInquiry(form, {
+              const response = await submitB2BInquiry(
+                {
+                  ...form,
+                  notes: [
+                    (form.notes ?? "").trim(),
+                    permissionCode.trim()
+                      ? `Kode izin / kode kerja sama: ${permissionCode.trim()}`
+                      : "",
+                  ]
+                    .filter(Boolean)
+                    .join("\n\n"),
+                },
+                {
                 accessToken: session?.access_token,
-              });
+                },
+              );
               setSubmittedInquiryNumber(response.inquiry_number);
               setFeedback(
                 `Inquiry ${response.inquiry_number} masuk dengan status ${response.status_label.toLowerCase()}. Tim akan follow-up lewat ${response.preferred_follow_up}.`,
@@ -308,6 +343,7 @@ export function B2BInquiryForm({
                   businessName: current.businessName,
                 };
               });
+              setPermissionCode("");
             } catch (submitError) {
               setFeedback(
                 submitError instanceof Error
@@ -437,6 +473,8 @@ export function B2BInquiryForm({
             />
           </label>
         </div>
+
+        <PermissionCodeInput value={permissionCode} onChange={setPermissionCode} />
 
         <div className="b2b-inquiry-items">
           <div className="b2b-inquiry-items__header">

@@ -10,6 +10,7 @@ import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { WishlistProvider } from "@/components/wishlist-provider";
 import "@/app/globals.css";
+import "@/app/design-system.css";
 import { getSiteUrl } from "@/lib/config";
 import "@/lib/static-content-validation";
 import {

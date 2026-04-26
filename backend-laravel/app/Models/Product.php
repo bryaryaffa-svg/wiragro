@@ -29,6 +29,12 @@ class Product extends Model
     protected $appends = [
         'current_price',
         'primary_image_url',
+        'review_summary',
+    ];
+
+    protected $hidden = [
+        'approved_reviews_count',
+        'approved_reviews_avg_rating',
     ];
 
     protected function casts(): array
@@ -62,6 +68,11 @@ class Product extends Model
         return $this->hasMany(ProductReview::class);
     }
 
+    public function approvedReviews(): HasMany
+    {
+        return $this->hasMany(ProductReview::class)->approved();
+    }
+
     public function getCurrentPriceAttribute(): string
     {
         $price = $this->promo_price ?: $this->price;
@@ -74,5 +85,21 @@ class Product extends Model
         $image = $this->images->firstWhere('is_primary', true) ?? $this->images->first();
 
         return $image?->image_url;
+    }
+
+    /**
+     * @return array{average_rating: float|null, total_reviews: int}
+     */
+    public function getReviewSummaryAttribute(): array
+    {
+        $totalReviews = (int) ($this->approved_reviews_count ?? 0);
+        $averageRating = $this->approved_reviews_avg_rating;
+
+        return [
+            'average_rating' => $totalReviews > 0 && $averageRating !== null
+                ? round((float) $averageRating, 1)
+                : null,
+            'total_reviews' => $totalReviews,
+        ];
     }
 }

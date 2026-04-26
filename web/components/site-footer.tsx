@@ -3,6 +3,7 @@ import Link from "next/link";
 import { WiragroLockup } from "@/components/wiragro-lockup";
 import { getFallbackStoreProfile, getStoreProfile } from "@/lib/api";
 import { FOOTER_LINK_GROUPS } from "@/lib/hybrid-navigation";
+import { buildWhatsAppConsultationUrl } from "@/lib/homepage-content";
 import { buildGoogleMapsStoreSearchUrl } from "@/lib/maps";
 
 export async function SiteFooter() {
@@ -10,6 +11,7 @@ export async function SiteFooter() {
   const mapsUrl = store
     ? buildGoogleMapsStoreSearchUrl(store.name, store.address)
     : null;
+  const consultationUrl = buildWhatsAppConsultationUrl(store?.whatsapp_number, store?.name);
 
   return (
     <footer className="site-footer">
@@ -21,9 +23,8 @@ export async function SiteFooter() {
         />
         <h2>Solusi tanaman, edukasi, produk, dan layanan pertanian digital dalam satu platform.</h2>
         <p>
-          Wiragro membantu petani, pehobi, kios, dan buyer bisnis bergerak dari masalah
-          ke keputusan yang lebih tepat dengan alur yang terasa modern, terpercaya, dan
-          mudah dipahami.
+          Wiragro membantu petani, toko pertanian, dan distributor bergerak dari masalah
+          tanaman ke pembelajaran, rekomendasi, dan pembelian yang lebih tepat.
         </p>
         <div className="site-footer__badges">
           <span>Solusi</span>
@@ -38,6 +39,11 @@ export async function SiteFooter() {
             <span>{store.address || "Alamat layanan sedang diperbarui."}</span>
             {store.operational_hours ? <span>Jam layanan: {store.operational_hours}</span> : null}
             {store.whatsapp_number ? <span>WhatsApp: {store.whatsapp_number}</span> : null}
+            {consultationUrl ? (
+              <a href={consultationUrl} rel="noreferrer" target="_blank">
+                Hubungi WhatsApp resmi
+              </a>
+            ) : null}
             {mapsUrl ? (
               <a href={mapsUrl} rel="noreferrer" target="_blank">
                 Buka Google Maps

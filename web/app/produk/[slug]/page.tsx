@@ -14,6 +14,8 @@ import { ProductCard } from "@/components/product-card";
 import { ProductDetailView } from "@/components/product-detail-view";
 import { ProductReviewSection } from "@/components/product-review-section";
 import { SolutionCard } from "@/components/solution-card";
+import { VideoCard } from "@/components/ui/video-card";
+import { ErrorState } from "@/components/ui/state";
 import {
   ApiRequestError,
   getArticles,
@@ -39,6 +41,7 @@ import {
   buildProductMetadata,
   buildUnavailableDetailMetadata,
 } from "@/lib/seo";
+import { getProductCatalogContext, getSolutionVideos } from "@/lib/solution-experience";
 
 export const dynamic = "force-dynamic";
 
@@ -135,24 +138,34 @@ export default async function ProductDetailPage({
   if (!product) {
     return (
       <div className="page-stack">
-        <article className="empty-state empty-state--shopping">
-          <span className="eyebrow-label">Produk belum bisa dibuka</span>
-          <h1>Detail produk gagal dimuat dari server.</h1>
-          <p>
-            Halaman produk ini tidak hilang, tetapi data detailnya sedang tidak berhasil
-            diambil. Silakan kembali ke katalog atau coba lagi beberapa saat lagi.
-          </p>
-          <div className="empty-state__actions">
-            <Link className="btn btn-primary" href="/produk">
-              Kembali ke katalog
-            </Link>
-          </div>
-        </article>
+        <ErrorState
+          actions={[
+            { href: `/produk/${slug}`, label: "Coba lagi" },
+            { href: "/produk", label: "Kembali ke katalog", variant: "secondary" },
+          ]}
+          description="Halaman produk ini masih ada, tetapi detailnya belum dapat ditampilkan dengan aman saat ini."
+          eyebrow="Produk belum dapat dimuat"
+          title="Produk belum dapat dimuat"
+        />
       </div>
     );
   }
 
   const enrichment = buildProductPageEnrichment(product);
+  const productContext = getProductCatalogContext(product);
+  const relatedVideos = getSolutionVideos(
+    productContext.cropIds[0] ?? "lainnya",
+    productContext.problemIds[0] ?? "pertumbuhan-lambat",
+  );
+  const aiParams = new URLSearchParams();
+  if (productContext.cropIds[0]) {
+    aiParams.set("crop", productContext.cropIds[0]);
+  }
+  if (productContext.problemIds[0]) {
+    aiParams.set("problem", productContext.problemIds[0]);
+  }
+  aiParams.set("product", product.slug);
+  const aiChatHref = `/ai-chat?${aiParams.toString()}`;
 
   const [articleFeed, store, complementaryRelations, reviewFeed] = await Promise.all([
     getArticles({ page_size: 40 }).catch(() => ({
@@ -237,6 +250,7 @@ export default async function ProductDetailPage({
       </div>
 
       <ProductDetailView
+        aiChatHref={aiChatHref}
         b2bInquiryHref="#b2b-quote-form"
         b2bInquiryLabel="Butuh penawaran partai"
         consultationLink={consultationLink}
@@ -247,19 +261,20 @@ export default async function ProductDetailPage({
       <section className="section-block">
         <div className="section-heading">
           <div>
-            <span className="eyebrow-label">Cara pakai & kecocokan</span>
-            <h2>Bantu pembeli memahami kapan produk ini masuk akal untuk dipakai.</h2>
+            <span className="eyebrow-label">Deskripsi & cara pakai</span>
+            <h2>Produk ini harus terasa sebagai bagian dari solusi, bukan sekadar nama barang.</h2>
             <p>
-              Halaman ini menjelaskan fungsi produk, fase pakai, komoditas yang relevan,
-              dan masalah yang bisa dibantu sebelum pembeli melangkah terlalu cepat ke checkout.
+              Halaman ini menjelaskan fungsi produk, manfaat utama, cara pakai ringkas,
+              dan kapan produk ini paling masuk akal dipertimbangkan.
             </p>
           </div>
         </div>
 
         <div className="product-use-grid">
           <article className="product-insight-card">
-            <span className="eyebrow-label">Cara pakai</span>
-            <h3>Urutan penggunaan yang lebih aman</h3>
+            <span className="eyebrow-label">Fungsi produk</span>
+            <h3>Ringkasan manfaat utama</h3>
+            <p>{product.description || product.summary}</p>
             <ol className="plain-list">
               {enrichment.usageSteps.map((item) => (
                 <li key={`${product.slug}-${item}`}>{item}</li>
@@ -269,10 +284,10 @@ export default async function ProductDetailPage({
           </article>
 
           <article className="product-insight-card">
-            <span className="eyebrow-label">Cocok untuk</span>
-            <h3>Komoditas dan fase yang paling relevan</h3>
+            <span className="eyebrow-label">Cocok untuk tanaman</span>
+            <h3>Tanaman dan fase pakai yang paling relevan</h3>
             <div className="product-insight-card__group">
-              <strong>Komoditas</strong>
+              <strong>Tanaman</strong>
               <div className="product-chip-links">
                 {enrichment.commodityLinks.map((item) => (
                   <Link href={item.href} key={`${product.slug}-${item.slug}`}>
@@ -294,8 +309,8 @@ export default async function ProductDetailPage({
           </article>
 
           <article className="product-insight-card">
-            <span className="eyebrow-label">Masalah yang dibantu</span>
-            <h3>Jembatan produk ke jalur solusi</h3>
+            <span className="eyebrow-label">Masalah yang bisa dibantu</span>
+            <h3>Masuk ke konteks masalah tanaman yang tepat</h3>
             <div className="product-problem-stack">
               {enrichment.problemLinks.map((item) => (
                 <Link className="product-problem-card" href={item.href} key={`${product.slug}-${item.slug}`}>
@@ -307,8 +322,8 @@ export default async function ProductDetailPage({
           </article>
 
           <article className="product-insight-card">
-            <span className="eyebrow-label">Spesifikasi ringkas</span>
-            <h3>Data dasar sebelum membeli</h3>
+            <span className="eyebrow-label">Catatan penggunaan aman</span>
+            <h3>Simpan dan gunakan sesuai label produk</h3>
             <div className="product-spec-list">
               <div>
                 <span>Kategori</span>
@@ -327,22 +342,10 @@ export default async function ProductDetailPage({
                 <strong>{product.stock_badge.message}</strong>
               </div>
             </div>
-            {product.videos.length ? (
-              <ul className="plain-list">
-                {product.videos.map((video) => (
-                  <li key={video.id}>
-                    <a href={video.url} rel="noreferrer" target="_blank">
-                      Lihat video {video.platform}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p>
-                Video panduan belum tersedia. Untuk saat ini, konsultasi tim menjadi jalur
-                tercepat bila pembeli ingin memastikan cara pakai sebelum membeli.
-              </p>
-            )}
+            <p>
+              Gunakan produk sesuai label resmi, sesuaikan dengan kondisi lapangan, dan
+              hindari mengubah pola pakai terlalu agresif tanpa konteks yang cukup.
+            </p>
           </article>
         </div>
       </section>
@@ -372,17 +375,41 @@ export default async function ProductDetailPage({
 
       <ContentRelationAlert
         actionLabel="Buka Edukasi"
-        href="/belajar"
+        href="/artikel"
         items={missingRelations}
         title="Sebagian referensi pendukung sedang dilengkapi"
       />
+
+      {relatedVideos.length ? (
+        <section className="section-block">
+          <div className="section-heading">
+            <div>
+              <span className="eyebrow-label">Video terkait</span>
+              <h2>Belajar cepat dari studi kasus, review, dan edukasi yang paling dekat dengan produk ini.</h2>
+            </div>
+            <Link href="/artikel">Buka edukasi</Link>
+          </div>
+          <div className="homepage-video-grid">
+            {relatedVideos.map((video) => (
+              <VideoCard
+                category={video.category}
+                description={video.description}
+                href={video.href}
+                key={video.id}
+                thumbnail={video.thumbnail}
+                title={video.title}
+              />
+            ))}
+          </div>
+        </section>
+      ) : null}
 
       {relatedArticles.length ? (
         <section className="section-block">
           <div className="section-heading">
             <div>
               <span className="eyebrow-label">Artikel terkait</span>
-              <h2>Edukasi yang membantu pengunjung memahami kenapa produk ini relevan.</h2>
+              <h2>Edukasi yang membantu user memahami fungsi, cara pakai, dan konteks produk ini.</h2>
             </div>
             <Link href="/artikel">Buka artikel</Link>
           </div>
@@ -415,8 +442,8 @@ export default async function ProductDetailPage({
         <section className="section-block">
           <div className="section-heading">
             <div>
-              <span className="eyebrow-label">Alternatif sejenis</span>
-              <h2>Bantu pengunjung membandingkan tanpa keluar dari alur belanja.</h2>
+              <span className="eyebrow-label">Produk untuk masalah serupa</span>
+              <h2>Bantu user membandingkan opsi tanpa keluar dari konteks solusi.</h2>
             </div>
           </div>
           <div className="product-grid product-grid--catalog">
@@ -431,8 +458,8 @@ export default async function ProductDetailPage({
         <section className="section-block">
           <div className="section-heading">
             <div>
-              <span className="eyebrow-label">Produk pelengkap</span>
-              <h2>Cross-sell dan bundling yang terasa masuk akal, bukan dipaksakan.</h2>
+              <span className="eyebrow-label">Sering dibeli bersama</span>
+              <h2>Produk pelengkap yang tetap terasa relevan dengan kebutuhan yang sama.</h2>
               <p>{enrichment.bundleSuggestion.description}</p>
             </div>
             <Link href={enrichment.bundleSuggestion.href}>{enrichment.bundleSuggestion.title}</Link>

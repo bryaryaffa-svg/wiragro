@@ -9,6 +9,7 @@ import {
 } from "react";
 
 import { useAuth } from "@/components/auth-provider";
+import { trackUiEvent } from "@/lib/analytics";
 import { getGoogleClientId } from "@/lib/config";
 
 function explainPromptReason(reason?: string) {
@@ -182,6 +183,9 @@ export function GoogleSignInButton({
                   return;
                 }
 
+                trackUiEvent("login_started", {
+                  provider: "google",
+                });
                 initializeGoogle();
                 onMessage("Membuka login Google...");
               }}

@@ -72,6 +72,9 @@ Route::prefix('v1/customer')->group(function (): void {
         Route::post('/auth/logout', [CustomerAuthController::class, 'logout']);
         Route::get('/me', [CustomerCompatController::class, 'me']);
         Route::patch('/me', [CustomerCompatController::class, 'updateMe']);
+        Route::post('/b2b-inquiries/me', [CustomerB2BInquiryController::class, 'storeForCurrentCustomer']);
+        Route::get('/b2b-inquiries/me', [CustomerB2BInquiryController::class, 'index']);
+        Route::get('/b2b-inquiries/me/{inquiryId}', [CustomerB2BInquiryController::class, 'show']);
         Route::get('/me/addresses', [CustomerCompatController::class, 'listAddresses']);
         Route::post('/me/addresses', [CustomerCompatController::class, 'createAddress']);
         Route::patch('/me/addresses/{addressId}', [CustomerCompatController::class, 'updateAddress']);

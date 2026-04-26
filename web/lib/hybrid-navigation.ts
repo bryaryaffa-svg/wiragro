@@ -28,7 +28,8 @@ type FooterLinkGroup = {
 };
 
 const PILLAR_ROUTE_ALIASES: Record<string, string[]> = {
-  "/belajar": ["/artikel"],
+  "/artikel": ["/belajar", "/edukasi"],
+  "/belajar": ["/artikel", "/edukasi"],
   "/produk": ["/belanja", "/belanja/paket", "/kampanye", "/b2b", "/cari"],
 };
 
@@ -46,7 +47,7 @@ export const PLATFORM_ENTRY_LINKS: NavLink[] = [
     description: "Jelajahi produk pertanian, paket pilihan, dan kebutuhan budidaya dari satu katalog yang rapi.",
   },
   {
-    href: "/belajar",
+    href: "/artikel",
     label: "Edukasi",
     description:
       "Pelajari budidaya, input pertanian, dan keputusan lapangan dengan bahasa yang lebih mudah dipahami.",
@@ -98,39 +99,37 @@ export const FOOTER_LINK_GROUPS: FooterLinkGroup[] = [
     links: [
       { href: "/solusi", label: "Solusi Tanaman" },
       { href: "/produk", label: "Produk Pertanian" },
-      { href: "/belajar", label: "Edukasi" },
+      { href: "/artikel", label: "Edukasi" },
       { href: "/ai-chat", label: "AI Chat Premium" },
-      { href: "/komoditas", label: "Komoditas" },
-      { href: "/artikel", label: "Artikel" },
+      { href: "/lacak-pesanan", label: "Lacak Pesanan" },
     ],
   },
   {
-    title: "Belanja & Layanan",
+    title: "Tentang",
+    links: [
+      { href: "/tentang-kami", label: "Tentang Wiragro" },
+      { href: "/kontak", label: "Kontak" },
+      { href: "/faq", label: "FAQ" },
+      { href: "/kebijakan-privasi", label: "Kebijakan Privasi" },
+      { href: "/syarat-dan-ketentuan", label: "Syarat & Ketentuan" },
+    ],
+  },
+  {
+    title: "Belanja & Akun",
     links: [
       { href: "/belanja/paket", label: "Bundle" },
-      { href: "/kampanye", label: "Campaign" },
-      { href: "/b2b", label: "B2B Inquiry" },
-      { href: "/lacak-pesanan", label: "Lacak Pesanan" },
-      { href: "/pengiriman-pembayaran", label: "Pengiriman & Pembayaran" },
-    ],
-  },
-  {
-    title: "Akun",
-    links: [
-      { href: "/masuk", label: "Masuk" },
-      { href: "/akun", label: "Akun" },
-      { href: "/wishlist", label: "Wishlist" },
+      { href: "/b2b", label: "Pembelian Grosir" },
       { href: "/keranjang", label: "Keranjang" },
+      { href: "/masuk", label: "Masuk / Akun" },
     ],
   },
   {
-    title: "Informasi",
+    title: "Kanal Resmi",
     links: [
-      { href: "/tentang-kami", label: "Tentang Kami" },
+      { href: "/kontak", label: "WhatsApp Resmi" },
+      { href: "/kontak", label: "Sosial Media" },
       { href: "/pengiriman-pembayaran", label: "Pengiriman & Pembayaran" },
       { href: "/garansi-retur", label: "Garansi & Retur" },
-      { href: "/kebijakan-privasi", label: "Kebijakan Privasi" },
-      { href: "/syarat-dan-ketentuan", label: "Syarat dan Ketentuan" },
     ],
   },
 ];
@@ -142,7 +141,7 @@ export const HOMEPAGE_ENTRY_CARDS: PathwayCard[] = [
     title: "Mulai dari pemahaman, bukan dari tebak-tebakan.",
     description:
       "Pelajari dasar budidaya, pilihan input, dan konteks penggunaan sebelum masuk ke keputusan belanja.",
-    href: "/belajar",
+    href: "/artikel",
     actionLabel: "Buka edukasi",
     bullets: ["Panduan dasar", "Input pertanian", "Artikel yang siap dibaca"],
     supportingLinks: [
@@ -345,7 +344,7 @@ const SHOPPING_HUB_CARDS: PathwayCard[] = [
     href: "/b2b",
     actionLabel: "Masuk ke B2B inquiry",
     supportingLinks: [
-      { href: "/belajar", label: "Butuh konteks dulu" },
+      { href: "/artikel", label: "Butuh konteks dulu" },
       { href: "/solusi", label: "Masuk dari gejala" },
     ],
   },
@@ -372,7 +371,7 @@ export function getArticleRelationCards(articleTitle?: string): PathwayCard[] {
       description: articleTitle
         ? `Setelah membaca "${articleTitle}", Anda bisa melanjutkan ke hub edukasi untuk topik yang lebih luas.`
         : "Masuk ke hub edukasi untuk menyusun pemahaman yang lebih runtut sebelum mengambil keputusan berikutnya.",
-      href: "/belajar",
+      href: "/artikel",
       actionLabel: "Masuk ke Edukasi",
       supportingLinks: [{ href: "/artikel", label: "Artikel lain" }],
     },
@@ -413,7 +412,7 @@ export function getProductRelationCards(
       description: productName
         ? `Gunakan jalur edukasi untuk memahami kapan "${productName}" lebih relevan dipakai dan apa alternatif pertimbangannya.`
         : "Masuk ke hub edukasi untuk memahami cara pakai, peran input, dan konteks pembelian yang lebih sehat.",
-      href: "/belajar",
+      href: "/artikel",
       actionLabel: "Masuk ke Edukasi",
       supportingLinks: [{ href: "/artikel", label: "Baca panduan" }],
     },
@@ -452,7 +451,7 @@ export function getStaticRelationCards(pageTitle?: string): PathwayCard[] {
       description: pageTitle
         ? `Setelah membaca ${pageTitle.toLowerCase()}, pembaca bisa masuk ke hub edukasi untuk memperdalam konteks.`
         : "Masuk ke hub edukasi untuk memperdalam konteks sebelum mengambil langkah berikutnya.",
-      href: "/belajar",
+      href: "/artikel",
       actionLabel: "Buka Edukasi",
       supportingLinks: [{ href: "/artikel", label: "Artikel terbaru" }],
     },

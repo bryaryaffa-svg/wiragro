@@ -278,9 +278,9 @@ export function buildPageMetadata({
 
 export function buildHomepageMetadata() {
   return buildPageMetadata({
-    title: `Wiragro | ${BRAND_TAGLINE}`,
+    title: "Wiragro - Platform Solusi Pertanian Digital",
     description:
-      "Wiragro menghadirkan solusi tanaman, edukasi, produk pertanian, AI premium, dan layanan B2C maupun B2B dalam satu platform digital.",
+      "Cari solusi masalah tanaman, baca edukasi pertanian, dan beli produk pertanian yang tepat di Wiragro.",
     path: "/",
     section: "home",
     keywords: [
@@ -387,11 +387,10 @@ export function buildStaticPageMetadata(page: ContentPagePayload, path: string) 
 
 export function buildProductMetadata(product: ProductDetailPayload) {
   return buildPageMetadata({
-    title:
-      product.seo?.title ||
-      `${product.name}${product.category?.name ? ` - ${product.category.name}` : ""}`,
+    title: product.seo?.title || `${product.name} - Wiragro`,
     description:
-      product.seo?.description || product.summary || product.description || DEFAULT_DESCRIPTION,
+      product.seo?.description ||
+      `Beli ${product.name} di Wiragro. Lihat manfaat, cara pakai, dan rekomendasi produk terkait.`,
     path: `/produk/${product.slug}`,
     image:
       product.images.find((item) => item.is_primary)?.url ??

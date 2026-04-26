@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 
 import { useCart } from "@/components/cart/cart-provider";
+import { trackUiEvent } from "@/lib/analytics";
 
 export function AddToCartButton({
   productId,
@@ -32,6 +33,10 @@ export function AddToCartButton({
           startTransition(async () => {
             try {
               await addItem(productId, qty);
+              trackUiEvent("add_to_cart", {
+                product_id: productId,
+                qty,
+              });
               setMessage("Masuk ke keranjang");
             } catch {
               setMessage("Gagal menambah produk");

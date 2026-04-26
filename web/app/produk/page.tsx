@@ -1,22 +1,52 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 
 import { JsonLd } from "@/components/json-ld";
 import { PathwaySection } from "@/components/pathway-section";
 import { ProductCard } from "@/components/product-card";
+import { FilterChip } from "@/components/ui/filter-chip";
+import { SearchInput } from "@/components/ui/search-input";
+import { SectionHeader } from "@/components/ui/section-header";
+import { EmptyState, ErrorState } from "@/components/ui/state";
 import { StorefrontCategoryNavigator } from "@/components/storefront-category-navigator";
 import { getCategories, getFallbackProductList, getProducts } from "@/lib/api";
 import { getProductRelationCards } from "@/lib/hybrid-navigation";
-import { resolveStorefrontCategorySelection } from "@/lib/storefront-category-system";
+import {
+  filterProductsForCatalog,
+  normalizeSolutionCropId,
+  normalizeSolutionProblemId,
+} from "@/lib/solution-experience";
 import {
   buildBreadcrumbJsonLd,
   buildCatalogMetadata,
   buildCollectionJsonLd,
 } from "@/lib/seo";
+import { resolveStorefrontCategorySelection } from "@/lib/storefront-category-system";
 
 export const dynamic = "force-dynamic";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
+
+function getParam(
+  params: Record<string, string | string[] | undefined>,
+  key: string,
+) {
+  return typeof params[key] === "string" ? params[key] : undefined;
+}
+
+function buildProductsHref(
+  params: Record<string, string | undefined>,
+) {
+  const search = new URLSearchParams();
+
+  for (const [key, value] of Object.entries(params)) {
+    if (value) {
+      search.set(key, value);
+    }
+  }
+
+  const query = search.toString();
+  return query ? `/produk?${query}` : "/produk";
+}
 
 export async function generateMetadata({
   searchParams,
@@ -24,24 +54,32 @@ export async function generateMetadata({
   searchParams: SearchParams;
 }): Promise<Metadata> {
   const resolved = await searchParams;
-  const search = typeof resolved.q === "string" ? resolved.q : undefined;
-  const category = typeof resolved.kategori === "string" ? resolved.kategori : undefined;
-  const mainCategoryKey = typeof resolved.kelompok === "string" ? resolved.kelompok : undefined;
-  const subcategory = typeof resolved.subkategori === "string" ? resolved.subkategori : undefined;
-  const sort = typeof resolved.sort === "string" ? resolved.sort : undefined;
   const hasRefinement = Boolean(
-    search || category || mainCategoryKey || subcategory || (sort && sort !== "latest"),
+    getParam(resolved, "q") ||
+      getParam(resolved, "kategori") ||
+      getParam(resolved, "tanaman") ||
+      getParam(resolved, "masalah") ||
+      getParam(resolved, "promo") ||
+      getParam(resolved, "stok") ||
+      getParam(resolved, "harga"),
   );
 
   return buildCatalogMetadata({
-    title: hasRefinement ? "Hasil pencarian produk pertanian" : "Produk Pertanian Wiragro",
+    title: hasRefinement ? "Hasil pencarian produk pertanian" : "Produk Pertanian - Wiragro",
     description: hasRefinement
-      ? "Hasil pencarian produk pertanian Wiragro. Buka halaman produk utama untuk menjelajahi seluruh produk aktif."
-      : "Jelajahi produk pertanian Wiragro: pupuk, benih, pestisida, nutrisi, alat pertanian, bundle, dan penawaran terkait.",
+      ? "Hasil pencarian produk pertanian Wiragro dengan konteks tanaman, masalah, dan kebutuhan lapangan."
+      : "Belanja nutrisi tanaman, pestisida, benih, dan perlengkapan pertanian sesuai kebutuhan tanaman Anda.",
     path: "/produk",
     canonicalPath: "/produk",
     noIndex: hasRefinement,
-    keywords: ["katalog produk", "produk pertanian", "pupuk", "benih", "pestisida"],
+    keywords: [
+      "produk pertanian wiragro",
+      "nutrisi tanaman",
+      "pestisida",
+      "benih",
+      "alat pertanian",
+      "solusi tanaman",
+    ],
   });
 }
 
@@ -51,22 +89,38 @@ export default async function ProductsPage({
   searchParams: SearchParams;
 }) {
   const resolved = await searchParams;
-  const search = typeof resolved.q === "string" ? resolved.q : undefined;
-  const category = typeof resolved.kategori === "string" ? resolved.kategori : undefined;
-  const mainCategoryKey = typeof resolved.kelompok === "string" ? resolved.kelompok : undefined;
-  const subcategory = typeof resolved.subkategori === "string" ? resolved.subkategori : undefined;
-  const sort = typeof resolved.sort === "string" ? resolved.sort : "latest";
+  const search = getParam(resolved, "q");
+  const category = getParam(resolved, "kategori");
+  const mainCategoryKey = getParam(resolved, "kelompok");
+  const subcategory = getParam(resolved, "subkategori");
+  const sort = getParam(resolved, "sort") ?? "latest";
+  const cropId = normalizeSolutionCropId(getParam(resolved, "tanaman"));
+  const problemId = normalizeSolutionProblemId(getParam(resolved, "masalah"));
+  const priceBand = (getParam(resolved, "harga") ?? "all") as
+    | "100k-250k"
+    | "250k+"
+    | "all"
+    | "under-100k";
+  const promoOnly = getParam(resolved, "promo") === "1";
+  const stockOnly = getParam(resolved, "stok") === "1";
 
   const [categoriesResult, productsResult] = await Promise.allSettled([
     getCategories(),
-    getProducts({ q: search, category_slug: category, sort }),
+    getProducts({ q: search, category_slug: category, sort, page_size: 60 }),
   ]);
   const categories = categoriesResult.status === "fulfilled" ? categoriesResult.value : [];
-  const products =
+  const rawProducts =
     productsResult.status === "fulfilled"
       ? productsResult.value
-      : getFallbackProductList({ q: search, category_slug: category, sort });
+      : getFallbackProductList({ q: search, category_slug: category, sort, page_size: 60 });
   const catalogUnavailable = productsResult.status === "rejected";
+  const products = filterProductsForCatalog(rawProducts.items, {
+    cropId: cropId ?? null,
+    priceBand,
+    problemId: problemId ?? null,
+    promoOnly,
+    stockOnly,
+  });
   const activeCategory = categories.find((item) => item.slug === category);
   const storefrontSelection = resolveStorefrontCategorySelection({
     mainKey: mainCategoryKey,
@@ -75,6 +129,27 @@ export default async function ProductsPage({
     query: search,
   });
   const activeStorefrontMain = storefrontSelection.main;
+  const quickProblemChips = [
+    { label: "Untuk daun kuning", value: "daun-kuning" },
+    { label: "Untuk hama", value: "hama" },
+    { label: "Untuk pembungaan", value: "pembungaan-buruk" },
+    { label: "Untuk buah rontok", value: "buah-rontok" },
+    { label: "Untuk gulma", value: "gulma" },
+    { label: "Untuk pertumbuhan", value: "pertumbuhan-lambat" },
+  ];
+
+  const baseParams = {
+    harga: priceBand !== "all" ? priceBand : undefined,
+    kategori: category,
+    kelompok: mainCategoryKey,
+    masalah: problemId ?? undefined,
+    promo: promoOnly ? "1" : undefined,
+    q: search,
+    sort,
+    stok: stockOnly ? "1" : undefined,
+    subkategori: subcategory,
+    tanaman: cropId ?? undefined,
+  };
 
   return (
     <section className="page-stack">
@@ -83,9 +158,9 @@ export default async function ProductsPage({
           buildCollectionJsonLd({
             title: "Katalog Produk Pertanian Wiragro",
             description:
-              "Katalog produk pertanian aktif dari Wiragro, mulai dari pupuk, benih, pestisida, hingga alat pertanian.",
+              "Produk pertanian Wiragro yang terhubung ke kebutuhan tanaman, gejala, dan keputusan budidaya.",
             path: "/produk",
-            itemUrls: products.items.slice(0, 12).map((product) => `/produk/${product.slug}`),
+            itemUrls: products.slice(0, 12).map((product) => `/produk/${product.slug}`),
           }),
           buildBreadcrumbJsonLd([
             { name: "Beranda", path: "/" },
@@ -94,18 +169,13 @@ export default async function ProductsPage({
         ]}
         id="products-page-jsonld"
       />
+
       <div className="page-intro page-intro--compact">
-            <span className="eyebrow-label">Belanja / Katalog</span>
-        <h1>
-          {activeCategory
-            ? `Katalog ${activeCategory.name}`
-            : activeStorefrontMain
-              ? activeStorefrontMain.label
-              : "Produk pertanian Wiragro"}
-        </h1>
+        <span className="eyebrow-label">Katalog solusi-produk</span>
+        <h1>Produk Pertanian Wiragro</h1>
         <p>
-          Gunakan pencarian, kategori, dan urutan untuk menemukan produk yang paling relevan.
-          Harga, ketersediaan, dan kategori utama ditampilkan langsung agar proses belanja terasa lebih jelas.
+          Temukan nutrisi tanaman, pestisida, benih, dan perlengkapan pertanian
+          sesuai kebutuhan tanaman Anda.
         </p>
       </div>
 
@@ -118,107 +188,204 @@ export default async function ProductsPage({
           categories={categories}
         />
 
-        <form action="/produk" className="catalog-search-card">
+        <div className="catalog-search-card">
           <div className="catalog-search-card__primary">
+            <SearchInput
+              action="/produk"
+              defaultValue={search}
+              hiddenInputs={{
+                harga: priceBand !== "all" ? priceBand : undefined,
+                kategori: category,
+                kelompok: mainCategoryKey,
+                masalah: problemId ?? undefined,
+                promo: promoOnly ? "1" : undefined,
+                sort,
+                stok: stockOnly ? "1" : undefined,
+                subkategori: subcategory,
+                tanaman: cropId ?? undefined,
+              }}
+              inputLabel="Cari produk pertanian"
+              placeholder="Cari pupuk, pestisida, hama, tanaman, atau masalah..."
+            />
+
+            <form action="/produk" className="catalog-sort-form">
+              <label className="catalog-search-card__field catalog-search-card__field--select">
+                <span>Urutkan</span>
+                <select defaultValue={sort} name="sort">
+                  <option value="latest">Terbaru</option>
+                  <option value="promo">Promo aktif</option>
+                  <option value="best_seller">Terlaris</option>
+                  <option value="name_asc">Nama A-Z</option>
+                  <option value="price_asc">Harga termurah</option>
+                  <option value="price_desc">Harga tertinggi</option>
+                </select>
+              </label>
+              {Object.entries({
+                harga: priceBand !== "all" ? priceBand : undefined,
+                kategori: category,
+                kelompok: mainCategoryKey,
+                masalah: problemId ?? undefined,
+                promo: promoOnly ? "1" : undefined,
+                q: search,
+                stok: stockOnly ? "1" : undefined,
+                subkategori: subcategory,
+                tanaman: cropId ?? undefined,
+              }).map(([key, value]) =>
+                value ? <input key={key} name={key} type="hidden" value={value} /> : null,
+              )}
+              <button className="btn btn-secondary" type="submit">
+                Terapkan
+              </button>
+            </form>
+          </div>
+
+          <form action="/produk" className="catalog-filter-form">
+            {Object.entries({
+              kategori: category,
+              kelompok: mainCategoryKey,
+              q: search,
+              sort,
+              subkategori: subcategory,
+            }).map(([key, value]) =>
+              value ? <input key={key} name={key} type="hidden" value={value} /> : null,
+            )}
             <label className="catalog-search-card__field">
-              <span>Cari produk</span>
-              <input
-                defaultValue={search}
-                name="q"
-                placeholder="Cari pupuk, benih, pestisida, minyak, gula..."
-              />
-            </label>
-            <label className="catalog-search-card__field catalog-search-card__field--select">
-              <span>Urutkan</span>
-              <select defaultValue={sort} name="sort">
-                <option value="latest">Terbaru</option>
-                <option value="promo">Promo aktif</option>
-                <option value="best_seller">Paling disorot</option>
-                <option value="name_asc">Nama A-Z</option>
-                <option value="price_asc">Harga termurah</option>
-                <option value="price_desc">Harga tertinggi</option>
+              <span>Tanaman</span>
+              <select defaultValue={cropId ?? ""} name="tanaman">
+                <option value="">Semua tanaman</option>
+                <option value="padi">Padi</option>
+                <option value="cabai">Cabai</option>
+                <option value="jagung">Jagung</option>
+                <option value="tomat">Tomat</option>
+                <option value="bawang">Bawang</option>
+                <option value="melon">Semangka / Melon</option>
+                <option value="sawit">Sawit</option>
+                <option value="hortikultura">Hortikultura</option>
+                <option value="lainnya">Lainnya</option>
               </select>
             </label>
-            {mainCategoryKey ? <input name="kelompok" type="hidden" value={mainCategoryKey} /> : null}
-            {subcategory ? <input name="subkategori" type="hidden" value={subcategory} /> : null}
-            {category ? <input name="kategori" type="hidden" value={category} /> : null}
-            <button className="btn btn-primary" type="submit">
-              Cari
-            </button>
-          </div>
+
+            <label className="catalog-search-card__field">
+              <span>Masalah</span>
+              <select defaultValue={problemId ?? ""} name="masalah">
+                <option value="">Semua masalah</option>
+                <option value="daun-kuning">Daun kuning</option>
+                <option value="hama">Hama</option>
+                <option value="bercak-daun">Jamur / bercak</option>
+                <option value="gulma">Gulma</option>
+                <option value="pertumbuhan-lambat">Pertumbuhan lambat</option>
+                <option value="buah-rontok">Buah rontok</option>
+                <option value="pembungaan-buruk">Pembungaan buruk</option>
+                <option value="hasil-panen">Hasil panen kurang maksimal</option>
+              </select>
+            </label>
+
+            <label className="catalog-search-card__field">
+              <span>Harga</span>
+              <select defaultValue={priceBand} name="harga">
+                <option value="all">Semua harga</option>
+                <option value="under-100k">Di bawah 100 ribu</option>
+                <option value="100k-250k">100 ribu - 250 ribu</option>
+                <option value="250k+">Di atas 250 ribu</option>
+              </select>
+            </label>
+
+            <label className="catalog-checkbox">
+              <input defaultChecked={promoOnly} name="promo" type="checkbox" value="1" />
+              <span>Promo</span>
+            </label>
+
+            <label className="catalog-checkbox">
+              <input defaultChecked={stockOnly} name="stok" type="checkbox" value="1" />
+              <span>Stok tersedia</span>
+            </label>
+
+            <div className="catalog-filter-form__actions">
+              <button className="btn btn-secondary" type="submit">
+                Terapkan filter
+              </button>
+              <a className="btn btn-secondary" href="/produk">
+                Reset filter
+              </a>
+            </div>
+          </form>
 
           <div className="catalog-chip-row" aria-label="Kategori produk">
-            <Link
-              className={!category ? "is-active" : undefined}
-              href={search ? `/produk?q=${encodeURIComponent(search)}` : "/produk"}
-            >
+            <FilterChip active={!category} href={buildProductsHref({ ...baseParams, kategori: undefined })}>
               Semua
-            </Link>
-            {categories.map((item) => {
-              const href = search
-                ? `/produk?kategori=${item.slug}&q=${encodeURIComponent(search)}`
-                : `/produk?kategori=${item.slug}`;
-
-              return (
-                <Link
-                  className={category === item.slug ? "is-active" : undefined}
-                  href={href}
-                  key={item.id}
-                >
-                  {item.name}
-                </Link>
-              );
-            })}
+            </FilterChip>
+            {categories.map((item) => (
+              <FilterChip
+                active={category === item.slug}
+                href={buildProductsHref({ ...baseParams, kategori: item.slug })}
+                key={item.id}
+              >
+                {item.name}
+              </FilterChip>
+            ))}
           </div>
-        </form>
 
-        <div className="catalog-results-header">
-          <div>
-            <span className="eyebrow-label">Hasil pencarian</span>
-            <h2>{products.pagination.count} produk tersedia</h2>
+          <div className="catalog-chip-row" aria-label="Quick problem chips">
+            {quickProblemChips.map((chip) => (
+              <FilterChip
+                active={problemId === chip.value}
+                href={buildProductsHref({
+                  ...baseParams,
+                  masalah: chip.value === problemId ? undefined : chip.value,
+                })}
+                key={chip.value}
+              >
+                {chip.label}
+              </FilterChip>
+            ))}
           </div>
-          <span>{search ? `Kata kunci: "${search}"` : "Menampilkan seluruh produk aktif"}</span>
         </div>
 
+        <SectionHeader
+          action={{ href: "/solusi", label: "Mulai dari solusi", variant: "secondary" }}
+          description={
+            activeCategory
+              ? `Kategori aktif: ${activeCategory.name}`
+              : activeStorefrontMain
+                ? activeStorefrontMain.label
+                : "Katalog ini membantu user mencari produk lewat konteks tanaman dan masalah."
+          }
+          eyebrow="Hasil katalog"
+          title={`${products.length} produk tersedia`}
+        />
+
         {catalogUnavailable ? (
-          <article className="empty-state empty-state--shopping">
-            <span className="eyebrow-label">Katalog belum dapat dimuat</span>
-            <h2>Daftar produk sementara belum bisa dimuat.</h2>
-            <p>
-              Silakan muat ulang halaman beberapa saat lagi. Pencarian dan filter Anda tetap
-              dipertahankan.
-            </p>
-            <div className="empty-state__actions">
-              <Link className="btn btn-primary" href="/produk">
-                Muat ulang katalog
-              </Link>
-            </div>
-          </article>
-        ) : products.items.length ? (
+          <ErrorState
+            actions={[{ href: buildProductsHref(baseParams), label: "Muat ulang katalog" }]}
+            description="Silakan coba lagi beberapa saat lagi. Filter yang Anda pilih tetap bisa dipakai kembali."
+            eyebrow="Gagal memuat produk"
+            title="Gagal memuat produk"
+          />
+        ) : products.length ? (
           <div className="product-grid product-grid--catalog">
-            {products.items.map((product) => (
+            {products.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
           </div>
         ) : (
-          <article className="empty-state empty-state--shopping">
-            <span className="eyebrow-label">Produk tidak ditemukan</span>
-            <h2>Tidak ada produk yang cocok dengan filter saat ini</h2>
-            <p>Coba ubah kata kunci, reset kategori, atau kembali ke seluruh katalog aktif.</p>
-            <div className="empty-state__actions">
-              <Link className="btn btn-primary" href="/produk">
-                Lihat semua produk
-              </Link>
-            </div>
-          </article>
+          <EmptyState
+            actions={[
+              { href: "/produk", label: "Reset filter" },
+              { href: "/ai-chat", label: "Tanya AI", variant: "secondary" },
+              { href: "/produk", label: "Lihat semua produk", variant: "secondary" },
+            ]}
+            description="Coba ganti filter tanaman, masalah, atau masuk ke AI agar kebutuhan Anda lebih cepat dipersempit."
+            eyebrow="Produk belum ditemukan"
+            title="Produk belum ditemukan"
+          />
         )}
       </section>
 
       <PathwaySection
         cards={getProductRelationCards(undefined, activeCategory)}
-        description="Katalog perlu tetap fokus pada pembelian, tetapi selalu memberi jalan kembali ke belajar dan solusi saat kebutuhan belum benar-benar final."
+        description="Katalog tetap fokus pada pembelian, tetapi setiap langkahnya mengantar user kembali ke konteks solusi dan edukasi."
         eyebrow="Relasi silang"
-        title="Belanja yang sehat tetap terhubung ke konteks."
+        title="Belanja yang sehat tetap terhubung ke masalah tanaman."
       />
     </section>
   );

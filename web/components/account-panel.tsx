@@ -7,6 +7,7 @@ import { useEffect, useRef, useState, useTransition } from "react";
 import { AccountDashboard } from "@/components/account-dashboard";
 import { useAuth } from "@/components/auth-provider";
 import { GoogleSignInButton } from "@/components/google-signin-button";
+import { trackUiEvent } from "@/lib/analytics";
 
 function normalizeNextPath(rawValue: string | null) {
   if (!rawValue || !rawValue.startsWith("/") || rawValue.startsWith("//")) {
@@ -102,12 +103,9 @@ export function AccountPanel() {
     <section className="page-stack account-page">
       <div className="account-hero">
         <div className="account-hero__copy">
-          <span className="eyebrow-label">Masuk ke akun</span>
-          <h1>Akses wishlist, checkout, pesanan, dan fitur premium dengan akun Wiragro.</h1>
-          <p>
-            Masuk dengan Google atau WhatsApp OTP. Setelah berhasil, website langsung
-            melanjutkan Anda ke halaman yang sedang dibutuhkan.
-          </p>
+          <span className="eyebrow-label">Masuk ke Wiragro</span>
+          <h1>Masuk ke Wiragro</h1>
+          <p>Akses akun, wishlist, checkout, dan pesanan Anda.</p>
           {nextPath ? (
             <div className="account-hero__next">
               Setelah login Anda akan diarahkan ke <strong>{nextPath}</strong>.
@@ -119,8 +117,8 @@ export function AccountPanel() {
               <span>Produk favorit dapat dibuka lagi dari akun yang sama.</span>
             </li>
             <li>
-              <strong>Checkout lebih singkat</strong>
-              <span>Data pelanggan tidak perlu diisi ulang setiap kali belanja.</span>
+              <strong>Checkout wajib login</strong>
+              <span>Belanja tetap bebas, tetapi penyelesaian order memakai akun yang aktif.</span>
             </li>
             <li>
               <strong>Dua metode login</strong>
@@ -161,6 +159,9 @@ export function AccountPanel() {
               startTransition(async () => {
                 try {
                   if (!challengeId) {
+                    trackUiEvent("login_started", {
+                      provider: "whatsapp_otp",
+                    });
                     const challenge = await requestOtpCode(otpPhone);
                     setChallengeId(challenge.challengeId);
                     setDebugCode(challenge.debugCode || null);

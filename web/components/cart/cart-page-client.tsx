@@ -4,10 +4,13 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 
+import { useAuth } from "@/components/auth-provider";
 import { useCart } from "@/components/cart/cart-provider";
+import { trackUiEvent } from "@/lib/analytics";
 import { formatCurrency } from "@/lib/format";
 
 export function CartPageClient() {
+  const { session } = useAuth();
   const { cart, error, isBusy, isReady, refreshCart, removeItem, setItemQty } = useCart();
   const [pendingItemId, setPendingItemId] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
@@ -223,13 +226,26 @@ export function CartPageClient() {
             <strong>{totalWeightKg > 0 ? `${totalWeightKg.toFixed(2)} kg` : "-"}</strong>
           </div>
           <div className="stack-list stack-list--compact">
-            <Link className="btn btn-primary btn-block" href="/checkout">
+            <Link
+              className="btn btn-primary btn-block"
+              href={session ? "/checkout" : "/masuk?next=%2Fcheckout"}
+              onClick={() =>
+                trackUiEvent("checkout_started", {
+                  source: "cart_page",
+                })
+              }
+            >
               Lanjut checkout
             </Link>
             <Link className="btn btn-secondary btn-block" href="/produk">
               Tambah produk lagi
             </Link>
           </div>
+          {!session ? (
+            <p className="inline-note">
+              Checkout memerlukan akun. Setelah login Anda akan kembali ke halaman checkout.
+            </p>
+          ) : null}
         </aside>
       </div>
     </section>

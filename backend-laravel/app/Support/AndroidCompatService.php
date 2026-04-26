@@ -24,6 +24,7 @@ class AndroidCompatService
     public function __construct(
         private readonly RajaOngkirService $rajaOngkir,
         private readonly CustomerPaymentService $paymentService,
+        private readonly CustomerProductReviewEligibilityService $reviewEligibility,
     ) {}
 
     public function resolveStore(?string $storeCode = null): StoreSetting
@@ -660,13 +661,19 @@ class AndroidCompatService
     {
         $rows = Order::query()
             ->where('customer_id', $customer->id)
+            ->with('items')
             ->latest('created_at')
             ->limit($limit)
             ->get();
+        $reviewSummaries = $this->reviewEligibility->buildOrderReviewSummaries($customer, $rows);
 
         return [
             'items' => $rows
-                ->map(fn (Order $order): array => $this->serializeOrderSummary($order, $customer))
+                ->map(fn (Order $order): array => $this->serializeOrderSummary(
+                    $order,
+                    $customer,
+                    $reviewSummaries[(string) $order->id] ?? null,
+                ))
                 ->values()
                 ->all(),
         ];
@@ -834,7 +841,11 @@ class AndroidCompatService
         ];
     }
 
-    private function serializeOrderSummary(Order $order, Customer $customer): array
+    private function serializeOrderSummary(
+        Order $order,
+        Customer $customer,
+        ?array $reviewSummary = null,
+    ): array
     {
         return [
             'id' => $order->id,
@@ -848,6 +859,7 @@ class AndroidCompatService
             'payment_method' => $order->payment_method,
             'invoice_source' => config('storefront.invoice_source', 'STORE'),
             'customer_role' => $this->roleFor($customer),
+            'review_summary' => $reviewSummary ?? $this->reviewEligibility->buildOrderReviewSummary($customer, $order),
         ];
     }
 
@@ -855,9 +867,12 @@ class AndroidCompatService
     {
         $order->loadMissing(['items.product', 'items.product.images', 'payments']);
         $payment = $order->payments()->latest('id')->first();
+        $reviewSummary = $this->reviewEligibility->buildOrderReviewSummary($customer, $order);
+        $reviewItemsByProductId = collect($reviewSummary['items'] ?? [])
+            ->keyBy(fn (array $item): string => (string) ($item['product_id'] ?? ''));
 
         return array_merge(
-            $this->serializeOrderSummary($order, $customer),
+            $this->serializeOrderSummary($order, $customer, $reviewSummary),
             [
                 'payment_due_at' => optional($order->auto_cancel_at)?->toIso8601String(),
                 'auto_cancel_at' => optional($order->auto_cancel_at)?->toIso8601String(),
@@ -910,6 +925,7 @@ class AndroidCompatService
                         'discount_total' => '0.00',
                         'line_total' => $this->decimalString($item->line_total),
                         'price_snapshot' => $item->product_snapshot ?? [],
+                        'review_status' => $reviewItemsByProductId->get((string) $item->product_id),
                     ])
                     ->values()
                     ->all(),

@@ -7,9 +7,9 @@ import { useState } from "react";
 import { AddToCartButton } from "@/components/cart/add-to-cart-button";
 import { BuyNowButton } from "@/components/cart/buy-now-button";
 import { CommerceIntentLink } from "@/components/commerce-intent-link";
+import { RoleAwarePrice } from "@/components/ui/role-aware-price";
 import { WishlistButton } from "@/components/wishlist-button";
 import type { ProductDetailPayload } from "@/lib/api";
-import { formatCurrency } from "@/lib/format";
 import type { CommerceWhatsAppLink } from "@/lib/growth-commerce";
 import type { ProductPageEnrichment } from "@/lib/product-content";
 
@@ -39,12 +39,14 @@ export function ProductDetailView({
   product,
   enrichment,
   consultationLink,
+  aiChatHref,
   b2bInquiryHref,
   b2bInquiryLabel,
 }: {
   product: ProductDetailPayload;
   enrichment: ProductPageEnrichment;
   consultationLink?: CommerceWhatsAppLink | null;
+  aiChatHref?: string;
   b2bInquiryHref?: string;
   b2bInquiryLabel?: string;
 }) {
@@ -56,7 +58,6 @@ export function ProductDetailView({
     product.images.find((image) => image.id === selectedImageId) ?? defaultImage ?? null;
   const isOutOfStock = product.availability.state === "out_of_stock";
   const itemWeightKg = Number(product.weight_grams || "0") / 1000;
-  const hasPromo = Boolean(product.price.compare_at_amount);
   const useUnoptimizedSelectedImage = selectedImage?.url.startsWith("/") ?? false;
 
   return (
@@ -141,16 +142,9 @@ export function ProductDetailView({
         <div className="product-purchase-panel product-purchase-panel--editorial">
           <div className="product-purchase-panel__heading">
             <span className="eyebrow-label">CTA beli</span>
-            <strong>Beli saat konteksnya sudah tepat, bukan karena produknya terlihat familiar.</strong>
+            <strong>Beli saat Anda sudah paham fungsi produk, masalah yang dibantu, dan fase pakainya.</strong>
           </div>
-          <div className="product-purchase-panel__price">
-            <strong>{formatCurrency(product.price.amount)}</strong>
-            {hasPromo ? (
-              <small className="price-strike">
-                {formatCurrency(product.price.compare_at_amount)}
-              </small>
-            ) : null}
-          </div>
+          <RoleAwarePrice availabilityText={product.stock_badge.message} price={product.price} />
           <span className={`status-badge status-badge--${product.availability.state}`}>
             {product.availability.label}
           </span>
@@ -190,14 +184,14 @@ export function ProductDetailView({
             <AddToCartButton
               buttonClassName="btn btn-primary btn-block"
               disabled={isOutOfStock}
-              label={enrichment.primaryCtaLabel}
+              label="Tambah ke Keranjang"
               productId={product.id}
               qty={qty}
             />
             <BuyNowButton
               buttonClassName="btn btn-secondary btn-block"
               disabled={isOutOfStock}
-              label={enrichment.secondaryCtaLabel}
+              label="Beli Sekarang"
               productId={product.id}
               qty={qty}
             />
@@ -209,7 +203,7 @@ export function ProductDetailView({
                 leadSummary={consultationLink.leadSummary}
                 tracking={consultationLink.tracking}
               >
-                Konsultasi sebelum beli
+                Konsultasi via WhatsApp
               </CommerceIntentLink>
             ) : (
               <Link className="btn btn-secondary btn-block" href="/kontak">
@@ -221,19 +215,21 @@ export function ProductDetailView({
                 {b2bInquiryLabel || "Ajukan inquiry B2B"}
               </Link>
             ) : null}
-            <Link className="btn btn-secondary btn-block" href="/keranjang">
-              Buka keranjang
-            </Link>
           </div>
 
           <div className="product-purchase-panel__support">
             <p>{enrichment.consultationPrompt}</p>
+            {aiChatHref ? (
+              <Link className="btn btn-secondary btn-block" href={aiChatHref}>
+                Tanya AI Pertanian
+              </Link>
+            ) : null}
           </div>
         </div>
 
         <div className="product-showcase__context">
           <article className="product-context-card">
-            <span className="eyebrow-label">Cocok untuk komoditas</span>
+            <span className="eyebrow-label">Cocok untuk tanaman</span>
             <div className="product-chip-links">
               {enrichment.commodityLinks.map((item) => (
                 <Link href={item.href} key={`${product.slug}-${item.slug}`}>
@@ -255,7 +251,7 @@ export function ProductDetailView({
           </article>
 
           <article className="product-context-card">
-            <span className="eyebrow-label">Masalah yang bisa dibantu</span>
+            <span className="eyebrow-label">Masalah yang bisa dibantu produk ini</span>
             <div className="product-chip-links">
               {enrichment.problemLinks.map((item) => (
                 <Link href={item.href} key={`${product.slug}-${item.slug}`}>
@@ -273,6 +269,23 @@ export function ProductDetailView({
               ? `Promo aktif: ${product.promotions[0]?.name}.`
               : "Harga aktif akan mengikuti katalog saat checkout."}
           </span>
+        </div>
+
+        <div className="product-mobile-cta" role="region" aria-label="Aksi beli mobile">
+          <AddToCartButton
+            buttonClassName="btn btn-primary btn-block"
+            disabled={isOutOfStock}
+            label="Tambah"
+            productId={product.id}
+            qty={qty}
+          />
+          <BuyNowButton
+            buttonClassName="btn btn-secondary btn-block"
+            disabled={isOutOfStock}
+            label="Beli Sekarang"
+            productId={product.id}
+            qty={qty}
+          />
         </div>
       </div>
     </section>

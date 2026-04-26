@@ -1,24 +1,36 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 
 import { ArticleCard } from "@/components/article-card";
-import { ArticleTaxonomyDirectory } from "@/components/article-taxonomy-directory";
 import { JsonLd } from "@/components/json-ld";
-import { PathwaySection } from "@/components/pathway-section";
+import { FilterChip } from "@/components/ui/filter-chip";
+import { SearchInput } from "@/components/ui/search-input";
+import { SectionHeader } from "@/components/ui/section-header";
+import { EmptyState } from "@/components/ui/state";
+import { PrimaryButton, SecondaryButton } from "@/components/ui/button";
+import { VideoCard } from "@/components/ui/video-card";
 import { getArticles } from "@/lib/api";
 import {
-  buildResetArticleFiltersHref,
-  filterArticlesByState,
-  getActiveArticleFilters,
-  getAvailableArticleTaxonomySlugs,
-  type ArticleFilterState,
-} from "@/lib/article-content";
-import { getArticleRelationCards } from "@/lib/hybrid-navigation";
+  EDUCATION_FORMAT_OPTIONS,
+  EDUCATION_TOPIC_OPTIONS,
+  buildEducationHref,
+  filterEducationArticles,
+  filterEducationVideos,
+  getFeaturedEducationVideos,
+  type EducationFilterState,
+} from "@/lib/education-content";
 import {
   buildArticleListingMetadata,
   buildBreadcrumbJsonLd,
   buildCollectionJsonLd,
+  buildWebPageJsonLd,
 } from "@/lib/seo";
+import {
+  buildProductSolutionHref,
+  getSolutionCropOptions,
+  getSolutionProblemOptions,
+  normalizeSolutionCropId,
+  normalizeSolutionProblemId,
+} from "@/lib/solution-experience";
 
 export const dynamic = "force-dynamic";
 
@@ -31,43 +43,43 @@ function getParam(
   return typeof params[key] === "string" ? params[key] : undefined;
 }
 
+function hasActiveFilters(filters: EducationFilterState) {
+  return Boolean(
+    filters.q ||
+      filters.tanaman ||
+      filters.masalah ||
+      filters.topik ||
+      (filters.format && filters.format !== "all"),
+  );
+}
+
 export async function generateMetadata({
   searchParams,
 }: {
   searchParams: SearchParams;
 }): Promise<Metadata> {
   const resolved = await searchParams;
-  const filters: ArticleFilterState = {
+  const filters: EducationFilterState = {
     q: getParam(resolved, "q"),
-    komoditas: getParam(resolved, "komoditas"),
-    topik: getParam(resolved, "topik"),
-    gejala: getParam(resolved, "gejala"),
-    fase: getParam(resolved, "fase"),
-    tujuan: getParam(resolved, "tujuan"),
+    tanaman: getParam(resolved, "tanaman"),
+    masalah: getParam(resolved, "masalah"),
+    topik: getParam(resolved, "topik") as EducationFilterState["topik"],
+    format: (getParam(resolved, "format") as EducationFilterState["format"]) ?? "all",
   };
-  const hasFilter = Boolean(
-    filters.q ||
-      filters.komoditas ||
-      filters.topik ||
-      filters.gejala ||
-      filters.fase ||
-      filters.tujuan,
-  );
 
   return buildArticleListingMetadata({
-    title: hasFilter ? "Hasil eksplorasi artikel pertanian" : "Ruang Edukasi & Artikel Pertanian",
-    description: hasFilter
-      ? "Eksplorasi artikel pertanian Wiragro berdasarkan komoditas, topik, gejala, fase tanam, atau tujuan pembaca."
-      : "Pusat edukasi Wiragro untuk membantu pembaca belajar, memahami gejala, memilih produk, dan bergerak ke solusi dengan lebih yakin.",
+    title: "Edukasi Pertanian - Wiragro",
+    description:
+      "Pelajari studi kasus, review produk, dan panduan pertanian praktis dari Wiragro.",
     path: "/artikel",
     canonicalPath: "/artikel",
-    noIndex: hasFilter,
+    noIndex: hasActiveFilters(filters),
     keywords: [
+      "edukasi pertanian praktis",
       "artikel pertanian",
-      "edukasi pertanian",
-      "taxonomy artikel pertanian",
-      "gejala tanaman",
-      "fase tanam",
+      "video pertanian",
+      "studi kasus pertanian",
+      "review produk pertanian",
     ],
   });
 }
@@ -78,156 +90,276 @@ export default async function ArticlesPage({
   searchParams: SearchParams;
 }) {
   const resolved = await searchParams;
-  const filters: ArticleFilterState = {
+  const filters: EducationFilterState = {
     q: getParam(resolved, "q"),
-    komoditas: getParam(resolved, "komoditas"),
-    topik: getParam(resolved, "topik"),
-    gejala: getParam(resolved, "gejala"),
-    fase: getParam(resolved, "fase"),
-    tujuan: getParam(resolved, "tujuan"),
+    tanaman: getParam(resolved, "tanaman"),
+    masalah: getParam(resolved, "masalah"),
+    topik: getParam(resolved, "topik") as EducationFilterState["topik"],
+    format: (getParam(resolved, "format") as EducationFilterState["format"]) ?? "all",
   };
 
-  const articles = await getArticles({ q: filters.q, page_size: 30 });
-  const filteredArticles = filterArticlesByState(articles.items, filters);
-  const featuredArticle = filteredArticles[0] ?? null;
-  const articleGrid = filteredArticles.slice(featuredArticle ? 1 : 0);
-  const activeFilters = getActiveArticleFilters(filters);
-  const resetHref = buildResetArticleFiltersHref(filters);
-  const availableSlugs = getAvailableArticleTaxonomySlugs(articles.items);
+  const articleFeed = await getArticles({ q: filters.q, page_size: 24 }).catch(() => ({
+    items: [],
+    pagination: { page: 1, page_size: 24, count: 0 },
+  }));
+  const filteredArticles = filterEducationArticles(articleFeed.items, filters);
+  const filteredVideos = filterEducationVideos(filters);
+  const featuredVideos = getFeaturedEducationVideos(filters, 3);
+  const cropOptions = getSolutionCropOptions();
+  const problemOptions = getSolutionProblemOptions();
+  const productHref = buildProductSolutionHref(
+    normalizeSolutionCropId(filters.tanaman),
+    normalizeSolutionProblemId(filters.masalah),
+  );
+  const resetHref = "/artikel";
+  const activeFilters = hasActiveFilters(filters);
+  const shouldShowVideos = filters.format !== "article";
+  const shouldShowArticles = filters.format !== "video";
+  const videoItems = activeFilters
+    ? filteredVideos
+    : filters.format === "video"
+      ? filteredVideos
+      : featuredVideos;
+  const hasResults =
+    (shouldShowArticles && filteredArticles.length > 0) ||
+    (shouldShowVideos && videoItems.length > 0);
 
   return (
     <section className="page-stack">
       <JsonLd
         data={[
-          buildCollectionJsonLd({
-            title: "Ruang Edukasi Wiragro",
+          buildWebPageJsonLd({
+            title: "Edukasi Pertanian Praktis | Wiragro",
             description:
-              "Kumpulan artikel dan insight pertanian yang bisa dijelajahi berdasarkan komoditas, topik, gejala, fase tanam, dan tujuan pembaca.",
+              "Pelajari masalah tanaman, cara penanganan, dan produk yang tepat berdasarkan kebutuhan lapangan.",
+            path: "/artikel",
+          }),
+          buildCollectionJsonLd({
+            title: "Pusat Edukasi Pertanian Wiragro",
+            description:
+              "Artikel SEO, video YouTube, studi kasus, dan review produk yang terhubung ke solusi dan produk.",
             path: "/artikel",
             itemUrls: filteredArticles.slice(0, 12).map((article) => `/artikel/${article.slug}`),
           }),
           buildBreadcrumbJsonLd([
             { name: "Beranda", path: "/" },
-            { name: "Artikel", path: "/artikel" },
+            { name: "Edukasi", path: "/artikel" },
           ]),
         ]}
-        id="articles-page-jsonld"
+        id="education-page-jsonld"
       />
 
-      <div className="page-intro page-intro--compact">
-        <span className="eyebrow-label">Mesin edukasi</span>
-        <h1>Ruang edukasi yang benar-benar bisa dijelajahi, bukan sekadar daftar artikel tipis.</h1>
-        <p>
-          Gunakan pencarian bila Anda sudah tahu topiknya, atau masuk lewat komoditas, gejala,
-          fase tanam, dan tujuan pembaca agar konten terasa lebih relevan sejak awal.
-        </p>
-      </div>
-
-      <form action="/artikel" className="filter-form filter-form--inline">
-        <input
-          defaultValue={filters.q}
-          name="q"
-          placeholder="Cari pupuk, benih, gejala, fase tanam, atau kebutuhan tanaman..."
-        />
-        {filters.komoditas ? <input name="komoditas" type="hidden" value={filters.komoditas} /> : null}
-        {filters.topik ? <input name="topik" type="hidden" value={filters.topik} /> : null}
-        {filters.gejala ? <input name="gejala" type="hidden" value={filters.gejala} /> : null}
-        {filters.fase ? <input name="fase" type="hidden" value={filters.fase} /> : null}
-        {filters.tujuan ? <input name="tujuan" type="hidden" value={filters.tujuan} /> : null}
-        <button className="btn btn-primary" type="submit">
-          Cari artikel
-        </button>
-      </form>
-
-      <ArticleTaxonomyDirectory availableSlugs={availableSlugs} filters={filters} />
-
-      <section className="article-results-shell">
-        <div className="section-heading article-results-shell__header">
-          <div>
-            <span className="eyebrow-label">Hasil eksplorasi</span>
-            <h2>{filteredArticles.length} artikel siap dibaca</h2>
-            <p>
-              Kombinasikan pencarian dan taxonomy untuk mempersempit konten dari kebutuhan,
-              bukan hanya dari judul artikel.
-            </p>
+      <section className="education-hero">
+        <div className="education-hero__copy">
+          <span className="eyebrow-label">Pusat edukasi</span>
+          <h1>Edukasi Pertanian Praktis</h1>
+          <p>
+            Pelajari masalah tanaman, cara penanganan, dan produk yang tepat berdasarkan
+            kebutuhan lapangan.
+          </p>
+          <div className="education-hero__actions">
+            <PrimaryButton href="#studi-kasus">Lihat Studi Kasus</PrimaryButton>
+            <SecondaryButton href="#jelajah-edukasi">Cari Artikel</SecondaryButton>
+            <SecondaryButton href="/ai-chat">Tanya AI</SecondaryButton>
           </div>
-          {activeFilters.length ? <Link href={resetHref}>Reset filter</Link> : null}
         </div>
 
-        {activeFilters.length ? (
-          <div className="article-active-filters">
-            {activeFilters.map((filter) => (
-              <span key={filter.key}>{filter.label}</span>
-            ))}
-          </div>
-        ) : null}
-
-        {featuredArticle ? (
-          <article className="article-list-highlight">
-            <div className="article-list-highlight__copy">
-              <span className="eyebrow-label">Mulai dari sini</span>
-              <h2>{featuredArticle.title}</h2>
-              <p>{featuredArticle.excerpt}</p>
-              <div className="article-list-highlight__meta">
-                {featuredArticle.taxonomy_labels?.map((label) => (
-                  <span key={`${featuredArticle.slug}-${label}`}>{label}</span>
-                ))}
-              </div>
-              <div className="article-list-highlight__actions">
-                <Link className="btn btn-primary" href={`/artikel/${featuredArticle.slug}`}>
-                  Baca artikel
-                </Link>
-                <Link className="btn btn-secondary" href="/solusi">
-                  Buka jalur solusi
-                </Link>
-              </div>
-            </div>
-            <div className="article-list-highlight__aside">
-              <span className="eyebrow-label">Kenapa relevan</span>
-              <strong>{featuredArticle.user_goal_summary}</strong>
-              {featuredArticle.key_takeaways?.length ? (
-                <ul className="plain-list">
-                  {featuredArticle.key_takeaways.slice(0, 3).map((item) => (
-                    <li key={`${featuredArticle.slug}-${item}`}>{item}</li>
-                  ))}
-                </ul>
-              ) : null}
-            </div>
+        <div className="education-hero__panel">
+          <article>
+            <span>Prioritas konten</span>
+            <strong>Studi kasus lapangan, review produk, lalu edukasi umum.</strong>
           </article>
-        ) : (
-          <article className="empty-state">
-            <span className="eyebrow-label">Artikel belum cocok</span>
-            <h2>Tidak ada artikel yang cocok dengan kombinasi filter saat ini.</h2>
-            <p>
-              Coba reset filter, ubah keyword, atau masuk ke jalur solusi jika kebutuhan Anda
-              datang dari problem lapangan yang lebih spesifik.
-            </p>
-            <div className="empty-state__actions">
-              <Link className="btn btn-primary" href={resetHref}>
-                Reset filter
-              </Link>
-              <Link className="btn btn-secondary" href="/solusi">
-                Cari solusi
-              </Link>
-            </div>
+          <article>
+            <span>Tujuan</span>
+            <strong>Edukasi menjadi jalan utama ke solusi dan produk, bukan pelengkap katalog.</strong>
           </article>
-        )}
-
-        {articleGrid.length ? (
-          <div className="article-grid article-grid--editorial">
-            {articleGrid.map((article) => (
-              <ArticleCard article={article} href={`/artikel/${article.slug}`} key={article.slug} />
-            ))}
-          </div>
-        ) : null}
+          <article>
+            <span>Untuk siapa</span>
+            <strong>Petani, toko pertanian, dan tim lapangan yang butuh konteks cepat.</strong>
+          </article>
+        </div>
       </section>
 
-      <PathwaySection
-        cards={getArticleRelationCards(featuredArticle?.title)}
-        description="Begitu pembaca mendapatkan konteks dari edukasi, selalu beri jalan jelas ke solusi atau ke produk."
-        eyebrow="Relasi silang"
-        title="Konten edukasi harus mendorong langkah berikutnya, bukan berhenti di bacaan."
-      />
+      <section className="education-filter-shell" id="jelajah-edukasi">
+        <SectionHeader
+          description="Cari hama, tanaman, pupuk, pestisida, atau masalah untuk mempersempit edukasi yang paling relevan."
+          eyebrow="Cari edukasi"
+          title="Masuk dari kebutuhan yang sedang Anda hadapi"
+        />
+
+        <SearchInput
+          action="/artikel"
+          buttonLabel="Cari Artikel"
+          defaultValue={filters.q}
+          hiddenInputs={{
+            tanaman: filters.tanaman,
+            masalah: filters.masalah,
+            topik: filters.topik,
+            format: filters.format && filters.format !== "all" ? filters.format : undefined,
+          }}
+          inputLabel="Cari edukasi pertanian"
+          placeholder="Cari hama, tanaman, pupuk, pestisida, atau masalah..."
+          size="large"
+        />
+
+        <div className="education-filter-groups">
+          <div className="education-chip-group">
+            <strong>Tanaman</strong>
+            <div className="education-chip-group__items">
+              <FilterChip
+                active={!filters.tanaman}
+                href={buildEducationHref(filters, { tanaman: undefined })}
+              >
+                Semua tanaman
+              </FilterChip>
+              {cropOptions.map((item) => (
+                <FilterChip
+                  active={filters.tanaman === item.id}
+                  href={buildEducationHref(filters, { tanaman: item.id })}
+                  key={item.id}
+                >
+                  {item.label}
+                </FilterChip>
+              ))}
+            </div>
+          </div>
+
+          <div className="education-chip-group">
+            <strong>Masalah</strong>
+            <div className="education-chip-group__items">
+              <FilterChip
+                active={!filters.masalah}
+                href={buildEducationHref(filters, { masalah: undefined })}
+              >
+                Semua masalah
+              </FilterChip>
+              {problemOptions.map((item) => (
+                <FilterChip
+                  active={filters.masalah === item.id}
+                  href={buildEducationHref(filters, { masalah: item.id })}
+                  key={item.id}
+                >
+                  {item.label}
+                </FilterChip>
+              ))}
+            </div>
+          </div>
+
+          <div className="education-chip-group">
+            <strong>Topik</strong>
+            <div className="education-chip-group__items">
+              <FilterChip
+                active={!filters.topik}
+                href={buildEducationHref(filters, { topik: undefined })}
+              >
+                Semua topik
+              </FilterChip>
+              {EDUCATION_TOPIC_OPTIONS.map((item) => (
+                <FilterChip
+                  active={filters.topik === item.id}
+                  href={buildEducationHref(filters, { topik: item.id })}
+                  key={item.id}
+                >
+                  {item.label}
+                </FilterChip>
+              ))}
+            </div>
+          </div>
+
+          <div className="education-chip-group">
+            <strong>Format</strong>
+            <div className="education-chip-group__items">
+              {EDUCATION_FORMAT_OPTIONS.map((item) => (
+                <FilterChip
+                  active={(filters.format ?? "all") === item.id}
+                  href={buildEducationHref(filters, {
+                    format: item.id === "all" ? undefined : item.id,
+                  })}
+                  key={item.id}
+                >
+                  {item.label}
+                </FilterChip>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {shouldShowVideos && videoItems.length ? (
+        <section className="section-block" id="studi-kasus">
+          <SectionHeader
+            description="Prioritas video mengikuti studi kasus lapangan, review produk, lalu edukasi umum."
+            eyebrow="Video unggulan"
+            title="Studi kasus terbaru"
+          />
+          <div className="education-video-grid">
+            {videoItems.map((video) => (
+              <VideoCard
+                category={video.category}
+                ctaLabel={video.youtubeId ? "Tonton" : "Lihat panduan"}
+                description={video.description}
+                href={video.href}
+                key={video.id}
+                thumbnail={video.thumbnail}
+                title={video.title}
+              />
+            ))}
+          </div>
+        </section>
+      ) : null}
+
+      {hasResults ? (
+        shouldShowArticles ? (
+          <section className="section-block">
+            <SectionHeader
+              action={activeFilters ? { href: resetHref, label: "Reset filter", variant: "secondary" } : undefined}
+              description="Artikel SEO, studi kasus, dan review produk disusun agar pembaca bisa lanjut ke solusi dan produk yang paling relevan."
+              eyebrow="Artikel praktis"
+              title="Panduan pertanian yang bisa langsung ditindaklanjuti"
+            />
+            <div className="article-grid article-grid--editorial">
+              {filteredArticles.map((article) => (
+                <ArticleCard article={article} href={`/artikel/${article.slug}`} key={article.slug} />
+              ))}
+            </div>
+          </section>
+        ) : null
+      ) : (
+        <EmptyState
+          actions={[
+            { href: resetHref, label: "Lihat edukasi lain" },
+            { href: "/ai-chat", label: "Tanya AI", variant: "secondary" },
+            { href: productHref, label: "Lihat produk terkait", variant: "secondary" },
+          ]}
+          description="Coba ubah tanaman, masalah, topik, atau format agar kami bisa menampilkan konten edukasi yang lebih sesuai."
+          eyebrow="Konten edukasi untuk topik ini belum tersedia"
+          headingLevel="h2"
+          title="Konten edukasi untuk topik ini belum tersedia"
+        />
+      )}
+
+      {shouldShowVideos && filters.format === "video" && filteredVideos.length > 3 ? (
+        <section className="section-block">
+          <SectionHeader
+            description="Kumpulan video tambahan yang masih relevan dengan tanaman, masalah, atau topik yang Anda pilih."
+            eyebrow="Video lain"
+            title="Video edukasi lainnya"
+          />
+          <div className="education-video-grid">
+            {filteredVideos.slice(3).map((video) => (
+              <VideoCard
+                category={video.category}
+                ctaLabel={video.youtubeId ? "Tonton" : "Lihat panduan"}
+                description={video.description}
+                href={video.href}
+                key={`more-${video.id}`}
+                thumbnail={video.thumbnail}
+                title={video.title}
+              />
+            ))}
+          </div>
+        </section>
+      ) : null}
     </section>
   );
 }

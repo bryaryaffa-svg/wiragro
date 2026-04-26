@@ -110,7 +110,7 @@ export function MobileBottomNav() {
       hybrid: true,
     },
     {
-      href: "/belajar",
+      href: "/artikel",
       label: "Edukasi",
       badge: null,
       icon: "learn" as const,

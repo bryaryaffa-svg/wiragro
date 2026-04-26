@@ -1,50 +1,74 @@
 import Link from "next/link";
 
+import { AIChatClient } from "@/components/ai-chat-client";
 import { JsonLd } from "@/components/json-ld";
+import { getArticles, getProducts } from "@/lib/api";
+import { getEducationVideoResources } from "@/lib/education-content";
 import {
   buildBreadcrumbJsonLd,
   buildPageMetadata,
   buildWebPageJsonLd,
 } from "@/lib/seo";
 
+export const dynamic = "force-dynamic";
+
+type SearchParams = Promise<Record<string, string | string[] | undefined>>;
+
+function getParam(
+  params: Record<string, string | string[] | undefined>,
+  key: string,
+) {
+  return typeof params[key] === "string" ? params[key] : undefined;
+}
+
 export const metadata = buildPageMetadata({
-  title: "AI Chat Pertanian Premium",
+  title: "AI Pertanian - Wiragro",
   description:
-    "Pendamping AI pertanian premium dari Wiragro untuk membantu membaca gejala, merangkum pilihan tindakan, dan menyiapkan langkah berikutnya.",
+    "Gunakan AI Pertanian Wiragro untuk mendapatkan arahan awal masalah tanaman dan rekomendasi produk.",
   path: "/ai-chat",
   keywords: [
-    "ai chat pertanian",
     "ai pertanian premium",
-    "asisten pertanian digital",
-    "wiragro ai",
+    "diagnosis awal tanaman",
+    "rekomendasi produk pertanian",
+    "ai chat wiragro",
   ],
-  section: "static",
+  section: "utility",
 });
 
-const AI_FEATURES = [
-  {
-    title: "Baca gejala lebih cepat",
-    body: "Mulai dari masalah tanaman, lalu dapatkan arahan awal yang lebih terstruktur sebelum lanjut ke solusi atau produk.",
-  },
-  {
-    title: "Rangkum pilihan tindakan",
-    body: "AI membantu menyederhanakan informasi agar keputusan lapangan terasa lebih tenang dan tidak terlalu teknis.",
-  },
-  {
-    title: "Terhubung ke alur Wiragro",
-    body: "Setelah mendapat arahan, Anda bisa lanjut ke edukasi, solusi, produk, atau hubungi tim untuk tindak lanjut.",
-  },
-];
+export default async function AIChatPage({
+  searchParams,
+}: {
+  searchParams: SearchParams;
+}) {
+  const resolved = await searchParams;
+  const context = {
+    crop: getParam(resolved, "crop") ?? getParam(resolved, "tanaman") ?? null,
+    problem: getParam(resolved, "problem") ?? getParam(resolved, "masalah") ?? null,
+    product: getParam(resolved, "product") ?? null,
+  };
 
-export default function AIChatPage() {
+  const [articles, products] = await Promise.all([
+    getArticles({ page_size: 12 }).catch(() => ({
+      items: [],
+      pagination: { page: 1, page_size: 12, count: 0 },
+    })),
+    getProducts({ page_size: 12, sort: "best_seller" }).catch(() => ({
+      items: [],
+      pagination: { page: 1, page_size: 12, count: 0 },
+      available_filters: {},
+      seo: {},
+    })),
+  ]);
+  const videos = getEducationVideoResources();
+
   return (
     <section className="page-stack">
       <JsonLd
         data={[
           buildWebPageJsonLd({
-            title: "AI Chat Pertanian Premium | Wiragro",
+            title: "AI Pertanian Wiragro | Premium Feature",
             description:
-              "Pendamping AI pertanian premium dari Wiragro untuk membantu membaca gejala, merangkum pilihan tindakan, dan menyiapkan langkah berikutnya.",
+              "Jelaskan masalah tanaman, dapatkan arahan awal, rekomendasi produk, serta artikel dan video terkait di AI Pertanian Wiragro.",
             path: "/ai-chat",
           }),
           buildBreadcrumbJsonLd([
@@ -55,60 +79,18 @@ export default function AIChatPage() {
         id="ai-chat-page-jsonld"
       />
 
-      <section className="page-intro">
-        <span className="eyebrow-label">AI premium</span>
-        <h1>AI Chat Pertanian Premium untuk keputusan yang lebih cepat dan tetap mudah dipahami.</h1>
-        <p>
-          AI Chat Wiragro dirancang sebagai pendamping digital untuk membantu membaca
-          gejala, menyusun pertanyaan, dan menyiapkan langkah berikutnya tanpa
-          menghilangkan konteks lapangan.
-        </p>
-        <div className="content-shell__cta">
-          <Link className="btn btn-primary" href="/masuk?next=%2Fai-chat">
-            Masuk untuk akses
-          </Link>
-          <Link className="btn btn-secondary" href="/solusi">
-            Mulai dari solusi
-          </Link>
-          <Link className="btn btn-secondary" href="/kontak">
-            Hubungi tim Wiragro
-          </Link>
-        </div>
-      </section>
+      <div className="breadcrumbs">
+        <Link href="/">Beranda</Link>
+        <span>/</span>
+        <span>AI Chat</span>
+      </div>
 
-      <section className="section-block">
-        <div className="section-heading">
-          <div>
-            <span className="eyebrow-label">Yang disiapkan</span>
-            <h2>AI ini dibuat untuk membantu, bukan menggantikan pertimbangan lapangan.</h2>
-            <p>
-              Fokus utamanya adalah merapikan proses tanya jawab, mempercepat pemetaan
-              masalah, dan membantu pengguna melanjutkan ke jalur yang tepat.
-            </p>
-          </div>
-        </div>
-
-        <div className="homepage-trust-grid">
-          {AI_FEATURES.map((item) => (
-            <article className="homepage-trust-card" key={item.title}>
-              <div>
-                <strong>{item.title}</strong>
-                <p>{item.body}</p>
-              </div>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      <section className="panel-card">
-        <span className="eyebrow-label">Akses bertahap</span>
-        <h2>Fitur ini sedang dibuka bertahap untuk pengalaman premium.</h2>
-        <p>
-          Halaman ini sengaja tampil publik agar arah produknya jelas. Jika akses penuh
-          belum tersedia untuk akun Anda, gunakan jalur solusi, edukasi, atau kontak
-          resmi sambil menunggu pembukaan akses berikutnya.
-        </p>
-      </section>
+      <AIChatClient
+        articles={articles.items}
+        context={context}
+        products={products.items}
+        videos={videos}
+      />
     </section>
   );
 }

@@ -3,7 +3,9 @@
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 
+import { useAuth } from "@/components/auth-provider";
 import { useCart } from "@/components/cart/cart-provider";
+import { trackUiEvent } from "@/lib/analytics";
 
 export function BuyNowButton({
   productId,
@@ -21,6 +23,7 @@ export function BuyNowButton({
   disabledLabel?: string;
 }) {
   const router = useRouter();
+  const { session } = useAuth();
   const { addItem } = useCart();
   const [message, setMessage] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -34,7 +37,10 @@ export function BuyNowButton({
           startTransition(async () => {
             try {
               await addItem(productId, qty);
-              router.push("/checkout");
+              trackUiEvent("checkout_started", {
+                source: "buy_now_button",
+              });
+              router.push(session ? "/checkout" : "/masuk?next=%2Fcheckout");
             } catch {
               setMessage("Gagal membuka checkout");
             }

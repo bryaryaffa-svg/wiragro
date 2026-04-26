@@ -45,6 +45,7 @@ export interface ProductSummary {
     compare_at_amount?: string | null;
     min_qty?: number | null;
     member_level?: string | null;
+    wholesale_amount?: string | null;
     is_promo?: boolean;
   };
   availability: {
@@ -170,7 +171,26 @@ export interface ArticleListPayload {
 
 export interface CartPayload {
   id: string;
+  checkout_rules?: {
+    allow_cod?: boolean;
+    allow_pickup?: boolean;
+    allow_store_delivery?: boolean;
+    apply_minimum_order?: boolean;
+    minimum_order_amount?: string | null;
+    payment_methods?: Array<{
+      code: string;
+      label: string;
+    }>;
+    pricing_mode?: string | null;
+    role?: string | null;
+    shipping_methods?: Array<{
+      code: string;
+      label: string;
+    }>;
+  };
+  customer_role?: string | null;
   guest_token?: string | null;
+  pricing_mode?: string | null;
   status: string;
   subtotal: string;
   discount_total: string;
@@ -186,7 +206,10 @@ export interface CartPayload {
     qty: number;
     price_snapshot: {
       amount?: string;
+      label?: string;
+      member_level?: string | null;
       price_type?: string;
+      pricing_mode?: string | null;
     };
     weight_grams?: number;
     promotion_snapshot: {
@@ -992,6 +1015,7 @@ function mapProductSummary(dto: LaravelProductDto): ProductSummary {
       compare_at_amount: isPromo ? basePrice : null,
       min_qty: null,
       member_level: null,
+      wholesale_amount: normalizeNumber(dto.reseller_price),
       is_promo: isPromo,
     },
     availability,
@@ -1609,6 +1633,12 @@ export async function getGuestCart(cartId: string, guestToken: string) {
   );
 }
 
+export async function getCustomerCart(accessToken: string) {
+  return fetchCustomerClientJson<CartPayload>("/customer/carts/me", {
+    headers: buildCustomerAuthHeaders(accessToken),
+  });
+}
+
 export async function addItemToCart(
   cartId: string,
   guestToken: string,
@@ -1626,6 +1656,21 @@ export async function addItemToCart(
   });
 }
 
+export async function addItemToCustomerCart(
+  accessToken: string,
+  productId: string,
+  qty: number,
+) {
+  return fetchCustomerClientJson<CartPayload>("/customer/carts/me/items", {
+    method: "POST",
+    headers: buildCustomerAuthHeaders(accessToken),
+    body: JSON.stringify({
+      product_id: productId,
+      qty,
+    }),
+  });
+}
+
 export async function updateCartItem(
   itemId: string,
   cartId: string,
@@ -1637,6 +1682,20 @@ export async function updateCartItem(
     body: JSON.stringify({
       cart_id: cartId,
       guest_token: guestToken,
+      qty,
+    }),
+  });
+}
+
+export async function updateCustomerCartItem(
+  accessToken: string,
+  itemId: string,
+  qty: number,
+) {
+  return fetchCustomerClientJson<CartPayload>(`/customer/carts/me/items/${itemId}`, {
+    method: "PATCH",
+    headers: buildCustomerAuthHeaders(accessToken),
+    body: JSON.stringify({
       qty,
     }),
   });
@@ -1683,6 +1742,81 @@ export async function submitGuestCheckout(payload: {
         phone: payload.phone,
         email: payload.email || null,
       },
+      shipping_method: payload.shippingMethod,
+      pickup_store_code: payload.shippingMethod === "pickup" ? getStoreCode() : null,
+      address:
+        payload.shippingMethod === "delivery"
+          ? {
+              recipient_name: payload.fullName,
+              recipient_phone: payload.phone,
+              address_line: payload.addressLine,
+              district: payload.district,
+              city: payload.city,
+              province: payload.province,
+              postal_code: payload.postalCode,
+            }
+          : null,
+      shipping:
+        payload.shippingMethod === "delivery" && payload.shippingSelection
+          ? {
+              destination_id: payload.shippingSelection.destinationId,
+              destination_label: payload.shippingSelection.destinationLabel,
+              province_name: payload.shippingSelection.provinceName ?? null,
+              city_name: payload.shippingSelection.cityName ?? null,
+              district_name: payload.shippingSelection.districtName ?? null,
+              subdistrict_name: payload.shippingSelection.subdistrictName ?? null,
+              zip_code: payload.shippingSelection.zipCode ?? null,
+              courier_code: payload.shippingSelection.courierCode,
+              courier_name: payload.shippingSelection.courierName,
+              service_code: payload.shippingSelection.serviceCode,
+              service_name: payload.shippingSelection.serviceName,
+              description: payload.shippingSelection.description ?? null,
+              cost: payload.shippingSelection.cost,
+              etd: payload.shippingSelection.etd ?? null,
+            }
+          : null,
+      payment_method: payload.paymentMethod,
+      notes: payload.notes || null,
+    }),
+  });
+}
+
+export async function submitCustomerCheckout(
+  accessToken: string,
+  payload: {
+    shippingMethod: "pickup" | "delivery";
+    fullName: string;
+    phone: string;
+    email?: string;
+    addressLine?: string;
+    district?: string;
+    city?: string;
+    province?: string;
+    postalCode?: string;
+    shippingSelection?: {
+      destinationId: string;
+      destinationLabel: string;
+      provinceName?: string | null;
+      cityName?: string | null;
+      districtName?: string | null;
+      subdistrictName?: string | null;
+      zipCode?: string | null;
+      courierCode: string;
+      courierName: string;
+      serviceCode: string;
+      serviceName: string;
+      description?: string | null;
+      cost: string;
+      etd?: string | null;
+    };
+    paymentMethod: string;
+    notes?: string;
+  },
+) {
+  return fetchCustomerClientJson<CheckoutResponse>("/customer/checkout/me", {
+    method: "POST",
+    headers: buildCustomerAuthHeaders(accessToken),
+    body: JSON.stringify({
       shipping_method: payload.shippingMethod,
       pickup_store_code: payload.shippingMethod === "pickup" ? getStoreCode() : null,
       address:

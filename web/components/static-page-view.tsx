@@ -62,7 +62,7 @@ export async function StaticPageView({ slug }: { slug: string }) {
         <Link className="btn btn-primary" href="/produk">
           Jelajahi produk
         </Link>
-        <Link className="btn btn-secondary" href="/belajar">
+        <Link className="btn btn-secondary" href="/artikel">
           Masuk ke Edukasi
         </Link>
       </div>

@@ -13,6 +13,8 @@ class PublicProductController extends ApiController
     {
         $products = Product::query()
             ->with(['category', 'images'])
+            ->withCount(['approvedReviews as approved_reviews_count'])
+            ->withAvg('approvedReviews as approved_reviews_avg_rating', 'rating')
             ->where('is_active', true)
             ->latest('created_at')
             ->latest('id')
@@ -33,6 +35,12 @@ class PublicProductController extends ApiController
     {
         abort_unless($product->is_active, 404);
 
-        return $this->success('Detail produk publik.', $product->load(['category', 'images']));
+        return $this->success(
+            'Detail produk publik.',
+            $product
+                ->load(['category', 'images'])
+                ->loadCount(['approvedReviews as approved_reviews_count'])
+                ->loadAvg('approvedReviews as approved_reviews_avg_rating', 'rating')
+        );
     }
 }

@@ -1,207 +1,201 @@
-import type { PathwayCard, PathwaySupportLink } from "@/lib/hybrid-navigation";
+export type HomeTrustBadge = {
+  icon: "distributor" | "education" | "product" | "solution";
+  label: string;
+  tone?: "accent" | "default" | "success";
+};
 
-export type HomeCommodityCard = {
-  theme: "rice" | "chili" | "corn" | "leafy" | "fruit" | "homegarden";
-  eyebrow: string;
-  title: string;
+export type HomeIconCard = {
+  actionLabel: string;
   description: string;
   href: string;
-  actionLabel: string;
-  supportingLinks?: PathwaySupportLink[];
-};
-
-export type HomeTrustPoint = {
+  icon:
+    | "chili"
+    | "corn"
+    | "fruit-drop"
+    | "fungus"
+    | "grid"
+    | "horti"
+    | "nutrition"
+    | "onion"
+    | "palm"
+    | "pest"
+    | "rice"
+    | "root"
+    | "stunted"
+    | "tomato"
+    | "weed"
+    | "yellow-leaf";
   title: string;
-  body: string;
-  icon: string;
 };
 
-export const HOMEPAGE_PROBLEM_CARDS: PathwayCard[] = [
+export type HomeVideoCard = {
+  category: string;
+  description: string;
+  href: string;
+  thumbnail: string;
+  title: string;
+};
+
+export const HOME_HERO_BADGES: HomeTrustBadge[] = [
+  { icon: "product", label: "Produk pertanian lengkap", tone: "success" },
+  { icon: "education", label: "Edukasi praktis" },
+  { icon: "solution", label: "Belanja langsung" },
+  { icon: "distributor", label: "Untuk petani, toko, dan distributor", tone: "accent" },
+];
+
+export const HOME_PROBLEM_CARDS: HomeIconCard[] = [
   {
-    pillar: "solve",
-    eyebrow: "Masalah populer",
-    title: "Daun menguning dan tanaman terlihat lemah.",
-    description:
-      "Mulai dari pemeriksaan nutrisi, akar, dan pola air sebelum buru-buru membeli produk yang belum tentu tepat.",
-    href: "/solusi/masalah/daun-menguning",
-    actionLabel: "Cari alur solusi",
-    bullets: ["Cek nutrisi dasar", "Baca gejala akar", "Bandingkan solusi awal"],
-    supportingLinks: [
-      { href: "/produk?q=pupuk", label: "Lihat pupuk" },
-      { href: "/belajar", label: "Masuk ke Edukasi" },
-    ],
+    actionLabel: "Cari solusi",
+    description: "Periksa nutrisi, akar, dan pola air sebelum memilih produk.",
+    href: "/solusi?masalah=daun-kuning",
+    icon: "yellow-leaf",
+    title: "Daun kuning",
   },
   {
-    pillar: "solve",
-    eyebrow: "Masalah populer",
-    title: "Hama mulai menyerang dan daun rusak.",
-    description:
-      "Arahkan pengunjung untuk mengenali gejala lebih dulu, lalu baru pertimbangkan proteksi yang paling relevan untuk kondisi lapangan.",
-    href: "/solusi/masalah/hama-daun",
-    actionLabel: "Lihat langkah awal",
-    bullets: ["Kenali jenis serangan", "Pisahkan hama vs penyakit", "Pilih proteksi yang masuk akal"],
-    supportingLinks: [
-      { href: "/produk?q=pestisida", label: "Produk proteksi" },
-      { href: "/kontak", label: "Tanya tim" },
-    ],
+    actionLabel: "Lihat arahan",
+    description: "Pisahkan gejala hama dan penyakit agar tindakan awal lebih tepat.",
+    href: "/solusi?masalah=hama",
+    icon: "pest",
+    title: "Hama menyerang",
   },
   {
-    pillar: "solve",
-    eyebrow: "Masalah populer",
-    title: "Pertumbuhan lambat, bunga rontok, atau buah tidak jadi.",
-    description:
-      "Masalah fase pertumbuhan sering butuh kombinasi edukasi, evaluasi lapangan, dan produk pendukung yang berbeda.",
-    href: "/solusi/masalah/bunga-rontok-dan-buah-tidak-jadi",
-    actionLabel: "Buka Cari Solusi",
-    bullets: ["Cek fase tanam", "Nilai kebutuhan booster", "Masuk ke rekomendasi produk"],
-    supportingLinks: [
-      { href: "/produk?q=nutrisi", label: "Cari nutrisi" },
-      { href: "/artikel", label: "Baca insight" },
-    ],
+    actionLabel: "Buka solusi",
+    description: "Cek fase tanam, kondisi akar, dan dukungan nutrisi dasarnya.",
+    href: "/solusi?masalah=tanaman-kerdil",
+    icon: "stunted",
+    title: "Tanaman kerdil",
+  },
+  {
+    actionLabel: "Lihat langkah",
+    description: "Evaluasi stres fase generatif sebelum buru-buru menambah booster.",
+    href: "/solusi?masalah=buah-rontok",
+    icon: "fruit-drop",
+    title: "Buah rontok",
+  },
+  {
+    actionLabel: "Cari solusi",
+    description: "Bantu bedakan pola penyakit daun dan kebutuhan proteksi awal.",
+    href: "/solusi?masalah=bercak-daun",
+    icon: "fungus",
+    title: "Jamur / bercak daun",
+  },
+  {
+    actionLabel: "Lihat arahan",
+    description: "Masuk dari masalah lapang yang mengganggu pertumbuhan utama tanaman.",
+    href: "/solusi?masalah=gulma",
+    icon: "weed",
+    title: "Gulma",
+  },
+  {
+    actionLabel: "Buka solusi",
+    description: "Cocokkan kondisi media, drainase, dan tanda busuk akar.",
+    href: "/solusi?masalah=akar-busuk",
+    icon: "root",
+    title: "Akar busuk",
+  },
+  {
+    actionLabel: "Cari solusi",
+    description: "Pelajari fondasi pemupukan dan ritme aplikasi sebelum belanja.",
+    href: "/solusi?masalah=pertumbuhan-lambat",
+    icon: "nutrition",
+    title: "Nutrisi kurang maksimal",
   },
 ];
 
-export const HOMEPAGE_COMMODITY_CARDS: HomeCommodityCard[] = [
+export const HOME_CROP_CARDS: HomeIconCard[] = [
   {
-    theme: "rice",
-    eyebrow: "Komoditas populer",
+    actionLabel: "Pilih padi",
+    description: "Solusi sawah dan tanaman pangan dari fase awal sampai panen.",
+    href: "/solusi?tanaman=padi",
+    icon: "rice",
     title: "Padi",
-    description: "Benih, pupuk dasar, dan proteksi fase awal untuk kebutuhan sawah.",
-    href: "/komoditas/padi",
-    actionLabel: "Mulai dari solusi padi",
-    supportingLinks: [
-      { href: "/produk?q=benih padi", label: "Benih padi" },
-      { href: "/produk?q=pupuk", label: "Pupuk dasar" },
-    ],
   },
   {
-    theme: "chili",
-    eyebrow: "Komoditas populer",
+    actionLabel: "Pilih cabai",
+    description: "Komoditas intensif dengan kebutuhan solusi dan edukasi yang berjalan beriringan.",
+    href: "/solusi?tanaman=cabai",
+    icon: "chili",
     title: "Cabai",
-    description: "Komoditas intensif yang sering butuh learning dan problem-solving berjalan beriringan.",
-    href: "/komoditas/cabai",
-    actionLabel: "Cari solusi cabai",
-    supportingLinks: [
-      { href: "/produk?q=benih cabai", label: "Benih cabai" },
-      { href: "/produk?q=pestisida", label: "Proteksi" },
-    ],
   },
   {
-    theme: "corn",
-    eyebrow: "Komoditas populer",
+    actionLabel: "Pilih jagung",
+    description: "Mulai dari benih, nutrisi awal, sampai ritme fase vegetatif.",
+    href: "/solusi?tanaman=jagung",
+    icon: "corn",
     title: "Jagung",
-    description: "Masuk dari kebutuhan benih, nutrisi awal, dan ritme aplikasi yang lebih terarah.",
-    href: "/komoditas/jagung",
-    actionLabel: "Edukasi untuk jagung",
-    supportingLinks: [
-      { href: "/produk?q=benih jagung", label: "Benih jagung" },
-      { href: "/produk?q=nutrisi", label: "Nutrisi" },
-    ],
   },
   {
-    theme: "leafy",
-    eyebrow: "Komoditas populer",
-    title: "Sayuran daun",
-    description: "Cepat panen, sensitif masalah daun, dan butuh keputusan input yang efisien.",
-    href: "/komoditas/sayuran-daun",
-    actionLabel: "Mulai belajar",
-    supportingLinks: [
-      { href: "/produk?q=benih sayur", label: "Benih sayur" },
-      { href: "/produk?q=media tanam", label: "Media tanam" },
-    ],
+    actionLabel: "Pilih tomat",
+    description: "Arahan awal untuk hortikultura yang sensitif pada daun dan fase generatif.",
+    href: "/solusi?tanaman=tomat",
+    icon: "tomato",
+    title: "Tomat",
   },
   {
-    theme: "fruit",
-    eyebrow: "Komoditas populer",
-    title: "Buah dan horti",
-    description: "Masalah pembungaan, pembuahan, dan pemulihan tanaman perlu jalur yang lebih jelas.",
-    href: "/komoditas/horti-buah",
-    actionLabel: "Cari solusi horti",
-    supportingLinks: [
-      { href: "/produk?q=booster buah", label: "Booster buah" },
-      { href: "/produk?q=fungisida", label: "Fungisida" },
-    ],
+    actionLabel: "Pilih bawang",
+    description: "Masuk dari gejala umum dan keputusan input yang lebih terarah.",
+    href: "/solusi?tanaman=bawang",
+    icon: "onion",
+    title: "Bawang",
   },
   {
-    theme: "homegarden",
-    eyebrow: "Komoditas populer",
-    title: "Kebun rumah",
-    description: "Untuk Anda yang ingin mulai sederhana: belajar, pilih input dasar, lalu belanja seperlunya.",
-    href: "/komoditas/kebun-rumah",
-    actionLabel: "Belanja kebutuhan awal",
-    supportingLinks: [
-      { href: "/produk?q=polybag", label: "Polybag" },
-      { href: "/produk?q=benih", label: "Benih" },
-    ],
+    actionLabel: "Pilih sawit",
+    description: "Buka jalur problem-solving untuk komoditas skala kebun dan kebutuhan mitra.",
+    href: "/solusi?tanaman=sawit",
+    icon: "palm",
+    title: "Sawit",
+  },
+  {
+    actionLabel: "Pilih horti",
+    description: "Fokus pada fase daun, bunga, buah, dan kualitas hasil.",
+    href: "/solusi?tanaman=hortikultura",
+    icon: "horti",
+    title: "Hortikultura",
+  },
+  {
+    actionLabel: "Lihat semua",
+    description: "Kalau komoditas Anda belum ada, mulai dari pencarian gejala atau kebutuhan.",
+    href: "/solusi",
+    icon: "grid",
+    title: "Lainnya",
   },
 ];
 
-export const HOMEPAGE_BUNDLE_CARDS: PathwayCard[] = [
+export const HOME_VIDEO_CARDS: HomeVideoCard[] = [
   {
-    pillar: "shop",
-    eyebrow: "Bundling",
-    title: "Paket mulai tanam",
-    description:
-      "Jalur cepat untuk pengguna yang baru mulai dan ingin menyiapkan kebutuhan awal tanpa menyusun item satu per satu.",
-    href: "/belanja/paket/mulai-tanam",
-    actionLabel: "Lihat kebutuhan awal",
-    bullets: ["Benih", "Media tanam", "Nutrisi tahap awal"],
-    supportingLinks: [
-      { href: "/belajar", label: "Pelajari dulu" },
-      { href: "/belanja", label: "Masuk ke Belanja" },
-    ],
+    category: "Studi kasus lapangan",
+    description: "Masuk dari gejala, cek akar dan pola air, lalu pilih tindakan yang lebih masuk akal.",
+    href: "/artikel/daun-menguning-dan-nutrisi-awal",
+    thumbnail: "/illustrations/agri-field-sunrise.svg",
+    title: "Membaca daun kuning sebelum memilih input koreksi",
   },
   {
-    pillar: "shop",
-    eyebrow: "Bundling",
-    title: "Paket proteksi dasar",
-    description:
-      "Untuk pengguna yang sudah melihat gejala dan ingin membandingkan proteksi serta alat aplikasi yang relevan.",
-    href: "/belanja/paket/proteksi-dasar",
-    actionLabel: "Lihat produk proteksi",
-    bullets: ["Proteksi hama", "Proteksi penyakit", "Sprayer dan alat aplikasi"],
-    supportingLinks: [
-      { href: "/solusi", label: "Mulai dari gejala" },
-      { href: "/kontak", label: "Konsultasi tim" },
-    ],
+    category: "Review produk",
+    description: "Ringkasan praktis agar pembelian booster tidak terasa terlalu cepat.",
+    href: "/artikel/panduan-memilih-pupuk",
+    thumbnail: "/category-photos/nutrisi-perangsang.png",
+    title: "Kapan nutrisi generatif benar-benar dibutuhkan tanaman",
   },
   {
-    pillar: "shop",
-    eyebrow: "Bundling",
-    title: "Paket belanja kios",
-    description:
-      "Untuk kios atau pembeli rutin yang ingin belanja lebih efisien, dari input utama sampai pelengkap operasional.",
-    href: "/belanja/paket/belanja-kios",
-    actionLabel: "Lihat kebutuhan kios",
-    bullets: ["Produk inti", "Pelengkap operasional", "Belanja lebih tertata"],
-    supportingLinks: [
-      { href: "/produk", label: "Jelajahi produk" },
-      { href: "/b2b", label: "B2B inquiry" },
-    ],
+    category: "Edukasi umum",
+    description: "Panduan fase tanam yang membantu user paham sebelum turun ke katalog.",
+    href: "/artikel/fase-tanam-cabai-dari-semai-sampai-berbuah",
+    thumbnail: "/illustrations/agri-seedling-lab.svg",
+    title: "Ritme budidaya cabai dari semai sampai fase berbuah",
   },
 ];
 
-export const HOMEPAGE_TRUST_POINTS: HomeTrustPoint[] = [
-  {
-    title: "Produk aktif lebih mudah dipindai",
-    body: "Katalog, harga, dan status stok tampil lebih jelas agar pembeli tidak menebak-nebak sebelum checkout.",
-    icon: "/wiragro-illustrations/wiragro_feature_produk_berkualitas_transparent.png",
-  },
-  {
-    title: "Masalah lapangan punya jalur tersendiri",
-    body: "Homepage tidak lagi memaksa semua pengunjung langsung belanja ketika sebenarnya mereka datang dengan masalah tertentu.",
-    icon: "/wiragro-illustrations/wiragro_feature_layanan_terpercaya_transparent.png",
-  },
-  {
-    title: "Edukasi dan produk tetap tersambung",
-    body: "Artikel, solusi, dan produk sekarang dibingkai sebagai satu alur, bukan tiga ruang yang terputus.",
-    icon: "/wiragro-illustrations/wiragro_feature_petani_indonesia_transparent.png",
-  },
-  {
-    title: "Konsultasi dan pelacakan tetap dekat",
-    body: "Ada jalur cepat untuk konsultasi WhatsApp, cek jam operasional, dan melacak pesanan tanpa keluar dari alur utama.",
-    icon: "/wiragro-illustrations/wiragro_feature_harga_bersahabat_transparent.png",
-  },
+export const HOME_PRODUCT_TOPIC_CHIPS = [
+  "Nutrisi tanaman",
+  "Pestisida",
+  "Benih",
+  "Alat pertanian",
+];
+
+export const HOME_AI_CHAT_PROMPTS = [
+  "Daun padi saya menguning, mulai dari mana?",
+  "Pupuk apa yang cocok untuk fase generatif cabai?",
+  "Apa beda gejala hama dan penyakit daun?",
 ];
 
 export function buildWhatsAppConsultationUrl(

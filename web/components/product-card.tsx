@@ -5,9 +5,11 @@ import Link from "next/link";
 
 import { AddToCartButton } from "@/components/cart/add-to-cart-button";
 import { BuyNowButton } from "@/components/cart/buy-now-button";
+import { RoleAwarePrice } from "@/components/ui/role-aware-price";
 import { WishlistButton } from "@/components/wishlist-button";
+import { trackUiEvent } from "@/lib/analytics";
 import type { ProductSummary } from "@/lib/api";
-import { formatCurrency } from "@/lib/format";
+import { getProductCatalogContext } from "@/lib/solution-experience";
 
 const PRODUCT_CARD_MEDIA_SHELL_STYLE = {
   position: "relative",
@@ -34,11 +36,22 @@ const PRODUCT_CARD_WISHLIST_SLOT_STYLE = {
   zIndex: 3,
 } as const;
 
-export function ProductCard({ product }: { product: ProductSummary }) {
+export function ProductCard({
+  benefitOverride,
+  contextBadge,
+  product,
+  trackingContext,
+}: {
+  benefitOverride?: string;
+  contextBadge?: string;
+  product: ProductSummary;
+  trackingContext?: string;
+}) {
   const primaryImage = product.images.find((image) => image.is_primary) ?? product.images[0];
   const isOutOfStock = product.availability.state === "out_of_stock";
   const showAvailabilityBadge = product.availability.state !== "in_stock";
   const useUnoptimizedImage = primaryImage?.url.startsWith("/") ?? false;
+  const context = getProductCatalogContext(product);
   const primaryBadge = product.badges.featured
     ? "Promo"
     : product.badges.new_arrival
@@ -46,27 +59,42 @@ export function ProductCard({ product }: { product: ProductSummary }) {
       : product.badges.best_seller
         ? "Terlaris"
         : null;
+  const totalReviews = product.review_summary?.total_reviews ?? 0;
+  const averageRating = product.review_summary?.average_rating ?? null;
+  const hasReviewSummary = totalReviews > 0 && averageRating !== null;
   const availabilityText =
     product.availability.state === "low_stock"
       ? "Stok menipis"
       : product.availability.state === "out_of_stock"
         ? "Stok habis"
-        : null;
-  const totalReviews = product.review_summary?.total_reviews ?? 0;
-  const averageRating = product.review_summary?.average_rating ?? null;
-  const hasReviewSummary = totalReviews > 0 && averageRating !== null;
+        : "Siap dipesan";
+  const floatingBadges = [
+    primaryBadge,
+    contextBadge ?? context.quickBadge,
+  ].filter(Boolean) as string[];
 
   return (
     <article className="product-card">
       <div className="product-card__media-shell" style={PRODUCT_CARD_MEDIA_SHELL_STYLE}>
-        {primaryBadge ? (
+        {floatingBadges.length ? (
           <div className="product-card__floating-badges">
-            <span>{primaryBadge}</span>
+            {floatingBadges.slice(0, 2).map((badge) => (
+              <span key={`${product.id}-${badge}`}>{badge}</span>
+            ))}
           </div>
         ) : null}
         <Link
           className="product-card__media"
           href={`/produk/${product.slug}`}
+          onClick={() =>
+            trackingContext
+              ? trackUiEvent("recommended_product_clicked", {
+                  product_id: product.id,
+                  product_name: product.name,
+                  source: trackingContext,
+                })
+              : undefined
+          }
           style={PRODUCT_CARD_MEDIA_LINK_STYLE}
         >
           {primaryImage ? (
@@ -104,7 +132,19 @@ export function ProductCard({ product }: { product: ProductSummary }) {
           <span>{product.unit}</span>
         </div>
 
-        <Link className="product-card__title" href={`/produk/${product.slug}`}>
+        <Link
+          className="product-card__title"
+          href={`/produk/${product.slug}`}
+          onClick={() =>
+            trackingContext
+              ? trackUiEvent("recommended_product_clicked", {
+                  product_id: product.id,
+                  product_name: product.name,
+                  source: trackingContext,
+                })
+              : undefined
+          }
+        >
           {product.name}
         </Link>
 
@@ -120,36 +160,42 @@ export function ProductCard({ product }: { product: ProductSummary }) {
         ) : null}
 
         <p className="product-card__summary">
-          {product.summary || "Produk pertanian aktif dari Wiragro yang siap dipilih sesuai kebutuhan Anda."}
+          {benefitOverride ||
+            context.benefit ||
+            product.summary ||
+            "Produk pertanian aktif dari Wiragro yang siap dipilih sesuai kebutuhan Anda."}
         </p>
 
-        <div className="product-card__price-block">
-          <div className="product-card__price-row">
-            <strong>{formatCurrency(product.price.amount)}</strong>
-            {product.price.compare_at_amount ? (
-              <small className="price-strike">
-                {formatCurrency(product.price.compare_at_amount)}
-              </small>
-            ) : null}
-          </div>
-          {availabilityText ? <small className="price-caption">{availabilityText}</small> : null}
-          <small className="price-caption price-caption--secondary">
-            {product.price.is_promo ? "Harga promo aktif" : "Harga aktif saat ini"}
-          </small>
-        </div>
+        <RoleAwarePrice availabilityText={availabilityText} price={product.price} />
 
         <div className="product-card__actions">
           <AddToCartButton
-            buttonClassName="btn btn-primary btn-block"
+            buttonClassName="btn btn-secondary btn-block"
             disabled={isOutOfStock}
             label="Tambah"
             productId={product.id}
           />
           <BuyNowButton
-            buttonClassName="btn btn-secondary btn-block"
+            buttonClassName="btn btn-primary btn-block"
             disabled={isOutOfStock}
+            label="Beli sekarang"
             productId={product.id}
           />
+          <Link
+            className="btn btn-secondary btn-block product-card__detail-link"
+            href={`/produk/${product.slug}`}
+            onClick={() =>
+              trackingContext
+                ? trackUiEvent("recommended_product_clicked", {
+                    product_id: product.id,
+                    product_name: product.name,
+                    source: trackingContext,
+                  })
+                : undefined
+            }
+          >
+            Detail
+          </Link>
         </div>
       </div>
     </article>

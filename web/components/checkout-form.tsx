@@ -2,26 +2,40 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useDeferredValue, useEffect, useMemo, useRef, useState, useTransition } from "react";
 
 import { useAuth } from "@/components/auth-provider";
 import { useCart } from "@/components/cart/cart-provider";
+import { MinimumOrderNotice } from "@/components/minimum-order-notice";
 import { TrustStrip } from "@/components/trust-strip";
 import {
   GooglePlacesAddressAssist,
   type GoogleAddressSelection,
 } from "@/components/google-places-address-assist";
+import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
+import { PermissionCodeInput } from "@/components/ui/permission-code-input";
+import { canUseCod, resolveAccountRole } from "@/lib/account-role";
+import { trackUiEvent } from "@/lib/analytics";
 import {
-  type CustomerAddressPayload,
+  addItemToCustomerCart,
   createDuitkuPayment,
   getCustomerAccount,
+  getCustomerCart,
   getShippingRates,
   searchShippingDestinations,
-  type StoreProfile,
-  submitGuestCheckout,
+  submitCustomerCheckout,
+  type CartPayload,
+  type CustomerAddressPayload,
   type ShippingDestination,
   type ShippingRateItem,
+  type StoreProfile,
+  updateCustomerCartItem,
 } from "@/lib/api";
+import {
+  evaluateCheckoutEligibility,
+  validateCheckoutPermissionCode,
+} from "@/lib/distributor-checkout";
 import { formatCurrency } from "@/lib/format";
 import { buildGoogleMapsStoreSearchUrl } from "@/lib/maps";
 
@@ -40,15 +54,15 @@ const initialState = {
 };
 
 type CheckoutResult = {
-  orderNumber: string;
-  paymentUrl?: string | null;
-  paymentStatus: string;
-  nextAction: string;
-  total: string;
   customerPhone: string;
+  nextAction: string;
+  orderNumber: string;
+  paymentSetupError?: string | null;
+  paymentStatus: string;
+  paymentUrl?: string | null;
   shippingService?: string | null;
   shippingTotal?: string | null;
-  paymentSetupError?: string | null;
+  total: string;
 };
 
 function buildValidationErrors(
@@ -102,8 +116,43 @@ function buildShippingEtaLabel(rate: ShippingRateItem) {
   return `Estimasi ${rate.etd}`;
 }
 
+async function syncCheckoutCartToAccount(
+  accessToken: string,
+  guestCart: CartPayload,
+) {
+  const customerCart = await getCustomerCart(accessToken);
+  const guestItemsByProductId = new Map(
+    guestCart.items.map((item) => [item.product_id, item]),
+  );
+  const customerItemsByProductId = new Map(
+    customerCart.items.map((item) => [item.product_id, item]),
+  );
+
+  for (const guestItem of guestCart.items) {
+    const existing = customerItemsByProductId.get(guestItem.product_id);
+
+    if (!existing) {
+      await addItemToCustomerCart(accessToken, guestItem.product_id, guestItem.qty);
+      continue;
+    }
+
+    if (existing.qty !== guestItem.qty) {
+      await updateCustomerCartItem(accessToken, existing.id, guestItem.qty);
+    }
+  }
+
+  for (const customerItem of customerCart.items) {
+    if (!guestItemsByProductId.has(customerItem.product_id)) {
+      await updateCustomerCartItem(accessToken, customerItem.id, 0);
+    }
+  }
+
+  return getCustomerCart(accessToken);
+}
+
 export function CheckoutForm({ store }: { store?: StoreProfile | null }) {
-  const { session } = useAuth();
+  const router = useRouter();
+  const { session, isReady: isAuthReady } = useAuth();
   const { cart, clearCart } = useCart();
   const [form, setForm] = useState(initialState);
   const [destinationQuery, setDestinationQuery] = useState("");
@@ -119,11 +168,19 @@ export function CheckoutForm({ store }: { store?: StoreProfile | null }) {
   const [savedAddresses, setSavedAddresses] = useState<CustomerAddressPayload[]>([]);
   const [savedAddressError, setSavedAddressError] = useState<string | null>(null);
   const [isLoadingSavedAddresses, setIsLoadingSavedAddresses] = useState(false);
+  const [checkoutCartSnapshot, setCheckoutCartSnapshot] = useState<CartPayload | null>(null);
+  const [checkoutSyncError, setCheckoutSyncError] = useState<string | null>(null);
+  const [isSyncingCheckoutCart, setIsSyncingCheckoutCart] = useState(false);
+  const [permissionCode, setPermissionCode] = useState("");
+  const [permissionValidated, setPermissionValidated] = useState(false);
+  const [permissionStatus, setPermissionStatus] = useState<"idle" | "invalid" | "valid" | "validating">("idle");
+  const [permissionMessage, setPermissionMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<CheckoutResult | null>(null);
   const [isPending, startTransition] = useTransition();
   const hasPrefilledCustomerRef = useRef(false);
   const hasAppliedDefaultAddressRef = useRef(false);
+  const hasRedirectedRef = useRef(false);
 
   const isDelivery = form.shippingMethod === "delivery";
   const selectedShippingRate = useMemo(
@@ -135,12 +192,29 @@ export function CheckoutForm({ store }: { store?: StoreProfile | null }) {
     selectedDestination,
     selectedRate: selectedShippingRate,
   });
-  const canSubmit = validationErrors.length === 0 && !isPending && !isLoadingRates;
+
+  const effectiveProvince = isDelivery ? form.province : "Jawa Timur";
+  const activeCheckoutCart = checkoutCartSnapshot ?? cart;
+  const subtotalAmount = Number.parseFloat(activeCheckoutCart?.grand_total ?? "0");
+  const eligibility = evaluateCheckoutEligibility({
+    permissionValidated,
+    province: effectiveProvince,
+    session,
+    subtotal: subtotalAmount,
+  });
+  const availablePaymentMethods = eligibility.allowedPaymentMethods;
+  const canSubmit =
+    Boolean(session) &&
+    validationErrors.length === 0 &&
+    !isPending &&
+    !isLoadingRates &&
+    !isSyncingCheckoutCart &&
+    !checkoutSyncError &&
+    eligibility.canCheckout;
   const submitLabel =
-    form.paymentMethod === "COD" ? "Buat order COD" : "Buat order dan lanjut bayar";
+    form.paymentMethod === "COD" ? "Buat order COD" : "Bayar Sekarang";
   const shippingTotal = isDelivery ? selectedShippingRate?.cost ?? "0" : "0";
-  const orderGrandTotal =
-    Number.parseFloat(cart?.grand_total ?? "0") + Number.parseFloat(shippingTotal);
+  const orderGrandTotal = subtotalAmount + Number.parseFloat(shippingTotal);
   const itemCount = cart?.items.reduce((total, item) => total + item.qty, 0) ?? 0;
   const totalWeightKg = Number(cart?.total_weight_grams ?? 0) / 1000;
   const pickupMapsUrl = store
@@ -168,6 +242,33 @@ export function CheckoutForm({ store }: { store?: StoreProfile | null }) {
     setDestinationError(null);
     setShippingRatesError(null);
   }
+
+  useEffect(() => {
+    if (!isAuthReady || session || hasRedirectedRef.current) {
+      return;
+    }
+
+    hasRedirectedRef.current = true;
+    router.replace("/masuk?next=/checkout");
+  }, [isAuthReady, router, session]);
+
+  useEffect(() => {
+    if (!availablePaymentMethods.some((item) => item.code === form.paymentMethod)) {
+      setForm((current) => ({
+        ...current,
+        paymentMethod: availablePaymentMethods[0]?.code ?? "duitku-va",
+      }));
+    }
+  }, [availablePaymentMethods, form.paymentMethod]);
+
+  useEffect(() => {
+    if (!eligibility.requiresPermissionCode) {
+      setPermissionCode("");
+      setPermissionValidated(false);
+      setPermissionStatus("idle");
+      setPermissionMessage(null);
+    }
+  }, [eligibility.requiresPermissionCode]);
 
   useEffect(() => {
     if (!session) {
@@ -242,6 +343,49 @@ export function CheckoutForm({ store }: { store?: StoreProfile | null }) {
       isCancelled = true;
     };
   }, [session?.access_token]);
+
+  useEffect(() => {
+    if (!session?.access_token || !cart?.items.length) {
+      setCheckoutCartSnapshot(null);
+      setCheckoutSyncError(null);
+      setIsSyncingCheckoutCart(false);
+      return;
+    }
+
+    let isCancelled = false;
+
+    const syncCart = async () => {
+      setIsSyncingCheckoutCart(true);
+      setCheckoutSyncError(null);
+
+      try {
+        const syncedCart = await syncCheckoutCartToAccount(session.access_token, cart);
+
+        if (!isCancelled) {
+          setCheckoutCartSnapshot(syncedCart);
+        }
+      } catch (syncError) {
+        if (!isCancelled) {
+          setCheckoutSyncError(
+            syncError instanceof Error
+              ? syncError.message
+              : "Gagal memuat aturan akun untuk checkout.",
+          );
+          setCheckoutCartSnapshot(null);
+        }
+      } finally {
+        if (!isCancelled) {
+          setIsSyncingCheckoutCart(false);
+        }
+      }
+    };
+
+    void syncCart();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [cart, session?.access_token]);
 
   useEffect(() => {
     if (!isDelivery) {
@@ -372,6 +516,34 @@ export function CheckoutForm({ store }: { store?: StoreProfile | null }) {
     };
   }, [cart?.guest_token, cart?.id, isDelivery, selectedDestination]);
 
+  if (!isAuthReady) {
+    return (
+      <LoadingSkeleton
+        cards={2}
+        eyebrow="Checkout Wiragro"
+        title="Memeriksa sesi akun Anda..."
+      />
+    );
+  }
+
+  if (!session) {
+    return (
+      <section className="empty-state empty-state--shopping">
+        <span className="eyebrow-label">Checkout</span>
+        <h1>Masuk untuk melanjutkan checkout</h1>
+        <p>Checkout wajib login. Setelah masuk, Anda akan diarahkan kembali ke halaman checkout.</p>
+        <div className="empty-state__actions">
+          <Link className="btn btn-primary" href="/masuk?next=/checkout">
+            Masuk / Daftar
+          </Link>
+          <Link className="btn btn-secondary" href="/keranjang">
+            Kembali ke keranjang
+          </Link>
+        </div>
+      </section>
+    );
+  }
+
   if (result) {
     return (
       <section className="page-stack checkout-page">
@@ -396,7 +568,7 @@ export function CheckoutForm({ store }: { store?: StoreProfile | null }) {
             Langkah berikutnya:{" "}
             {result.nextAction === "OPEN_PAYMENT"
               ? "buka halaman pembayaran"
-              : "tunggu konfirmasi pembayaran dari toko"}
+              : "tunggu konfirmasi pembayaran dari tim Wiragro"}
           </p>
           {result.paymentSetupError ? (
             <p className="form-error">
@@ -483,11 +655,11 @@ export function CheckoutForm({ store }: { store?: StoreProfile | null }) {
     <section className="page-stack checkout-page">
       <div className="checkout-overview">
         <div className="checkout-overview__copy">
-          <span className="eyebrow-label">{session ? "Checkout akun" : "Checkout tamu"}</span>
-          <h1>Selesaikan pesanan dengan alur kirim dan bayar yang lebih jelas.</h1>
+          <span className="eyebrow-label">Checkout akun</span>
+          <h1>Selesaikan pesanan dengan aturan akun yang lebih jelas.</h1>
           <p>
-            Isi data penerima, tentukan metode pengiriman, lalu tinjau total belanja sebelum
-            pesanan dikirim.
+            Login sudah aktif. Harga akun, metode pembayaran, dan minimum pembelian akan
+            menyesuaikan peran akun Anda saat checkout diproses.
           </p>
         </div>
         <div className="checkout-overview__stats">
@@ -500,19 +672,36 @@ export function CheckoutForm({ store }: { store?: StoreProfile | null }) {
             <strong>{totalWeightKg > 0 ? `${totalWeightKg.toFixed(2)} kg` : "-"}</strong>
           </div>
           <div>
-            <span>Status checkout</span>
-            <strong>{isDelivery ? "Delivery" : "Pickup toko"}</strong>
+            <span>Mode akun</span>
+            <strong>{resolveAccountRole(session) === "distributor" ? "Akun khusus" : "Pelanggan"}</strong>
           </div>
         </div>
       </div>
 
-      {session ? (
-        <div className="panel-card checkout-account-note">
-          <strong>Akun Anda aktif di browser ini.</strong>
-          <span>
-            Data profil dan alamat tersimpan bisa dipakai untuk mempercepat pesanan berikutnya
-            agar checkout terasa lebih ringkas.
-          </span>
+      <div className="panel-card checkout-account-note">
+        <strong>Akun Anda aktif di browser ini.</strong>
+        <span>
+          Checkout memeriksa ulang role, harga akun, minimum order, kode izin, dan metode
+          pembayaran sebelum pesanan dibuat.
+        </span>
+      </div>
+
+      <MinimumOrderNotice eligibility={eligibility} />
+
+      {checkoutSyncError ? (
+        <div className="panel-card panel-card--danger">
+          <strong>Role akun belum berhasil dimuat.</strong>
+          <p>
+            {checkoutSyncError}. Untuk keamanan, UI sementara memakai mode pelanggan biasa dan
+            checkout ditahan sampai sinkronisasi berhasil.
+          </p>
+          <button
+            className="btn btn-secondary"
+            onClick={() => window.location.reload()}
+            type="button"
+          >
+            Coba lagi
+          </button>
         </div>
       ) : null}
 
@@ -532,15 +721,32 @@ export function CheckoutForm({ store }: { store?: StoreProfile | null }) {
               return;
             }
 
+            if (!eligibility.canCheckout) {
+              setError(eligibility.summary);
+              return;
+            }
+
             startTransition(async () => {
               try {
-                const checkout = await submitGuestCheckout({
-                  cartId: cart.id,
-                  guestToken: cart.guest_token ?? "",
+                if (!session.access_token) {
+                  throw new Error("Sesi akun tidak ditemukan.");
+                }
+
+                const syncedCart = await syncCheckoutCartToAccount(session.access_token, cart);
+                setCheckoutCartSnapshot(syncedCart);
+
+                trackUiEvent("checkout_started", {
+                  item_count: cart.items.length,
+                  region: eligibility.region,
+                  role: resolveAccountRole(session),
+                  subtotal: syncedCart.grand_total,
+                });
+
+                const checkout = await submitCustomerCheckout(session.access_token, {
+                  shippingMethod: form.shippingMethod as "pickup" | "delivery",
                   fullName: form.fullName.trim(),
                   phone: form.phone.trim(),
                   email: form.email.trim(),
-                  shippingMethod: form.shippingMethod as "pickup" | "delivery",
                   addressLine: form.addressLine.trim(),
                   district: form.district.trim(),
                   city: form.city.trim(),
@@ -586,6 +792,7 @@ export function CheckoutForm({ store }: { store?: StoreProfile | null }) {
                 if (checkout.next_action === "OPEN_PAYMENT") {
                   try {
                     const payment = await createDuitkuPayment(checkout.order.id, {
+                      accessToken: session.access_token,
                       customerPhone: form.phone.trim(),
                     });
                     nextResult = {
@@ -686,58 +893,56 @@ export function CheckoutForm({ store }: { store?: StoreProfile | null }) {
                   type="radio"
                 />
                 <strong>Ambil di toko</strong>
-                <span>Lebih ringkas jika Anda mengambil pesanan sendiri di toko.</span>
+                <span>Lebih ringkas jika Anda mengambil pesanan sendiri di lokasi layanan.</span>
               </label>
             </div>
 
-            {session ? (
-              <div className="panel-card checkout-address-book">
-                <div className="checkout-address-book__header">
-                  <div>
-                    <span className="eyebrow-label">Alamat tersimpan</span>
-                    <strong>Gunakan alamat tersimpan agar form lebih cepat terisi.</strong>
-                  </div>
-                  <Link className="btn btn-secondary" href="/akun">
-                    Kelola alamat
-                  </Link>
+            <div className="panel-card checkout-address-book">
+              <div className="checkout-address-book__header">
+                <div>
+                  <span className="eyebrow-label">Alamat tersimpan</span>
+                  <strong>Gunakan alamat tersimpan agar form lebih cepat terisi.</strong>
                 </div>
-
-                {isLoadingSavedAddresses ? <p className="inline-note">Memuat alamat tersimpan...</p> : null}
-                {savedAddressError ? <p className="inline-note">{savedAddressError}</p> : null}
-
-                {savedAddresses.length ? (
-                  <div className="checkout-address-book__grid">
-                    {savedAddresses.map((address) => (
-                      <article className="checkout-address-card" key={address.id}>
-                        <div className="checkout-address-card__head">
-                          <strong>{address.label}</strong>
-                          {address.is_default ? <span>Default</span> : null}
-                        </div>
-                        <p>{address.recipient_name}</p>
-                        <p>{address.recipient_phone}</p>
-                        <p>
-                          {[address.address_line, address.district, address.city, address.province]
-                            .filter(Boolean)
-                            .join(", ")}
-                        </p>
-                        <button
-                          className="btn btn-secondary"
-                          onClick={() => applySavedAddress(address)}
-                          type="button"
-                        >
-                          Gunakan alamat ini
-                        </button>
-                      </article>
-                    ))}
-                  </div>
-                ) : !isLoadingSavedAddresses ? (
-                  <p className="inline-note">
-                    Belum ada alamat tersimpan. Simpan alamat dari halaman akun untuk mempercepat
-                    repeat order berikutnya.
-                  </p>
-                ) : null}
+                <Link className="btn btn-secondary" href="/akun">
+                  Kelola alamat
+                </Link>
               </div>
-            ) : null}
+
+              {isLoadingSavedAddresses ? <p className="inline-note">Memuat alamat tersimpan...</p> : null}
+              {savedAddressError ? <p className="inline-note">{savedAddressError}</p> : null}
+
+              {savedAddresses.length ? (
+                <div className="checkout-address-book__grid">
+                  {savedAddresses.map((address) => (
+                    <article className="checkout-address-card" key={address.id}>
+                      <div className="checkout-address-card__head">
+                        <strong>{address.label}</strong>
+                        {address.is_default ? <span>Default</span> : null}
+                      </div>
+                      <p>{address.recipient_name}</p>
+                      <p>{address.recipient_phone}</p>
+                      <p>
+                        {[address.address_line, address.district, address.city, address.province]
+                          .filter(Boolean)
+                          .join(", ")}
+                      </p>
+                      <button
+                        className="btn btn-secondary"
+                        onClick={() => applySavedAddress(address)}
+                        type="button"
+                      >
+                        Gunakan alamat ini
+                      </button>
+                    </article>
+                  ))}
+                </div>
+              ) : !isLoadingSavedAddresses ? (
+                <p className="inline-note">
+                  Belum ada alamat tersimpan. Simpan alamat dari halaman akun untuk mempercepat
+                  repeat order berikutnya.
+                </p>
+              ) : null}
+            </div>
 
             {isDelivery ? (
               <>
@@ -805,7 +1010,7 @@ export function CheckoutForm({ store }: { store?: StoreProfile | null }) {
                         >
                           <strong>{destination.label}</strong>
                           <span>
-                            {destination.district_name ?? "Kecamatan"} •{" "}
+                            {destination.district_name ?? "Kecamatan"} ·{" "}
                             {destination.city_name ?? "Kota"}
                           </span>
                         </button>
@@ -942,33 +1147,59 @@ export function CheckoutForm({ store }: { store?: StoreProfile | null }) {
               <h2>Metode pembayaran</h2>
             </div>
             <div className="choice-grid">
-              <label
-                className={`choice-card ${form.paymentMethod === "duitku-va" ? "is-selected" : ""}`}
-              >
-                <input
-                  checked={form.paymentMethod === "duitku-va"}
-                  name="paymentMethod"
-                  onChange={() =>
-                    setForm((current) => ({ ...current, paymentMethod: "duitku-va" }))
-                  }
-                  type="radio"
-                />
-                <strong>Duitku VA</strong>
-                <span>Pesanan dibuat lebih dulu, lalu Anda menerima link pembayaran.</span>
-              </label>
-              <label className={`choice-card ${form.paymentMethod === "COD" ? "is-selected" : ""}`}>
-                <input
-                  checked={form.paymentMethod === "COD"}
-                  name="paymentMethod"
-                  onChange={() =>
-                    setForm((current) => ({ ...current, paymentMethod: "COD" }))
-                  }
-                  type="radio"
-                />
-                <strong>COD / nota merah</strong>
-                <span>Pembayaran ditangani saat pesanan diterima atau setelah konfirmasi tim layanan.</span>
-              </label>
+              {availablePaymentMethods.map((method) => (
+                <label
+                  className={`choice-card ${form.paymentMethod === method.code ? "is-selected" : ""}`}
+                  key={method.code}
+                >
+                  <input
+                    checked={form.paymentMethod === method.code}
+                    name="paymentMethod"
+                    onChange={() =>
+                      setForm((current) => ({ ...current, paymentMethod: method.code }))
+                    }
+                    type="radio"
+                  />
+                  <strong>{method.label}</strong>
+                  <span>
+                    {method.code === "COD"
+                      ? "COD hanya tersedia untuk akun yang memenuhi aturan checkout."
+                      : "Pesanan dibuat lebih dulu, lalu Anda menerima link pembayaran."}
+                  </span>
+                </label>
+              ))}
             </div>
+
+            {!canUseCod(session) ? (
+              <p className="inline-note">
+                COD tidak muncul pada akun pelanggan biasa.
+              </p>
+            ) : null}
+
+            {eligibility.requiresPermissionCode ? (
+              <PermissionCodeInput
+                helperText="Pembelian luar Jawa membutuhkan kode izin dari admin."
+                isValidated={permissionValidated}
+                isValidating={permissionStatus === "validating"}
+                onChange={(value) => {
+                  setPermissionCode(value);
+                  setPermissionValidated(false);
+                  setPermissionStatus("idle");
+                  setPermissionMessage(null);
+                }}
+                onValidate={() => {
+                  setPermissionStatus("validating");
+                  void validateCheckoutPermissionCode(permissionCode).then((response) => {
+                    setPermissionValidated(response.valid);
+                    setPermissionStatus(response.valid ? "valid" : "invalid");
+                    setPermissionMessage(response.message ?? null);
+                  });
+                }}
+                statusMessage={permissionMessage ?? undefined}
+                value={permissionCode}
+              />
+            ) : null}
+
             <label>
               Catatan order
               <textarea
@@ -984,7 +1215,7 @@ export function CheckoutForm({ store }: { store?: StoreProfile | null }) {
 
           {error ? <p className="form-error">{error}</p> : null}
           {validationErrors.length > 0 && !error ? (
-            <p className="inline-note">Lengkapi data wajib sebelum submit order.</p>
+            <p className="inline-note">Lengkapi data wajib sebelum melanjutkan checkout.</p>
           ) : null}
 
           <button className="btn btn-primary btn-block" disabled={!canSubmit} type="submit">
@@ -1026,11 +1257,11 @@ export function CheckoutForm({ store }: { store?: StoreProfile | null }) {
           </div>
           <div className="summary-row">
             <span>Subtotal</span>
-            <strong>{formatCurrency(cart.subtotal)}</strong>
+            <strong>{formatCurrency(activeCheckoutCart?.subtotal ?? cart.subtotal)}</strong>
           </div>
           <div className="summary-row">
             <span>Diskon</span>
-            <strong>{formatCurrency(cart.discount_total)}</strong>
+            <strong>{formatCurrency(activeCheckoutCart?.discount_total ?? cart.discount_total)}</strong>
           </div>
           <div className="summary-row">
             <span>Ongkir</span>
@@ -1041,16 +1272,16 @@ export function CheckoutForm({ store }: { store?: StoreProfile | null }) {
             <strong>{formatCurrency(orderGrandTotal)}</strong>
           </div>
           <div className="checkout-status-note">
-            {isDelivery
-              ? "Tombol submit aktif setelah data penerima, tujuan, dan layanan kirim sudah lengkap."
-              : "Untuk pickup, cukup lengkapi data penerima lalu lanjutkan checkout."}
+            {isSyncingCheckoutCart
+              ? "Menyelaraskan keranjang ke akun Anda..."
+              : "Harga akun, aturan COD, minimum order, dan kode izin akan dicek ulang saat checkout diproses."}
           </div>
         </aside>
       </div>
 
       <TrustStrip
-        description="Sebelum order dibuat, user tetap bisa mengecek opsi pengiriman, pickup, metode bayar, dan jalur bantuan toko dari satu tempat."
-        heading="Checkout tidak harus terasa berisiko karena lapisan trust dasarnya selalu terlihat."
+        description="Checkout fokus pada pengiriman, pembayaran, dan aturan akun tanpa menambahkan jalur WhatsApp yang mengganggu tahap akhir transaksi."
+        heading="Lapisan trust tetap terlihat tanpa mengalihkan perhatian dari penyelesaian order."
         store={store}
       />
     </section>

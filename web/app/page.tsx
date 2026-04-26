@@ -1,13 +1,19 @@
 import Image from "next/image";
 import Link from "next/link";
 
+import { getFallbackArticleSummaries } from "@/lib/article-content";
 import { ArticleCard } from "@/components/article-card";
-import { CampaignSpotlightCard } from "@/components/campaign-spotlight-card";
-import { CommerceIntentLink } from "@/components/commerce-intent-link";
-import { CommerceIntentGrid } from "@/components/commerce-intent-grid";
 import { JsonLd } from "@/components/json-ld";
-import { PathwaySection } from "@/components/pathway-section";
 import { ProductCard } from "@/components/product-card";
+import { TrackedLinkButton } from "@/components/tracked-link-button";
+import { IconCard } from "@/components/ui/icon-card";
+import { EmptyState, ErrorState } from "@/components/ui/state";
+import { PrimaryButton, SecondaryButton } from "@/components/ui/button";
+import { SectionHeader } from "@/components/ui/section-header";
+import { StepWizard } from "@/components/ui/step-wizard";
+import { StickyMobileCTA } from "@/components/ui/sticky-mobile-cta";
+import { TrustBadge } from "@/components/ui/trust-badge";
+import { VideoCard } from "@/components/ui/video-card";
 import {
   type ArticleListPayload,
   type ProductSummary,
@@ -15,26 +21,15 @@ import {
   getFallbackHomeData,
   getHomeData,
 } from "@/lib/api";
-import { getFeaturedCampaignLandings } from "@/lib/campaign-content";
 import {
-  HOMEPAGE_BUNDLE_CARDS,
-  HOMEPAGE_COMMODITY_CARDS,
-  HOMEPAGE_PROBLEM_CARDS,
-  HOMEPAGE_TRUST_POINTS,
+  HOME_AI_CHAT_PROMPTS,
+  HOME_CROP_CARDS,
+  HOME_HERO_BADGES,
+  HOME_PROBLEM_CARDS,
+  HOME_PRODUCT_TOPIC_CHIPS,
+  HOME_VIDEO_CARDS,
 } from "@/lib/homepage-content";
 import {
-  buildCommerceIntentCards,
-  buildCommerceWhatsAppLink,
-} from "@/lib/growth-commerce";
-import {
-  HOMEPAGE_COMMERCIAL_ENTRY_CARDS,
-  HOMEPAGE_ENTRY_CARDS,
-  PLATFORM_ENTRY_LINKS,
-} from "@/lib/hybrid-navigation";
-import { buildGoogleMapsStoreSearchUrl } from "@/lib/maps";
-import {
-  BRAND_SUBTAGLINE,
-  BRAND_TAGLINE,
   buildCollectionJsonLd,
   buildHomepageMetadata,
   buildStoreJsonLd,
@@ -43,37 +38,6 @@ import {
 
 export const dynamic = "force-dynamic";
 export const metadata = buildHomepageMetadata();
-
-type ArticleFallback = {
-  slug: string;
-  title: string;
-  excerpt: string;
-  published_at: string | null;
-};
-
-const fallbackArticles: ArticleFallback[] = [
-  {
-    slug: "panduan-memilih-pupuk",
-    title: "Mulai dari dasar pemupukan sebelum memilih produk",
-    excerpt:
-      "Panduan singkat untuk memahami peran pupuk, waktu aplikasi, dan konteks pembelian yang lebih tepat.",
-    published_at: null,
-  },
-  {
-    slug: "dasar-memilih-benih",
-    title: "Cara membaca kualitas benih sebelum menyiapkan lahan",
-    excerpt:
-      "Pahami mutu benih, varietas, dan kebutuhan awal agar Anda tidak langsung belanja tanpa konteks.",
-    published_at: null,
-  },
-  {
-    slug: "manajemen-belanja-toko",
-    title: "Menyusun kebutuhan tani dalam satu ritme belanja yang lebih rapi",
-    excerpt:
-      "Gabungkan kebutuhan budidaya, solusi, dan produk agar keputusan pembelian terasa lebih terarah dan tidak reaktif.",
-    published_at: null,
-  },
-];
 
 function dedupeProducts(products: Array<ProductSummary | null | undefined>) {
   return products
@@ -106,45 +70,26 @@ export default async function HomePage() {
     ...home.new_arrivals,
     ...home.best_sellers,
   ]).slice(0, 4);
-  const latestArticles = (articleFeed.items.length ? articleFeed.items : fallbackArticles).slice(
-    0,
-    3,
-  );
-  const hasLiveArticles = articleFeed.items.length > 0;
-  const operationalHours = home.store.operational_hours || "Senin - Sabtu, 08:00 - 17:00";
-  const consultationLink = buildCommerceWhatsAppLink({
-    phone: home.store.whatsapp_number,
-    storeName: home.store.name || "Wiragro",
-    intent: "consultation",
-    sourcePath: "/",
-    surface: "homepage",
-    funnelStage: "discover",
-  });
-  const commerceIntentCards = buildCommerceIntentCards({
-    phone: home.store.whatsapp_number,
-    storeName: home.store.name || "Wiragro",
-    sourcePath: "/",
-    surface: "homepage",
-  });
-  const featuredCampaigns = getFeaturedCampaignLandings(3);
-  const mapsUrl = home.store.address
-    ? buildGoogleMapsStoreSearchUrl(home.store.name, home.store.address)
-    : null;
+  const latestArticles = (articleFeed.items.length
+    ? articleFeed.items
+    : getFallbackArticleSummaries()
+  ).slice(0, 3);
 
   return (
-    <div className="storefront-home storefront-home--hybrid">
+    <div className="page-stack homepage">
       <JsonLd
         data={[
           buildWebPageJsonLd({
-            title: `Wiragro | ${BRAND_TAGLINE}`,
-            description: BRAND_SUBTAGLINE,
+            title: "Wiragro - Platform Solusi Pertanian Digital",
+            description:
+              "Cari solusi masalah tanaman, baca edukasi pertanian, dan beli produk pertanian yang tepat di Wiragro.",
             path: "/",
           }),
           buildStoreJsonLd(home.store),
           buildCollectionJsonLd({
-            title: "Produk unggulan Wiragro",
+            title: "Produk rekomendasi Wiragro",
             description:
-              "Pilihan produk unggulan dari katalog pertanian Wiragro untuk membantu pengunjung bergerak dari pemahaman ke pembelian.",
+              "Pilihan produk unggulan yang menjadi jembatan dari solusi dan edukasi menuju pembelian yang lebih tepat.",
             path: "/",
             itemUrls: featuredProducts.map((product) => `/produk/${product.slug}`),
           }),
@@ -153,387 +98,247 @@ export default async function HomePage() {
       />
 
       {storefrontUnavailable ? (
-        <section className="storefront-alert">
-          <div>
-            <strong>Data produk sedang dimuat ulang.</strong>
-            <p>Anda tetap bisa mulai dari solusi tanaman, edukasi, dan layanan utama Wiragro.</p>
-          </div>
-          <Link className="btn btn-primary" href="/produk">
-            Jelajahi produk
-          </Link>
-        </section>
+        <ErrorState
+          actions={[
+            { href: "/solusi", label: "Mulai dari solusi" },
+            { href: "/produk", label: "Lihat produk", variant: "secondary" },
+          ]}
+          description="Data katalog live sedang dimuat ulang. Anda tetap bisa menjelajahi solusi tanaman, edukasi, dan rekomendasi produk fallback dari Wiragro."
+          eyebrow="Sinkronisasi data"
+          title="Sebagian data live sedang disegarkan."
+        />
       ) : null}
 
-      <section className="storefront-hero storefront-hero--hybrid">
-        <div className="storefront-hero__main storefront-hero__main--hybrid">
-          <div className="storefront-hero__copy">
-            <span className="storefront-eyebrow">{BRAND_TAGLINE}</span>
-            <h1>{BRAND_SUBTAGLINE}</h1>
-            <p>
-              Wiragro dirancang sebagai platform digital pertanian yang membantu Anda
-              bergerak dari masalah tanaman ke tindakan, pembelajaran, pembelian, dan
-              layanan premium dengan alur yang lebih jelas.
-            </p>
-
-            <div className="storefront-hero__actions storefront-hero__actions--hybrid">
-              <Link className="btn btn-primary" href="/solusi">
-                Cari solusi tanaman
-              </Link>
-              <Link className="btn btn-secondary" href="/produk">
-                Jelajahi produk
-              </Link>
-              <Link className="btn btn-secondary" href="/ai-chat">
-                Buka AI Chat
-              </Link>
-            </div>
-
-            <Link className="storefront-hero__text-link" href="/belajar">
-              Masuk ke edukasi pertanian
+      <section className="homepage-hero">
+        <div className="homepage-hero__copy">
+          <span className="eyebrow-label">Platform Solusi Pertanian Digital</span>
+          <h1>Platform Solusi Pertanian Digital</h1>
+          <p>
+            Cari solusi masalah tanaman, pelajari cara terbaik, dan beli produk
+            pertanian yang tepat dalam satu tempat.
+          </p>
+          <div className="homepage-hero__actions">
+            <TrackedLinkButton
+              event="click_cari_solusi"
+              href="/solusi"
+              payload={{ placement: "homepage_hero" }}
+            >
+              Cari Solusi Tanaman
+            </TrackedLinkButton>
+            <TrackedLinkButton
+              event="ask_ai"
+              href="/ai-chat"
+              payload={{ placement: "homepage_hero" }}
+              variant="secondary"
+            >
+              Tanya AI Pertanian
+            </TrackedLinkButton>
+            <Link className="homepage-hero__tertiary" href="/produk">
+              Lihat Produk
             </Link>
-
-            <div className="storefront-hero__spotlight storefront-hero__spotlight--hybrid">
-              <span>Satu platform, banyak jalur masuk</span>
-              <strong>Solusi, edukasi, produk, AI premium, dan B2C/B2B saling terhubung.</strong>
-              <em>Pilih jalur yang paling relevan tanpa terasa dilempar ke katalog terlalu cepat.</em>
-              <div className="storefront-hero__spotlight-hours">
-                <small>Jam layanan</small>
-                <b>{operationalHours}</b>
-              </div>
-            </div>
           </div>
-
-          <div className="storefront-hero__visual storefront-hero__visual--hybrid" aria-hidden="true">
-            <Image
-              alt=""
-              className="storefront-hero__art storefront-hero__art--hill"
-              height={112}
-              src="/wiragro-illustrations/wiragro_dekor_bukit_transparent.png"
-              width={280}
-            />
-            <Image
-              alt=""
-              className="storefront-hero__art storefront-hero__art--soil"
-              height={80}
-              src="/wiragro-illustrations/wiragro_dekor_tanah_transparent.png"
-              width={160}
-            />
-            <Image
-              alt=""
-              className="storefront-hero__art storefront-hero__art--leaf-left"
-              height={129}
-              src="/wiragro-illustrations/wiragro_dekor_daun_kiri_transparent.png"
-              width={137}
-            />
-            <Image
-              alt=""
-              className="storefront-hero__art storefront-hero__art--leaf-right"
-              height={87}
-              src="/wiragro-illustrations/wiragro_dekor_ranting_transparent.png"
-              width={112}
-            />
-            <Image
-              alt=""
-              className="storefront-hero__art storefront-hero__art--sprout"
-              height={72}
-              src="/wiragro-illustrations/wiragro_dekor_tunas_kecil_transparent.png"
-              width={72}
-            />
-            <Image
-              alt=""
-              className="storefront-hero__art storefront-hero__art--tall"
-              height={137}
-              src="/wiragro-illustrations/wiragro_dekor_tanaman_tinggi_transparent.png"
-              width={138}
-            />
-            <Image
-              alt="Kemasan pupuk organik untuk hero Wiragro."
-              className="storefront-hero__product storefront-hero__product--main"
-              height={220}
-              priority
-              src="/wiragro-illustrations/wiragro_produk_pupuk_transparent.png"
-              width={220}
-            />
-            <Image
-              alt="Botol herbisida untuk hero Wiragro."
-              className="storefront-hero__product storefront-hero__product--accent"
-              height={164}
-              src="/wiragro-illustrations/wiragro_produk_herbisida_transparent.png"
-              width={104}
-            />
-          </div>
-
-          <div className="storefront-hero__utility-grid storefront-hero__utility-grid--hybrid">
-            {PLATFORM_ENTRY_LINKS.map((pillar) => (
-              <Link className="storefront-utility-card" href={pillar.href} key={pillar.href}>
-                <span>{pillar.label}</span>
-                <strong>{pillar.description}</strong>
-              </Link>
+          <div className="homepage-hero__badges">
+            {HOME_HERO_BADGES.map((badge) => (
+              <TrustBadge
+                icon={badge.icon}
+                key={badge.label}
+                label={badge.label}
+                tone={badge.tone}
+              />
             ))}
           </div>
+          <StepWizard
+            steps={[
+              {
+                description: "Kenali masalah atau kebutuhan tanaman lebih dulu.",
+                label: "Cari solusi",
+                status: "current",
+              },
+              {
+                description: "Pelajari langkah yang lebih aman dan masuk akal.",
+                label: "Pahami arahan",
+                status: "upcoming",
+              },
+              {
+                description: "Beli produk yang tepat saat konteksnya sudah jelas.",
+                label: "Belanja tepat",
+                status: "upcoming",
+              },
+            ]}
+          />
+        </div>
+
+        <div className="homepage-hero__visual">
+          <div className="homepage-hero__image">
+            <Image
+              alt="Petani Wiragro menggunakan teknologi digital untuk menganalisis kebutuhan tanaman di lahan pertanian."
+              fill
+              priority
+              sizes="(max-width: 960px) 100vw, 46vw"
+              src="/home/hero-farmer-ai.png"
+            />
+          </div>
+          <div className="homepage-hero__insight homepage-hero__insight--analysis">
+            <span>Analisis AI</span>
+            <strong>Mulai dari gejala, bukan tebakan</strong>
+          </div>
+          <div className="homepage-hero__insight homepage-hero__insight--product">
+            <span>Rekomendasi</span>
+            <strong>Solusi, edukasi, lalu produk</strong>
+          </div>
         </div>
       </section>
 
-      <PathwaySection
-        action={{ href: "/solusi", label: "Mulai dari masalah tanaman" }}
-        cards={HOMEPAGE_ENTRY_CARDS}
-        description="Tiga jalur inti ini membantu pengunjung memilih mode yang paling tepat sebelum masuk lebih jauh ke platform."
-        eyebrow="Pilih jalur"
-        title="Homepage membantu pengunjung masuk ke mode yang tepat, bukan langsung dilempar ke katalog."
-      />
-
-      <PathwaySection
-        action={{ href: "/produk", label: "Buka semua jalur belanja" }}
-        cards={HOMEPAGE_COMMERCIAL_ENTRY_CARDS}
-        description="Paket, program musiman, dan B2B hadir sebagai lini penawaran resmi Wiragro yang mendukung kebutuhan retail maupun bisnis."
-        eyebrow="Lini penawaran resmi"
-        title="Jalur penawaran Wiragro tidak berhenti di satu katalog saja."
-      />
-
-      <PathwaySection
-        action={{ href: "/solusi", label: "Buka semua solusi" }}
-        cards={HOMEPAGE_PROBLEM_CARDS}
-        description="Bagian ini ditempatkan tinggi karena banyak pengunjung pertanian datang dengan masalah, bukan dengan daftar belanja yang sudah matang."
-        eyebrow="Masalah tanaman populer"
-        title="Mulai dari masalah lapangan yang paling sering dirasakan petani."
-      />
-
-      <section className="section-block homepage-commodity-section">
-        <div className="section-heading">
-          <div>
-            <span className="eyebrow-label">Komoditas populer</span>
-            <h2>Pilih komoditas yang paling dekat dengan kebutuhan Anda.</h2>
-            <p>
-              Jalur berbasis komoditas membantu pengunjung yang tidak datang dengan nama
-              produk, tetapi datang dengan kebutuhan tanaman atau usaha taninya.
-            </p>
-          </div>
-          <Link href="/komoditas">Lihat semua komoditas</Link>
-        </div>
-
-        <div className="homepage-commodity-grid">
-          {HOMEPAGE_COMMODITY_CARDS.map((commodity) => (
-            <article
-              className={`homepage-commodity-card homepage-commodity-card--${commodity.theme}`}
-              key={commodity.title}
-            >
-              <span className="eyebrow-label">{commodity.eyebrow}</span>
-              <strong>{commodity.title}</strong>
-              <p>{commodity.description}</p>
-              {commodity.supportingLinks?.length ? (
-                <div className="homepage-commodity-card__links">
-                  {commodity.supportingLinks.map((link) => (
-                    <Link href={link.href} key={`${commodity.title}-${link.href}`}>
-                      {link.label}
-                    </Link>
-                  ))}
-                </div>
-              ) : null}
-              <Link className="homepage-commodity-card__action" href={commodity.href}>
-                {commodity.actionLabel}
-              </Link>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      <section className="section-block homepage-article-section">
-        <div className="section-heading">
-          <div>
-            <span className="eyebrow-label">Edukasi terbaru</span>
-            <h2>Bangun kepercayaan lewat edukasi, bukan hanya lewat listing produk.</h2>
-            <p>
-              Konten edukasi membantu Wiragro terasa seperti partner belajar yang
-              terpercaya sekaligus tetap relevan untuk keputusan lapangan.
-            </p>
-          </div>
-          <Link href="/artikel">Lihat semua artikel</Link>
-        </div>
-
-        <div className="article-grid article-grid--editorial homepage-article-grid">
-          {latestArticles.map((article) => (
-            <ArticleCard
-              article={article}
-              href={hasLiveArticles ? `/artikel/${article.slug}` : "/belajar"}
-              key={article.slug}
+      <section className="section-block">
+        <SectionHeader
+          action={{ href: "/solusi", label: "Lihat semua masalah" }}
+          description="Pilih gejala yang paling dekat dengan kondisi lapangan Anda. Setiap kartu mengantar ke explorer solusi dengan konteks yang lebih terarah."
+          eyebrow="Masalah tanaman"
+          title="Masalah tanaman Anda apa?"
+        />
+        <div className="homepage-icon-grid">
+          {HOME_PROBLEM_CARDS.map((card) => (
+            <IconCard
+              actionLabel={card.actionLabel}
+              description={card.description}
+              href={card.href}
+              icon={card.icon}
+              key={card.title}
+              title={card.title}
             />
           ))}
         </div>
       </section>
 
-      <section className="storefront-section storefront-section--products">
-        <div className="storefront-section__header storefront-section__header--hybrid">
-          <div>
-            <span className="storefront-eyebrow">Produk unggulan</span>
-            <h2>Produk unggulan yang siap dipilih saat kebutuhan Anda sudah lebih jelas.</h2>
-            <p>
-              Katalog tetap penting, tetapi kini hadir sebagai bagian dari alur yang
-              lebih utuh bersama solusi, edukasi, dan pendampingan.
-            </p>
-          </div>
-          <Link href="/produk">Jelajahi produk</Link>
+      <section className="section-block">
+        <SectionHeader
+          action={{ href: "/solusi", label: "Buka explorer solusi", variant: "secondary" }}
+          description="Kalau Anda datang dari komoditas, bukan dari nama produk, pilih tanaman yang paling ingin ditangani terlebih dahulu."
+          eyebrow="Pilih tanaman"
+          title="Pilih tanaman yang ingin Anda tangani"
+        />
+        <div className="homepage-icon-grid homepage-icon-grid--crops">
+          {HOME_CROP_CARDS.map((card) => (
+            <IconCard
+              actionLabel={card.actionLabel}
+              description={card.description}
+              href={card.href}
+              icon={card.icon}
+              key={card.title}
+              title={card.title}
+              tone="accent"
+            />
+          ))}
         </div>
+      </section>
 
+      <section className="section-block">
+        <SectionHeader
+          action={{ href: "/produk", label: "Lihat semua produk" }}
+          description="Produk tetap penting, tetapi hadir setelah user memahami konteks kebutuhan tanamnya agar keputusan belanja terasa lebih tepat."
+          eyebrow="Produk rekomendasi"
+          title="Produk rekomendasi untuk kebutuhan pertanian"
+        />
+        <div className="homepage-topic-chips" aria-label="Kelompok produk">
+          {HOME_PRODUCT_TOPIC_CHIPS.map((chip) => (
+            <span className="filter-chip" key={chip}>
+              {chip}
+            </span>
+          ))}
+        </div>
         {featuredProducts.length ? (
-          <div className="product-grid product-grid--catalog storefront-product-grid">
+          <div className="product-grid product-grid--catalog">
             {featuredProducts.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
           </div>
         ) : (
-          <div className="storefront-empty">
-            <strong>Produk unggulan belum tersedia.</strong>
-            <p>Katalog akan tampil di sini setelah data produk aktif dimuat kembali.</p>
-          </div>
+          <EmptyState
+            actions={[{ href: "/produk", label: "Jelajahi katalog" }]}
+            description="Pilihan produk akan muncul di sini setelah sinkronisasi katalog selesai."
+            eyebrow="Produk belum tampil"
+            title="Rekomendasi produk sedang disiapkan."
+          />
         )}
       </section>
 
-      <PathwaySection
-        action={{ href: "/belanja/paket", label: "Lihat semua paket" }}
-        cards={HOMEPAGE_BUNDLE_CARDS}
-        description="Bundle resmi membantu Anda bergerak cepat tanpa kehilangan konteks belajar atau solusi yang dibutuhkan."
-        eyebrow="Bundle resmi"
-        title="Kurasi kebutuhan yang lebih siap dipilih dan dibeli."
-      />
-
       <section className="section-block">
-        <div className="section-heading">
-          <div>
-            <span className="eyebrow-label">Campaign resmi</span>
-            <h2>Halaman musiman dan problem-first untuk kebutuhan yang sudah dekat ke keputusan beli.</h2>
-            <p>
-              Program musiman membantu Wiragro menangkap momentum musim, komoditas, atau
-              masalah prioritas tanpa memutus jalur bundle, solusi, dan bantuan tim.
-            </p>
-          </div>
-          <Link href="/kampanye">Semua campaign</Link>
-        </div>
-        <div className="campaign-grid">
-          {featuredCampaigns.map((campaign) => (
-            <CampaignSpotlightCard campaign={campaign} key={campaign.slug} />
+        <SectionHeader
+          action={{ href: "/artikel", label: "Masuk ke edukasi", variant: "secondary" }}
+          description="Saat feed video belum lengkap dari backend, Wiragro tetap menampilkan studi kasus dan ringkasan yang paling membantu user memahami konteks."
+          eyebrow="Edukasi video"
+          title="Belajar dari studi kasus lapangan"
+        />
+        <div className="homepage-video-grid">
+          {HOME_VIDEO_CARDS.map((video) => (
+            <VideoCard
+              category={video.category}
+              description={video.description}
+              href={video.href}
+              key={video.title}
+              thumbnail={video.thumbnail}
+              title={video.title}
+            />
           ))}
         </div>
       </section>
 
-      <section className="section-block homepage-trust-section">
-        <div className="section-heading">
-          <div>
-            <span className="eyebrow-label">Kepercayaan</span>
-            <h2>Alasan kenapa Wiragro terasa lebih meyakinkan sejak halaman pertama.</h2>
-            <p>
-              Kepercayaan dibangun dari kombinasi edukasi, solusi, layanan yang jelas,
-              dan pengalaman belanja yang terasa lebih rapi.
-            </p>
-          </div>
-          <Link href="/lacak-pesanan">Lacak pesanan</Link>
-        </div>
-
-        <div className="homepage-trust-layout">
-          <div className="homepage-trust-grid">
-            {HOMEPAGE_TRUST_POINTS.map((point) => (
-              <article className="homepage-trust-card" key={point.title}>
-                <Image alt={point.title} height={64} src={point.icon} width={64} />
-                <div>
-                  <strong>{point.title}</strong>
-                  <p>{point.body}</p>
-                </div>
-              </article>
-            ))}
-          </div>
-
-          <aside className="homepage-trust-panel">
-            <span className="eyebrow-label">Layanan Wiragro</span>
-            <h3>{home.store.name || "Wiragro"}</h3>
-            <p>
-              Semua jalur di platform ini tetap terhubung ke layanan, jam operasional,
-              dan tim yang bisa dihubungi langsung saat Anda butuh bantuan.
-            </p>
-            <div className="homepage-trust-panel__meta">
-              <div>
-                <span>Jam layanan</span>
-                <strong>{operationalHours}</strong>
-              </div>
-              <div>
-                <span>Alamat layanan</span>
-                <strong>{home.store.address || "Alamat layanan sedang diperbarui."}</strong>
-              </div>
-              <div>
-                <span>WhatsApp</span>
-                <strong>{home.store.whatsapp_number || "Arahkan ke halaman kontak"}</strong>
-              </div>
-            </div>
-            <div className="homepage-trust-panel__actions">
-              {consultationLink ? (
-                <CommerceIntentLink
-                  className="btn btn-primary"
-                  href={consultationLink.href}
-                  leadRef={consultationLink.leadRef}
-                  leadSummary={consultationLink.leadSummary}
-                  tracking={consultationLink.tracking}
-                >
-                  Konsultasi WhatsApp
-                </CommerceIntentLink>
-              ) : (
-                <Link className="btn btn-primary" href="/kontak">
-                  Hubungi tim
-                </Link>
-              )}
-              {mapsUrl ? (
-                <a className="btn btn-secondary" href={mapsUrl} rel="noreferrer" target="_blank">
-                  Buka Google Maps
-                </a>
-              ) : (
-                <Link className="btn btn-secondary" href="/kontak">
-                  Lihat kontak
-                </Link>
-              )}
-              <Link className="btn btn-secondary" href="/pengiriman-pembayaran">
-                Pengiriman & pembayaran
-              </Link>
-              <Link className="btn btn-secondary" href="/garansi-retur">
-                Garansi & retur
-              </Link>
-            </div>
-          </aside>
+      <section className="section-block">
+        <SectionHeader
+          action={{ href: "/artikel", label: "Lihat semua artikel" }}
+          description="Panduan praktis ini membantu user memahami masalah dan fase tanam sebelum mengambil keputusan beli."
+          eyebrow="Artikel"
+          title="Panduan praktis sebelum membeli produk"
+        />
+        <div className="article-grid article-grid--editorial">
+          {latestArticles.map((article) => (
+            <ArticleCard article={article} href={`/artikel/${article.slug}`} key={article.slug} />
+          ))}
         </div>
       </section>
 
-      <section className="section-block homepage-wa-section">
-        <div className="homepage-wa-band">
-          <div>
-            <span className="eyebrow-label">Konsultasi WA</span>
-            <h2>Pilih jalur WA yang paling masuk akal setelah visitor paham konteksnya.</h2>
-            <p>
-              Homepage tidak lagi menampilkan semua intent sekaligus. Konsultasi tetap ada
-              di panel trust, sementara section ini fokus ke rekomendasi kebutuhan dan jalur
-              inquiry partai yang lebih mudah dibaca tim layanan.
-            </p>
+      <section className="homepage-ai-band">
+        <div className="homepage-ai-band__copy">
+          <div className="homepage-ai-band__badge-row">
+            <TrustBadge icon="ai" label="Premium Feature" tone="accent" />
           </div>
-          {commerceIntentCards.length ? (
-            <CommerceIntentGrid items={commerceIntentCards} />
-          ) : (
-            <div className="homepage-wa-band__actions">
-              {consultationLink ? (
-                <CommerceIntentLink
-                  className="btn btn-primary"
-                  href={consultationLink.href}
-                  leadRef={consultationLink.leadRef}
-                  leadSummary={consultationLink.leadSummary}
-                  tracking={consultationLink.tracking}
-                >
-                  Konsultasi via WhatsApp
-                </CommerceIntentLink>
-              ) : (
-                <Link className="btn btn-primary" href="/kontak">
-                  Hubungi lewat kontak
-                </Link>
-              )}
-              <Link className="btn btn-secondary" href="/faq">
-                Lihat FAQ dulu
-              </Link>
-            </div>
-          )}
+          <h2>Masih bingung dengan masalah tanaman?</h2>
+          <p>
+            Tanya AI Pertanian Wiragro untuk mendapatkan arahan awal dan rekomendasi
+            produk yang sesuai.
+          </p>
+          <div className="homepage-ai-band__actions">
+            <PrimaryButton href="/ai-chat">Tanya AI</PrimaryButton>
+            <SecondaryButton href="/solusi">Mulai dari solusi</SecondaryButton>
+          </div>
+        </div>
+        <div className="homepage-ai-band__prompts" aria-label="Contoh pertanyaan">
+          {HOME_AI_CHAT_PROMPTS.map((prompt) => (
+            <span key={prompt}>{prompt}</span>
+          ))}
         </div>
       </section>
+
+      <section className="homepage-b2b-band">
+        <div className="homepage-b2b-band__copy">
+          <span className="eyebrow-label">Untuk toko & pembelian volume besar</span>
+          <h2>Wiragro mendukung kebutuhan toko dan pembelian rutin.</h2>
+          <p>
+            Untuk toko pertanian dan kebutuhan volume besar, tim Wiragro membantu
+            menyiapkan alur pembelian yang lebih rapi sesuai kerja sama tanpa
+            mengganggu pengalaman belanja utama.
+          </p>
+        </div>
+        <div className="homepage-b2b-band__actions">
+          <PrimaryButton href="/b2b">Hubungi Tim Wiragro</PrimaryButton>
+          <SecondaryButton href="/kontak">Butuh bantuan cepat</SecondaryButton>
+        </div>
+      </section>
+
+      <StickyMobileCTA
+        primary={{ href: "/solusi", label: "Cari Solusi" }}
+        secondary={{ href: "/ai-chat", label: "Tanya AI" }}
+      />
     </div>
   );
 }
