@@ -88,135 +88,139 @@ export function AppHeader() {
 
   return (
     <>
-      <header className={`site-header app-header${isScrolled ? " site-header--scrolled" : ""}${isMenuOpen ? " site-header--menu-open" : ""}`}>
-      <div className="app-header__surface">
-        <div className="site-header__bar app-header__bar">
-          <Link className="app-header__brand" href="/">
-            <WiragroLockup contextLabel="Platform Solusi Pertanian Digital" variant="header" />
-          </Link>
-
-          <nav className="site-nav app-header__nav" aria-label="Navigasi utama">
-            {HEADER_NAV_LINKS.map((link) => {
-              const isActive = isHybridNavActive(pathname, link.href);
-
-              return (
-                <Link
-                  aria-current={isActive ? "page" : undefined}
-                  className={isActive ? "is-active" : undefined}
-                  href={link.href}
-                  key={link.href}
-                >
-                  {link.label}
-                </Link>
-              );
-            })}
-          </nav>
-
-          <div className="app-header__search">
-            <GlobalSearch />
-          </div>
-
-          <div className="header-actions app-header__actions">
-            <Link
-              className={`header-action-link ${isActivePath(pathname, accountHref) ? "is-active" : ""}`}
-              href={accountHref}
-            >
-              <span>{session ? firstName : "Masuk"}</span>
+      <header
+        className={`site-header app-header${isScrolled ? " site-header--scrolled" : ""}${isMenuOpen ? " site-header--menu-open" : ""}`}
+      >
+        <div className="app-header__surface">
+          <div className="site-header__bar app-header__bar">
+            <Link className="app-header__brand" href="/">
+              <WiragroLockup contextLabel="Platform Solusi Pertanian Digital" variant="header" />
             </Link>
-            <Link
-              className={`header-action-link ${isActivePath(pathname, "/keranjang") ? "is-active" : ""}`}
-              href="/keranjang"
-            >
-              <span>Keranjang</span>
-              {cartCount > 0 ? <em>{cartCount}</em> : null}
-            </Link>
-          </div>
 
-          <button
-            aria-expanded={isMenuOpen}
-            aria-label={isMenuOpen ? "Tutup menu navigasi" : "Buka menu navigasi"}
-            className="site-header__bar-toggle app-header__toggle"
-            onClick={() => setIsMenuOpen((current) => !current)}
-            type="button"
-          >
-            <MenuIcon open={isMenuOpen} />
-          </button>
+            <div className="app-header__search">
+              <GlobalSearch />
+            </div>
 
-          <div className="app-header__mobile-actions">
+            <div className="header-actions app-header__actions">
+              <Link
+                className={`header-action-link ${isActivePath(pathname, accountHref) ? "is-active" : ""}`}
+                href={accountHref}
+              >
+                <span>{session ? firstName : "Masuk"}</span>
+              </Link>
+              <Link
+                className={`header-action-link ${isActivePath(pathname, "/keranjang") ? "is-active" : ""}`}
+                href="/keranjang"
+              >
+                <span>Keranjang</span>
+                {cartCount > 0 ? <em>{cartCount}</em> : null}
+              </Link>
+            </div>
+
             <button
-              aria-label="Buka pencarian"
-              className="app-header__icon-button"
-              onClick={() => setIsSearchOpen(true)}
+              aria-expanded={isMenuOpen}
+              aria-label={isMenuOpen ? "Tutup menu navigasi" : "Buka menu navigasi"}
+              className="site-header__bar-toggle app-header__toggle"
+              onClick={() => setIsMenuOpen((current) => !current)}
               type="button"
             >
-              <SearchIcon />
+              <MenuIcon open={isMenuOpen} />
             </button>
-            <Link
-              aria-label="Buka keranjang"
-              className={`app-header__icon-button ${isActivePath(pathname, "/keranjang") ? "is-active" : ""}`}
-              href="/keranjang"
-            >
-              <CartIcon />
-              {cartCount > 0 ? <em>{cartCount}</em> : null}
-            </Link>
+
+            <div className="app-header__mobile-actions">
+              <button
+                aria-label="Buka pencarian"
+                className="app-header__icon-button"
+                onClick={() => setIsSearchOpen(true)}
+                type="button"
+              >
+                <SearchIcon />
+              </button>
+              <Link
+                aria-label="Buka keranjang"
+                className={`app-header__icon-button ${isActivePath(pathname, "/keranjang") ? "is-active" : ""}`}
+                href="/keranjang"
+              >
+                <CartIcon />
+                {cartCount > 0 ? <em>{cartCount}</em> : null}
+              </Link>
+            </div>
           </div>
-        </div>
 
-        <div className={`site-header__mobile-panel app-header__mobile-panel${isMenuOpen ? " is-open" : ""}`}>
-          <div className="site-header__mobile-panel-group">
-            <span className="site-header__mobile-panel-label">Jelajah platform</span>
-            {HEADER_NAV_LINKS.map((link) => {
-              const isActive = isHybridNavActive(pathname, link.href);
+          <div className="app-header__nav-row">
+            <nav className="site-nav app-header__nav" aria-label="Navigasi utama">
+              {HEADER_NAV_LINKS.map((link) => {
+                const isActive = isHybridNavActive(pathname, link.href);
 
-              return (
+                return (
+                  <Link
+                    aria-current={isActive ? "page" : undefined}
+                    className={isActive ? "is-active" : undefined}
+                    href={link.href}
+                    key={link.href}
+                  >
+                    {link.label}
+                  </Link>
+                );
+              })}
+            </nav>
+          </div>
+
+          <div className={`site-header__mobile-panel app-header__mobile-panel${isMenuOpen ? " is-open" : ""}`}>
+            <div className="site-header__mobile-panel-group">
+              <span className="site-header__mobile-panel-label">Jelajah platform</span>
+              {HEADER_NAV_LINKS.map((link) => {
+                const isActive = isHybridNavActive(pathname, link.href);
+
+                return (
+                  <Link
+                    aria-current={isActive ? "page" : undefined}
+                    className={isActive ? "is-active" : undefined}
+                    href={link.href}
+                    key={`mobile-${link.href}`}
+                  >
+                    {link.label}
+                  </Link>
+                );
+              })}
+            </div>
+
+            <div className="site-header__mobile-panel-group">
+              <span className="site-header__mobile-panel-label">Akun & bantuan</span>
+              <Link
+                className={isActivePath(pathname, "/wishlist") ? "is-active" : undefined}
+                href="/wishlist"
+              >
+                Wishlist {items.length > 0 ? `(${items.length})` : ""}
+              </Link>
+              <Link
+                className={isActivePath(pathname, "/keranjang") ? "is-active" : undefined}
+                href="/keranjang"
+              >
+                Keranjang {cartCount > 0 ? `(${cartCount})` : ""}
+              </Link>
+              <Link
+                className={
+                  isActivePath(pathname, "/akun") || isActivePath(pathname, "/masuk")
+                    ? "is-active"
+                    : undefined
+                }
+                href={accountHref}
+              >
+                {session ? "Akun Saya" : "Masuk"}
+              </Link>
+              {UTILITY_NAV_LINKS.map((link) => (
                 <Link
-                  aria-current={isActive ? "page" : undefined}
-                  className={isActive ? "is-active" : undefined}
+                  className={isActivePath(pathname, link.href) ? "is-active" : undefined}
                   href={link.href}
-                  key={`mobile-${link.href}`}
+                  key={`utility-${link.href}`}
                 >
                   {link.label}
                 </Link>
-              );
-            })}
-          </div>
-
-          <div className="site-header__mobile-panel-group">
-            <span className="site-header__mobile-panel-label">Akun & bantuan</span>
-            <Link
-              className={isActivePath(pathname, "/wishlist") ? "is-active" : undefined}
-              href="/wishlist"
-            >
-              Wishlist {items.length > 0 ? `(${items.length})` : ""}
-            </Link>
-            <Link
-              className={isActivePath(pathname, "/keranjang") ? "is-active" : undefined}
-              href="/keranjang"
-            >
-              Keranjang {cartCount > 0 ? `(${cartCount})` : ""}
-            </Link>
-            <Link
-              className={
-                isActivePath(pathname, "/akun") || isActivePath(pathname, "/masuk")
-                  ? "is-active"
-                  : undefined
-              }
-              href={accountHref}
-            >
-              {session ? "Akun Saya" : "Masuk"}
-            </Link>
-            {UTILITY_NAV_LINKS.map((link) => (
-              <Link
-                className={isActivePath(pathname, link.href) ? "is-active" : undefined}
-                href={link.href}
-                key={`utility-${link.href}`}
-              >
-                {link.label}
-              </Link>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
-      </div>
       </header>
       <MobileSearchOverlay onClose={() => setIsSearchOpen(false)} open={isSearchOpen} />
     </>

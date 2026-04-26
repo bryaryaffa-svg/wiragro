@@ -44,6 +44,11 @@ export function ArticleCard({
 }) {
   const isLinked = Boolean(href);
   const safeHref = href ?? "/artikel";
+  const visual = pickArticleVisual(article);
+  const isIllustration =
+    visual.includes("/illustrations/") ||
+    visual.includes("/wiragro-illustrations/") ||
+    visual.endsWith(".svg");
 
   return (
     <article className="article-card">
@@ -59,9 +64,10 @@ export function ArticleCard({
       >
         <Image
           alt={article.title}
+          className={isIllustration ? "article-card__image article-card__image--illustration" : "article-card__image"}
           fill
           sizes="(max-width: 768px) 92vw, (max-width: 1200px) 32vw, 24vw"
-          src={pickArticleVisual(article)}
+          src={visual}
         />
       </Link>
       <span className="eyebrow-label">Edukasi</span>
@@ -89,7 +95,10 @@ export function ArticleCard({
           <span>{article.title}</span>
         )}
       </h3>
-      <p>{article.excerpt || "Artikel ini sedang disiapkan untuk kanal edukasi Wiragro."}</p>
+      <p>
+        {article.excerpt ||
+          "Panduan ini membantu Anda memahami konteks lapangan sebelum memilih solusi atau produk yang lebih tepat."}
+      </p>
       <div className="article-card__footer">
         <span>
           {formatDate(article.published_at)}
@@ -108,7 +117,7 @@ export function ArticleCard({
             Baca
           </Link>
         ) : (
-          <span>Segera tersedia</span>
+          <span>Lihat ringkasan</span>
         )}
       </div>
     </article>

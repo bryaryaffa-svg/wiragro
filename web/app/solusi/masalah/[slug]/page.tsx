@@ -305,7 +305,7 @@ export default async function SolutionDetailPage({
             <span className="eyebrow-label">Edukasi terkait</span>
             <strong>Butuh konteks yang lebih lengkap sebelum memilih produk?</strong>
             <p>Lanjutkan ke artikel edukasi agar proses memahami masalah tetap meyakinkan, bukan terasa memaksa untuk langsung membeli.</p>
-            <Link className="btn btn-secondary" href="/belajar">
+            <Link className="btn btn-secondary" href="/artikel">
               Buka Edukasi
             </Link>
           </section>

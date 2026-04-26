@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -36,6 +37,30 @@ const PRODUCT_CARD_WISHLIST_SLOT_STYLE = {
   zIndex: 3,
 } as const;
 
+function getFallbackProductVisual(product: ProductSummary) {
+  const haystack = `${product.name} ${product.category?.name ?? ""} ${product.product_type}`.toLowerCase();
+
+  if (haystack.includes("benih") || haystack.includes("bibit")) {
+    return "/wiragro-illustrations/wiragro_produk_benih_transparent.png";
+  }
+  if (
+    haystack.includes("pestisida") ||
+    haystack.includes("insektisida") ||
+    haystack.includes("fungisida") ||
+    haystack.includes("herbisida")
+  ) {
+    return "/wiragro-illustrations/wiragro_produk_herbisida_transparent.png";
+  }
+  if (haystack.includes("nutrisi") || haystack.includes("booster") || haystack.includes("kalium")) {
+    return "/wiragro-illustrations/wiragro_produk_nutrisi_transparent.png";
+  }
+  if (haystack.includes("alat") || haystack.includes("sprayer") || haystack.includes("semprot")) {
+    return "/wiragro-illustrations/wiragro_icon_alat_pertanian_transparent.png";
+  }
+
+  return "/wiragro-illustrations/wiragro_produk_pupuk_transparent.png";
+}
+
 export function ProductCard({
   benefitOverride,
   contextBadge,
@@ -47,10 +72,14 @@ export function ProductCard({
   product: ProductSummary;
   trackingContext?: string;
 }) {
+  const [imageFailed, setImageFailed] = useState(false);
   const primaryImage = product.images.find((image) => image.is_primary) ?? product.images[0];
+  const fallbackImage = getFallbackProductVisual(product);
+  const hasPrimaryImage = Boolean(primaryImage?.url);
+  const resolvedImageUrl = hasPrimaryImage && primaryImage && !imageFailed ? primaryImage.url : fallbackImage;
   const isOutOfStock = product.availability.state === "out_of_stock";
   const showAvailabilityBadge = product.availability.state !== "in_stock";
-  const useUnoptimizedImage = primaryImage?.url.startsWith("/") ?? false;
+  const useUnoptimizedImage = resolvedImageUrl.startsWith("/");
   const context = getProductCatalogContext(product);
   const primaryBadge = product.badges.featured
     ? "Promo"
@@ -68,19 +97,18 @@ export function ProductCard({
       : product.availability.state === "out_of_stock"
         ? "Stok habis"
         : "Siap dipesan";
-  const floatingBadges = [
-    primaryBadge,
-    contextBadge ?? context.quickBadge,
-  ].filter(Boolean) as string[];
+  const contextualBadge = contextBadge ?? context.quickBadge;
+
+  useEffect(() => {
+    setImageFailed(false);
+  }, [primaryImage?.url, product.id]);
 
   return (
     <article className="product-card">
       <div className="product-card__media-shell" style={PRODUCT_CARD_MEDIA_SHELL_STYLE}>
-        {floatingBadges.length ? (
+        {primaryBadge ? (
           <div className="product-card__floating-badges">
-            {floatingBadges.slice(0, 2).map((badge) => (
-              <span key={`${product.id}-${badge}`}>{badge}</span>
-            ))}
+            <span>{primaryBadge}</span>
           </div>
         ) : null}
         <Link
@@ -97,18 +125,20 @@ export function ProductCard({
           }
           style={PRODUCT_CARD_MEDIA_LINK_STYLE}
         >
-          {primaryImage ? (
-            <Image
-              alt={primaryImage.alt_text || product.name}
-              fill
-              sizes="(max-width: 640px) 48vw, (max-width: 1080px) 32vw, 25vw"
-              src={primaryImage.url}
-              style={PRODUCT_CARD_IMAGE_STYLE}
-              unoptimized={useUnoptimizedImage}
-            />
-          ) : (
-            <div className="product-card__placeholder" />
-          )}
+          <Image
+            alt={primaryImage?.alt_text || product.name}
+            fill
+            onError={() => setImageFailed(true)}
+            sizes="(max-width: 640px) 48vw, (max-width: 1080px) 32vw, 25vw"
+            src={resolvedImageUrl}
+            style={PRODUCT_CARD_IMAGE_STYLE}
+            unoptimized={useUnoptimizedImage}
+          />
+          {!hasPrimaryImage || imageFailed ? (
+            <span className="product-card__fallback-note">
+              {product.category?.name ?? "Produk"}
+            </span>
+          ) : null}
           {showAvailabilityBadge ? (
             <div className="product-card__overlay">
               <span className={`status-badge status-badge--${product.availability.state}`}>
@@ -126,15 +156,21 @@ export function ProductCard({
         </div>
       </div>
 
-      <div className="product-card__body">
-        <div className="product-card__meta">
-          <span>{product.category?.name ?? product.product_type}</span>
-          <span>{product.unit}</span>
-        </div>
+        <div className="product-card__body">
+          <div className="product-card__meta">
+            <span>{product.category?.name ?? product.product_type}</span>
+            <span>{product.unit}</span>
+          </div>
 
-        <Link
-          className="product-card__title"
-          href={`/produk/${product.slug}`}
+          {contextualBadge ? (
+            <div className="product-card__context-hint">
+              <span>{contextualBadge}</span>
+            </div>
+          ) : null}
+
+          <Link
+            className="product-card__title"
+            href={`/produk/${product.slug}`}
           onClick={() =>
             trackingContext
               ? trackUiEvent("recommended_product_clicked", {

@@ -3,6 +3,7 @@
 import Link from "next/link";
 
 import { AgriIcon, type AgriIconName } from "@/components/ui/agri-icon";
+import { AgriScene } from "@/components/ui/agri-scene";
 import { trackUiEvent } from "@/lib/analytics";
 
 type ProblemSelectorItem = {
@@ -44,12 +45,19 @@ export function ProblemSelector({
               })
             }
           >
-            <span className="selector-card__icon">
-              <AgriIcon name={item.icon} />
-            </span>
-            <strong>{item.label}</strong>
-            <p>{item.description}</p>
-            <small>{item.symptomHint}</small>
+            <div className="selector-card__visual">
+              <AgriScene mode="problem" name={item.icon} />
+            </div>
+            <div className="selector-card__content">
+              <span className="selector-card__eyebrow">
+                <AgriIcon name="warning" />
+                Gejala lapangan
+              </span>
+              <strong>{item.label}</strong>
+              <p>{item.description}</p>
+              <small>{item.symptomHint}</small>
+              <span className="selector-card__cta">Lihat arahan</span>
+            </div>
           </Link>
         ))}
       </div>

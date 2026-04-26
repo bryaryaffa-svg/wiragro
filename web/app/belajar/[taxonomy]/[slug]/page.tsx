@@ -101,8 +101,8 @@ export async function generateMetadata({
 
   if (!filteredArticles.length) {
     return buildArticleListingMetadata({
-      title: "Cluster edukasi sedang disiapkan",
-      description: "Cluster edukasi ini belum memiliki materi yang siap ditampilkan.",
+      title: "Cluster edukasi belum memiliki materi aktif",
+      description: "Cluster edukasi ini belum memiliki materi aktif yang bisa ditampilkan saat ini.",
       path: `/belajar/${taxonomy}/${slug}`,
       canonicalPath: buildArticleTaxonomyBrowseHref(section.queryKey),
       noIndex: true,
@@ -166,7 +166,7 @@ export default async function LearningTaxonomyDetailPage({
           }),
           buildBreadcrumbJsonLd([
             { name: "Beranda", path: "/" },
-            { name: "Edukasi", path: "/belajar" },
+            { name: "Edukasi", path: "/artikel" },
             { name: section.title.replace(/^Berdasarkan /, ""), path: `/belajar/${taxonomy}` },
             { name: term.label, path: `/belajar/${taxonomy}/${slug}` },
           ]),
@@ -177,7 +177,7 @@ export default async function LearningTaxonomyDetailPage({
       <div className="breadcrumbs">
         <Link href="/">Beranda</Link>
         <span>/</span>
-        <Link href="/belajar">Edukasi</Link>
+        <Link href="/artikel">Edukasi</Link>
         <span>/</span>
         <Link href={`/belajar/${taxonomy}`}>{section.title.replace(/^Berdasarkan /, "")}</Link>
         <span>/</span>

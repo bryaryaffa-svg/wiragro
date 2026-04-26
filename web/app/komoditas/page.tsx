@@ -14,13 +14,13 @@ import {
 
 export const dynamic = "force-dynamic";
 export const metadata = buildPageMetadata({
-  title: "Komoditas Pertanian",
+  title: "Komoditas Pertanian - Wiragro",
   description:
-    "Hub komoditas Wiragro menghubungkan artikel edukasi, solusi lapangan, produk, dan konsultasi dalam satu konteks tanaman yang lebih jelas.",
+    "Hub komoditas Wiragro menghubungkan edukasi, solusi, dan produk berdasarkan tanaman yang sedang Anda tangani.",
   path: "/komoditas",
   canonicalPath: "/komoditas",
   section: "static",
-  keywords: ["komoditas pertanian", "hub komoditas", "padi", "cabai", "jagung"],
+  keywords: ["komoditas pertanian", "solusi berdasarkan tanaman", "padi", "cabai", "jagung"],
 });
 
 export default function CommodityIndexPage() {
@@ -31,7 +31,7 @@ export default function CommodityIndexPage() {
       <JsonLd
         data={[
           buildWebPageJsonLd({
-            title: "Komoditas Pertanian",
+            title: "Komoditas Pertanian - Wiragro",
             description:
               "Pusat komoditas Wiragro untuk menyatukan edukasi, solusi, produk, dan konsultasi per tanaman.",
             path: "/komoditas",
@@ -51,21 +51,50 @@ export default function CommodityIndexPage() {
         id="commodity-index-jsonld"
       />
 
-      <div className="page-intro page-intro--compact">
-        <span className="eyebrow-label">Komoditas</span>
-        <h1>Masuk dari tanaman yang sedang dibudidayakan, bukan dari silo edukasi dan jualan yang terpisah.</h1>
-        <p>
-          Hub komoditas ini menjadi jembatan praktis antara artikel, solusi, produk, bundle,
-          dan konsultasi. User bisa memulai dari konteks tanamnya dulu, lalu bergerak ke langkah
-          berikutnya dengan lebih percaya diri.
-        </p>
-      </div>
+      <section className="hub-hero hub-hero--learn">
+        <div className="hub-hero__copy">
+          <span className="eyebrow-label">Komoditas</span>
+          <h1>Masuk dari tanaman yang sedang Anda tangani, lalu lanjut ke solusi dan produk yang lebih tepat.</h1>
+          <p>
+            Hub komoditas membantu pengguna memulai dari konteks tanaman lebih dulu. Setelah itu,
+            mereka bisa bergerak ke edukasi, solusi, bundle, dan produk tanpa terasa meloncat
+            antarhalaman yang tidak saling terhubung.
+          </p>
+          <div className="hub-hero__actions">
+            <Link className="btn btn-primary" href="/solusi">
+              Mulai dari solusi
+            </Link>
+            <Link className="btn btn-secondary" href="/artikel">
+              Buka edukasi
+            </Link>
+          </div>
+        </div>
+
+        <div className="hub-hero__meta">
+          <div>
+            <span>Masuk dari</span>
+            <strong>Tanaman yang sedang ditanam, bukan dari nama produk yang belum tentu dikenal</strong>
+          </div>
+          <div>
+            <span>Tujuan</span>
+            <strong>Membuat alur belajar, solusi, dan belanja terasa lebih mudah dipahami</strong>
+          </div>
+          <div>
+            <span>Jalur lanjut</span>
+            <strong>Setiap komoditas selalu punya pintu ke produk, bundle, dan edukasi terkait</strong>
+          </div>
+        </div>
+      </section>
 
       <section className="section-block">
         <div className="section-heading">
           <div>
             <span className="eyebrow-label">Pilih komoditas</span>
-            <h2>Setiap komoditas punya jalur belajar, solusi, dan belanja yang sedikit berbeda.</h2>
+            <h2>Setiap komoditas punya ritme belajar, masalah, dan kebutuhan produk yang berbeda.</h2>
+            <p>
+              Gunakan jalur ini saat Anda lebih mudah mengenali tanaman dibanding nama produk atau
+              istilah gejala yang spesifik.
+            </p>
           </div>
           <Link href="/solusi">Lihat semua solusi</Link>
         </div>
@@ -77,11 +106,11 @@ export default function CommodityIndexPage() {
       </section>
 
       <PathwaySection
-        action={{ href: "/belajar", label: "Mulai dari Edukasi" }}
+        action={{ href: "/artikel", label: "Mulai dari Edukasi" }}
         cards={getLearningHubCards()}
-        description="Komoditas hanyalah pintu masuk konteks. Setelah itu, pengguna tetap harus bisa bergerak ke edukasi, solusi, dan belanja tanpa kehilangan arah."
+        description="Hub komoditas menjaga semua bagian website tetap bertemu dalam satu alur: pahami tanaman, cari solusi, lalu ambil keputusan produk yang lebih sehat."
         eyebrow="Ekosistem"
-        title="Hub komoditas membantu semua bagian website bertemu dalam satu alur."
+        title="Komoditas adalah pintu masuk konteks, bukan silo baru."
       />
     </section>
   );

@@ -2,18 +2,24 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { getFallbackArticleSummaries } from "@/lib/article-content";
-import { ArticleCard } from "@/components/article-card";
+import {
+  HomepageAiMascot,
+  HomepageArticleList,
+  HomepageCropTile,
+  HomepageHeroMetricCard,
+  HomepageMiniProductCard,
+  HomepageMiniVideoCard,
+  HomepagePartnerBenefitCard,
+  HomepageProblemCard,
+  HomepageTrustStripItemCard,
+} from "@/components/homepage-showcase";
 import { JsonLd } from "@/components/json-ld";
-import { ProductCard } from "@/components/product-card";
 import { TrackedLinkButton } from "@/components/tracked-link-button";
-import { IconCard } from "@/components/ui/icon-card";
+import { AgriIcon } from "@/components/ui/agri-icon";
 import { EmptyState, ErrorState } from "@/components/ui/state";
 import { PrimaryButton, SecondaryButton } from "@/components/ui/button";
-import { SectionHeader } from "@/components/ui/section-header";
-import { StepWizard } from "@/components/ui/step-wizard";
 import { StickyMobileCTA } from "@/components/ui/sticky-mobile-cta";
 import { TrustBadge } from "@/components/ui/trust-badge";
-import { VideoCard } from "@/components/ui/video-card";
 import {
   type ArticleListPayload,
   type ProductSummary,
@@ -24,9 +30,10 @@ import {
 import {
   HOME_AI_CHAT_PROMPTS,
   HOME_CROP_CARDS,
-  HOME_HERO_BADGES,
+  HOME_HERO_METRICS,
+  HOME_PARTNER_BENEFITS,
   HOME_PROBLEM_CARDS,
-  HOME_PRODUCT_TOPIC_CHIPS,
+  HOME_TRUST_STRIP,
   HOME_VIDEO_CARDS,
 } from "@/lib/homepage-content";
 import {
@@ -74,6 +81,20 @@ export default async function HomePage() {
     ? articleFeed.items
     : getFallbackArticleSummaries()
   ).slice(0, 3);
+  const spotlightProblems = [
+    HOME_PROBLEM_CARDS[0],
+    HOME_PROBLEM_CARDS[4],
+    HOME_PROBLEM_CARDS[1],
+    HOME_PROBLEM_CARDS[3],
+  ].filter(Boolean);
+  const spotlightCrops = [
+    HOME_CROP_CARDS[0],
+    HOME_CROP_CARDS[2],
+    HOME_CROP_CARDS[1],
+    HOME_CROP_CARDS[3],
+    HOME_CROP_CARDS[4],
+    HOME_CROP_CARDS[7],
+  ].filter(Boolean);
 
   return (
     <div className="page-stack homepage">
@@ -111,11 +132,16 @@ export default async function HomePage() {
 
       <section className="homepage-hero">
         <div className="homepage-hero__copy">
-          <span className="eyebrow-label">Platform Solusi Pertanian Digital</span>
+          <span className="homepage-hero__welcome">
+            <span className="homepage-hero__welcome-icon">
+              <AgriIcon name="leaf" />
+            </span>
+            Selamat datang di Wiragro
+          </span>
           <h1>Platform Solusi Pertanian Digital</h1>
           <p>
-            Cari solusi masalah tanaman, pelajari cara terbaik, dan beli produk
-            pertanian yang tepat dalam satu tempat.
+            Semua yang petani butuhkan untuk hasil panen lebih baik. Solusi penyakit,
+            rekomendasi produk, edukasi, hingga dukungan AI dalam satu platform.
           </p>
           <div className="homepage-hero__actions">
             <TrackedLinkButton
@@ -123,7 +149,7 @@ export default async function HomePage() {
               href="/solusi"
               payload={{ placement: "homepage_hero" }}
             >
-              Cari Solusi Tanaman
+              Temukan Solusi Sekarang
             </TrackedLinkButton>
             <TrackedLinkButton
               event="ask_ai"
@@ -131,41 +157,15 @@ export default async function HomePage() {
               payload={{ placement: "homepage_hero" }}
               variant="secondary"
             >
-              Tanya AI Pertanian
+              Tanya AI Chat
             </TrackedLinkButton>
-            <Link className="homepage-hero__tertiary" href="/produk">
-              Lihat Produk
-            </Link>
           </div>
-          <div className="homepage-hero__badges">
-            {HOME_HERO_BADGES.map((badge) => (
-              <TrustBadge
-                icon={badge.icon}
-                key={badge.label}
-                label={badge.label}
-                tone={badge.tone}
-              />
+
+          <div className="homepage-hero__metrics">
+            {HOME_HERO_METRICS.map((item) => (
+              <HomepageHeroMetricCard item={item} key={item.title} />
             ))}
           </div>
-          <StepWizard
-            steps={[
-              {
-                description: "Kenali masalah atau kebutuhan tanaman lebih dulu.",
-                label: "Cari solusi",
-                status: "current",
-              },
-              {
-                description: "Pelajari langkah yang lebih aman dan masuk akal.",
-                label: "Pahami arahan",
-                status: "upcoming",
-              },
-              {
-                description: "Beli produk yang tepat saat konteksnya sudah jelas.",
-                label: "Belanja tepat",
-                status: "upcoming",
-              },
-            ]}
-          />
         </div>
 
         <div className="homepage-hero__visual">
@@ -178,161 +178,190 @@ export default async function HomePage() {
               src="/home/hero-farmer-ai.png"
             />
           </div>
+          <div className="homepage-hero__signal homepage-hero__signal--leaf">
+            <AgriIcon name="leaf" />
+          </div>
+          <div className="homepage-hero__signal homepage-hero__signal--water">
+            <AgriIcon name="nutrition" />
+          </div>
           <div className="homepage-hero__insight homepage-hero__insight--analysis">
-            <span>Analisis AI</span>
-            <strong>Mulai dari gejala, bukan tebakan</strong>
+            <div className="homepage-hero__insight-pill">
+              <span className="homepage-hero__insight-icon">
+                <AgriIcon name="ai" />
+              </span>
+              <div>
+                <span>Analisis AI</span>
+                <strong>Daun sehat</strong>
+                <small>Risiko rendah</small>
+              </div>
+            </div>
           </div>
           <div className="homepage-hero__insight homepage-hero__insight--product">
-            <span>Rekomendasi</span>
-            <strong>Solusi, edukasi, lalu produk</strong>
+            <span>Rekomendasi NPK</span>
+            <strong>16 - 16 - 16</strong>
+            <small>Untuk fase generatif</small>
+            <div className="homepage-hero__bars" aria-hidden="true">
+              <span />
+              <span />
+              <span />
+              <span />
+              <span />
+            </div>
           </div>
         </div>
       </section>
 
-      <section className="section-block">
-        <SectionHeader
-          action={{ href: "/solusi", label: "Lihat semua masalah" }}
-          description="Pilih gejala yang paling dekat dengan kondisi lapangan Anda. Setiap kartu mengantar ke explorer solusi dengan konteks yang lebih terarah."
-          eyebrow="Masalah tanaman"
-          title="Masalah tanaman Anda apa?"
-        />
-        <div className="homepage-icon-grid">
-          {HOME_PROBLEM_CARDS.map((card) => (
-            <IconCard
-              actionLabel={card.actionLabel}
-              description={card.description}
-              href={card.href}
-              icon={card.icon}
-              key={card.title}
-              title={card.title}
-            />
-          ))}
+      <section className="homepage-discovery">
+        <div className="homepage-panel homepage-discovery__panel">
+          <div className="homepage-panel__header">
+            <div>
+              <h2>Masalah Tanaman Anda?</h2>
+              <p>Kenali masalah dan dapatkan solusi yang lebih tepat.</p>
+            </div>
+            <Link href="/solusi">Lihat Semua</Link>
+          </div>
+          <div className="home-problem-grid">
+            {spotlightProblems.map((card) => (
+              <HomepageProblemCard card={card} key={card.title} />
+            ))}
+            <Link className="home-problem-card home-problem-card--more" href="/solusi">
+              <div className="home-problem-card__media home-problem-card__media--more">
+                <span className="home-problem-card__more-icon">
+                  <AgriIcon name="solution" />
+                </span>
+              </div>
+              <div className="home-problem-card__body">
+                <strong>Lihat Semua Masalah</strong>
+                <p>Buka explorer solusi lengkap untuk gejala lain.</p>
+                <span>Masuk ke Solusi</span>
+              </div>
+            </Link>
+          </div>
         </div>
-      </section>
 
-      <section className="section-block">
-        <SectionHeader
-          action={{ href: "/solusi", label: "Buka explorer solusi", variant: "secondary" }}
-          description="Kalau Anda datang dari komoditas, bukan dari nama produk, pilih tanaman yang paling ingin ditangani terlebih dahulu."
-          eyebrow="Pilih tanaman"
-          title="Pilih tanaman yang ingin Anda tangani"
-        />
-        <div className="homepage-icon-grid homepage-icon-grid--crops">
-          {HOME_CROP_CARDS.map((card) => (
-            <IconCard
-              actionLabel={card.actionLabel}
-              description={card.description}
-              href={card.href}
-              icon={card.icon}
-              key={card.title}
-              title={card.title}
-              tone="accent"
-            />
-          ))}
-        </div>
-      </section>
-
-      <section className="section-block">
-        <SectionHeader
-          action={{ href: "/produk", label: "Lihat semua produk" }}
-          description="Produk tetap penting, tetapi hadir setelah user memahami konteks kebutuhan tanamnya agar keputusan belanja terasa lebih tepat."
-          eyebrow="Produk rekomendasi"
-          title="Produk rekomendasi untuk kebutuhan pertanian"
-        />
-        <div className="homepage-topic-chips" aria-label="Kelompok produk">
-          {HOME_PRODUCT_TOPIC_CHIPS.map((chip) => (
-            <span className="filter-chip" key={chip}>
-              {chip}
-            </span>
-          ))}
-        </div>
-        {featuredProducts.length ? (
-          <div className="product-grid product-grid--catalog">
-            {featuredProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
+        <div className="homepage-panel homepage-discovery__panel homepage-discovery__panel--crops">
+          <div className="homepage-panel__header">
+            <div>
+              <h2>Pilih Tanaman Anda</h2>
+              <p>Dapatkan rekomendasi yang lebih tepat berdasarkan komoditas.</p>
+            </div>
+          </div>
+          <div className="home-crop-grid">
+            {spotlightCrops.map((card) => (
+              <HomepageCropTile card={card} key={card.title} />
             ))}
           </div>
-        ) : (
-          <EmptyState
-            actions={[{ href: "/produk", label: "Jelajahi katalog" }]}
-            description="Pilihan produk akan muncul di sini setelah sinkronisasi katalog selesai."
-            eyebrow="Produk belum tampil"
-            title="Rekomendasi produk sedang disiapkan."
-          />
-        )}
+        </div>
       </section>
 
-      <section className="section-block">
-        <SectionHeader
-          action={{ href: "/artikel", label: "Masuk ke edukasi", variant: "secondary" }}
-          description="Saat feed video belum lengkap dari backend, Wiragro tetap menampilkan studi kasus dan ringkasan yang paling membantu user memahami konteks."
-          eyebrow="Edukasi video"
-          title="Belajar dari studi kasus lapangan"
-        />
-        <div className="homepage-video-grid">
-          {HOME_VIDEO_CARDS.map((video) => (
-            <VideoCard
-              category={video.category}
-              description={video.description}
-              href={video.href}
-              key={video.title}
-              thumbnail={video.thumbnail}
-              title={video.title}
+      <section className="homepage-showcase-row">
+        <div className="homepage-panel homepage-showcase-card">
+          <div className="homepage-panel__header">
+            <div>
+              <h2>Rekomendasi Produk</h2>
+              <p>Produk terbaik sesuai kebutuhan tanaman Anda.</p>
+            </div>
+            <Link href="/produk">Lihat Semua</Link>
+          </div>
+          {featuredProducts.length ? (
+            <div className="home-mini-product-grid">
+              {featuredProducts.map((product) => (
+                <HomepageMiniProductCard key={product.id} product={product} />
+              ))}
+            </div>
+          ) : (
+            <EmptyState
+              actions={[{ href: "/produk", label: "Jelajahi katalog" }]}
+              description="Pilihan produk akan muncul di sini setelah sinkronisasi katalog selesai."
+              eyebrow="Produk belum tampil"
+              title="Rekomendasi produk akan segera muncul kembali."
             />
-          ))}
+          )}
         </div>
-      </section>
 
-      <section className="section-block">
-        <SectionHeader
-          action={{ href: "/artikel", label: "Lihat semua artikel" }}
-          description="Panduan praktis ini membantu user memahami masalah dan fase tanam sebelum mengambil keputusan beli."
-          eyebrow="Artikel"
-          title="Panduan praktis sebelum membeli produk"
-        />
-        <div className="article-grid article-grid--editorial">
-          {latestArticles.map((article) => (
-            <ArticleCard article={article} href={`/artikel/${article.slug}`} key={article.slug} />
-          ))}
-        </div>
-      </section>
-
-      <section className="homepage-ai-band">
-        <div className="homepage-ai-band__copy">
-          <div className="homepage-ai-band__badge-row">
-            <TrustBadge icon="ai" label="Premium Feature" tone="accent" />
+        <div className="homepage-panel homepage-showcase-card">
+          <div className="homepage-panel__header">
+            <div>
+              <h2>Belajar dari Video</h2>
+              <p>Video praktis dari ahli pertanian.</p>
+            </div>
+            <Link href="/artikel">Lihat Semua</Link>
           </div>
-          <h2>Masih bingung dengan masalah tanaman?</h2>
-          <p>
-            Tanya AI Pertanian Wiragro untuk mendapatkan arahan awal dan rekomendasi
-            produk yang sesuai.
-          </p>
-          <div className="homepage-ai-band__actions">
-            <PrimaryButton href="/ai-chat">Tanya AI</PrimaryButton>
-            <SecondaryButton href="/solusi">Mulai dari solusi</SecondaryButton>
+          <div className="home-mini-video-grid">
+            {HOME_VIDEO_CARDS.map((video) => (
+              <HomepageMiniVideoCard key={video.title} video={video} />
+            ))}
           </div>
         </div>
-        <div className="homepage-ai-band__prompts" aria-label="Contoh pertanyaan">
-          {HOME_AI_CHAT_PROMPTS.map((prompt) => (
-            <span key={prompt}>{prompt}</span>
-          ))}
+
+        <div className="homepage-panel homepage-showcase-card">
+          <div className="homepage-panel__header">
+            <div>
+              <h2>Artikel Praktis</h2>
+              <p>Tips dan info terbaru untuk petani.</p>
+            </div>
+            <Link href="/artikel">Lihat Semua</Link>
+          </div>
+          <HomepageArticleList articles={latestArticles} />
         </div>
       </section>
 
-      <section className="homepage-b2b-band">
-        <div className="homepage-b2b-band__copy">
-          <span className="eyebrow-label">Untuk toko & pembelian volume besar</span>
-          <h2>Wiragro mendukung kebutuhan toko dan pembelian rutin.</h2>
-          <p>
-            Untuk toko pertanian dan kebutuhan volume besar, tim Wiragro membantu
-            menyiapkan alur pembelian yang lebih rapi sesuai kerja sama tanpa
-            mengganggu pengalaman belanja utama.
-          </p>
+      <section className="homepage-insight-row">
+        <div className="homepage-ai-showcase">
+          <div className="homepage-ai-showcase__copy">
+            <div className="homepage-ai-band__badge-row">
+              <TrustBadge icon="ai" label="Premium" tone="accent" />
+            </div>
+            <h2>AI Chat Wiragro</h2>
+            <p>
+              Tanya apa saja seputar pertanian. AI kami siap bantu 24/7 dengan
+              arahan awal yang lebih mudah dipahami.
+            </p>
+            <div className="homepage-ai-band__actions">
+              <PrimaryButton href="/ai-chat">Mulai Chat Sekarang</PrimaryButton>
+              <SecondaryButton href="/solusi">Lihat Contoh Pertanyaan</SecondaryButton>
+            </div>
+          </div>
+          <HomepageAiMascot />
+          <div className="homepage-ai-showcase__prompts" aria-label="Contoh pertanyaan">
+            {HOME_AI_CHAT_PROMPTS.map((prompt) => (
+              <span key={prompt}>{prompt}</span>
+            ))}
+          </div>
         </div>
-        <div className="homepage-b2b-band__actions">
-          <PrimaryButton href="/b2b">Hubungi Tim Wiragro</PrimaryButton>
-          <SecondaryButton href="/kontak">Butuh bantuan cepat</SecondaryButton>
+
+        <div className="homepage-partner-showcase">
+          <div className="homepage-partner-showcase__copy">
+            <span className="eyebrow-label">Dukungan untuk distributor & mitra</span>
+            <h2>Dukungan untuk Distributor & Mitra</h2>
+            <p>
+              Wiragro mendukung bisnis Anda bersama jaringan petani di seluruh Indonesia
+              dengan alur kebutuhan yang lebih rapi dan visual yang tetap meyakinkan.
+            </p>
+            <div className="homepage-partner-showcase__benefits">
+              {HOME_PARTNER_BENEFITS.map((item) => (
+                <HomepagePartnerBenefitCard item={item} key={item.title} />
+              ))}
+            </div>
+            <div className="homepage-b2b-band__actions">
+              <PrimaryButton href="/b2b">Gabung Menjadi Mitra</PrimaryButton>
+            </div>
+          </div>
+          <div className="homepage-partner-showcase__visual">
+            <Image
+              alt="Ilustrasi dukungan logistik dan operasional untuk mitra Wiragro."
+              fill
+              sizes="(max-width: 960px) 100vw, 34vw"
+              src="/illustrations/agri-logistics-hub.svg"
+            />
+          </div>
         </div>
+      </section>
+
+      <section className="homepage-trust-strip">
+        {HOME_TRUST_STRIP.map((item) => (
+          <HomepageTrustStripItemCard item={item} key={item.title} />
+        ))}
       </section>
 
       <StickyMobileCTA

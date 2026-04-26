@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 
+import { ArticleCard } from "@/components/article-card";
 import { JsonLd } from "@/components/json-ld";
 import { PathwaySection } from "@/components/pathway-section";
 import { ProductCard } from "@/components/product-card";
@@ -7,11 +9,22 @@ import { FilterChip } from "@/components/ui/filter-chip";
 import { SearchInput } from "@/components/ui/search-input";
 import { SectionHeader } from "@/components/ui/section-header";
 import { EmptyState, ErrorState } from "@/components/ui/state";
+import { PrimaryButton, SecondaryButton } from "@/components/ui/button";
+import { VideoCard } from "@/components/ui/video-card";
 import { StorefrontCategoryNavigator } from "@/components/storefront-category-navigator";
-import { getCategories, getFallbackProductList, getProducts } from "@/lib/api";
+import { getArticles, getCategories, getFallbackProductList, getProducts } from "@/lib/api";
+import {
+  buildEducationHref,
+  filterEducationArticles,
+  getFeaturedEducationVideos,
+  type EducationFilterState,
+} from "@/lib/education-content";
 import { getProductRelationCards } from "@/lib/hybrid-navigation";
 import {
+  buildProductSolutionHref,
+  buildSolutionHref,
   filterProductsForCatalog,
+  getSolutionCropOptions,
   normalizeSolutionCropId,
   normalizeSolutionProblemId,
 } from "@/lib/solution-experience";
@@ -104,15 +117,20 @@ export default async function ProductsPage({
   const promoOnly = getParam(resolved, "promo") === "1";
   const stockOnly = getParam(resolved, "stok") === "1";
 
-  const [categoriesResult, productsResult] = await Promise.allSettled([
+  const [categoriesResult, productsResult, articleResult] = await Promise.allSettled([
     getCategories(),
     getProducts({ q: search, category_slug: category, sort, page_size: 60 }),
+    getArticles({ q: search, page_size: 18 }),
   ]);
   const categories = categoriesResult.status === "fulfilled" ? categoriesResult.value : [];
   const rawProducts =
     productsResult.status === "fulfilled"
       ? productsResult.value
       : getFallbackProductList({ q: search, category_slug: category, sort, page_size: 60 });
+  const articleFeed =
+    articleResult.status === "fulfilled"
+      ? articleResult.value
+      : { items: [], pagination: { page: 1, page_size: 18, count: 0 } };
   const catalogUnavailable = productsResult.status === "rejected";
   const products = filterProductsForCatalog(rawProducts.items, {
     cropId: cropId ?? null,
@@ -137,6 +155,7 @@ export default async function ProductsPage({
     { label: "Untuk gulma", value: "gulma" },
     { label: "Untuk pertumbuhan", value: "pertumbuhan-lambat" },
   ];
+  const cropChips = getSolutionCropOptions().slice(0, 8);
 
   const baseParams = {
     harga: priceBand !== "all" ? priceBand : undefined,
@@ -150,6 +169,25 @@ export default async function ProductsPage({
     subkategori: subcategory,
     tanaman: cropId ?? undefined,
   };
+
+  const educationFilters: EducationFilterState = {
+    format: "all",
+    masalah: problemId ?? undefined,
+    q: search,
+    tanaman: cropId ?? undefined,
+  };
+  const supportArticles = filterEducationArticles(articleFeed.items, educationFilters).slice(0, 3);
+  const supportVideos = getFeaturedEducationVideos(educationFilters, 3);
+  const supportArticleHref = buildEducationHref(educationFilters, {});
+  const productSolutionHref = buildProductSolutionHref(cropId, problemId);
+  const productContextLabel =
+    cropId && problemId
+      ? "Produk ini sudah dipersempit berdasarkan tanaman dan masalah yang sedang Anda tangani."
+      : cropId
+        ? "Produk ini dipersempit berdasarkan tanaman yang sedang Anda tangani."
+        : problemId
+          ? "Produk ini dipersempit berdasarkan masalah yang sedang Anda hadapi."
+          : "Mulai dari masalah tanaman, lalu persempit dengan filter yang paling relevan.";
 
   return (
     <section className="page-stack">
@@ -170,25 +208,65 @@ export default async function ProductsPage({
         id="products-page-jsonld"
       />
 
-      <div className="page-intro page-intro--compact">
-        <span className="eyebrow-label">Katalog solusi-produk</span>
+      <section className="page-intro page-intro--compact">
+        <span className="eyebrow-label">Produk berbasis solusi</span>
         <h1>Produk Pertanian Wiragro</h1>
         <p>
           Temukan nutrisi tanaman, pestisida, benih, dan perlengkapan pertanian
-          sesuai kebutuhan tanaman Anda.
+          dari masalah, tanaman, dan kebutuhan lapangan yang sedang Anda hadapi.
         </p>
-      </div>
+        <div className="hub-hero__actions">
+          <PrimaryButton href={buildSolutionHref(cropId, problemId)}>Mulai dari solusi</PrimaryButton>
+          <SecondaryButton href={supportArticleHref}>Buka edukasi</SecondaryButton>
+        </div>
+      </section>
 
-      <section className="catalog-shell">
-        <StorefrontCategoryNavigator
-          activeCategorySlug={category}
-          activeMainKey={mainCategoryKey}
-          activeQuery={search}
-          activeSubcategory={subcategory}
-          categories={categories}
+      <section className="section-block">
+        <SectionHeader
+          description="Jika kebutuhan Anda datang dari gejala tanaman, mulai dari masalah dan komoditas lebih dulu agar produk yang muncul terasa lebih relevan."
+          eyebrow="Mulai dari masalah"
+          title="Masuk ke produk dari konteks yang paling dekat dengan kondisi lapangan"
         />
 
+        <div className="catalog-chip-row" aria-label="Masalah tanaman populer">
+          {quickProblemChips.map((chip) => (
+            <FilterChip
+              active={problemId === chip.value}
+              href={buildProductsHref({
+                ...baseParams,
+                masalah: chip.value === problemId ? undefined : chip.value,
+              })}
+              key={chip.value}
+            >
+              {chip.label}
+            </FilterChip>
+          ))}
+        </div>
+
+        <div className="catalog-chip-row" aria-label="Tanaman populer">
+          {cropChips.map((chip) => (
+            <FilterChip
+              active={cropId === chip.id}
+              href={buildProductsHref({
+                ...baseParams,
+                tanaman: chip.id === cropId ? undefined : chip.id,
+              })}
+              key={chip.id}
+            >
+              {chip.label}
+            </FilterChip>
+          ))}
+        </div>
+      </section>
+
+      <section className="catalog-shell">
         <div className="catalog-search-card">
+          <SectionHeader
+            description="Cari pupuk, pestisida, benih, hama, tanaman, atau kebutuhan budidaya lain untuk mempersempit hasil dengan cepat."
+            eyebrow="Cari dan saring"
+            title="Persempit pilihan produk tanpa kehilangan konteks"
+          />
+
           <div className="catalog-search-card__primary">
             <SearchInput
               action="/produk"
@@ -253,15 +331,11 @@ export default async function ProductsPage({
               <span>Tanaman</span>
               <select defaultValue={cropId ?? ""} name="tanaman">
                 <option value="">Semua tanaman</option>
-                <option value="padi">Padi</option>
-                <option value="cabai">Cabai</option>
-                <option value="jagung">Jagung</option>
-                <option value="tomat">Tomat</option>
-                <option value="bawang">Bawang</option>
-                <option value="melon">Semangka / Melon</option>
-                <option value="sawit">Sawit</option>
-                <option value="hortikultura">Hortikultura</option>
-                <option value="lainnya">Lainnya</option>
+                {getSolutionCropOptions().map((item) => (
+                  <option key={item.id} value={item.id}>
+                    {item.label}
+                  </option>
+                ))}
               </select>
             </label>
 
@@ -312,7 +386,7 @@ export default async function ProductsPage({
 
           <div className="catalog-chip-row" aria-label="Kategori produk">
             <FilterChip active={!category} href={buildProductsHref({ ...baseParams, kategori: undefined })}>
-              Semua
+              Semua kategori
             </FilterChip>
             {categories.map((item) => (
               <FilterChip
@@ -324,40 +398,28 @@ export default async function ProductsPage({
               </FilterChip>
             ))}
           </div>
-
-          <div className="catalog-chip-row" aria-label="Quick problem chips">
-            {quickProblemChips.map((chip) => (
-              <FilterChip
-                active={problemId === chip.value}
-                href={buildProductsHref({
-                  ...baseParams,
-                  masalah: chip.value === problemId ? undefined : chip.value,
-                })}
-                key={chip.value}
-              >
-                {chip.label}
-              </FilterChip>
-            ))}
-          </div>
         </div>
 
         <SectionHeader
-          action={{ href: "/solusi", label: "Mulai dari solusi", variant: "secondary" }}
+          action={{ href: buildSolutionHref(cropId, problemId), label: "Masuk ke solusi", variant: "secondary" }}
           description={
             activeCategory
-              ? `Kategori aktif: ${activeCategory.name}`
+              ? `${productContextLabel} Kategori aktif: ${activeCategory.name}.`
               : activeStorefrontMain
-                ? activeStorefrontMain.label
-                : "Katalog ini membantu user mencari produk lewat konteks tanaman dan masalah."
+                ? `${productContextLabel} Kategori aktif: ${activeStorefrontMain.label}.`
+                : productContextLabel
           }
-          eyebrow="Hasil katalog"
+          eyebrow="Hasil produk"
           title={`${products.length} produk tersedia`}
         />
 
         {catalogUnavailable ? (
           <ErrorState
-            actions={[{ href: buildProductsHref(baseParams), label: "Muat ulang katalog" }]}
-            description="Silakan coba lagi beberapa saat lagi. Filter yang Anda pilih tetap bisa dipakai kembali."
+            actions={[
+              { href: buildProductsHref(baseParams), label: "Coba lagi" },
+              { href: buildSolutionHref(cropId, problemId), label: "Buka solusi", variant: "secondary" },
+            ]}
+            description="Silakan muat ulang atau masuk ke jalur solusi lebih dulu agar kebutuhan Anda tetap bisa dilanjutkan."
             eyebrow="Gagal memuat produk"
             title="Gagal memuat produk"
           />
@@ -371,14 +433,65 @@ export default async function ProductsPage({
           <EmptyState
             actions={[
               { href: "/produk", label: "Reset filter" },
+              { href: buildSolutionHref(cropId, problemId), label: "Buka solusi", variant: "secondary" },
               { href: "/ai-chat", label: "Tanya AI", variant: "secondary" },
-              { href: "/produk", label: "Lihat semua produk", variant: "secondary" },
             ]}
-            description="Coba ganti filter tanaman, masalah, atau masuk ke AI agar kebutuhan Anda lebih cepat dipersempit."
+            description="Coba ganti tanaman, masalah, atau masuk ke jalur solusi agar kebutuhan Anda lebih cepat dipersempit."
             eyebrow="Produk belum ditemukan"
             title="Produk belum ditemukan"
           />
         )}
+      </section>
+
+      {(supportArticles.length || supportVideos.length) ? (
+        <section className="section-block">
+          <SectionHeader
+            action={{ href: supportArticleHref, label: "Buka edukasi", variant: "secondary" }}
+            description="Belanja yang sehat tetap didahului konteks. Karena itu, katalog ini selalu punya jalan lanjut ke artikel dan video yang paling dekat."
+            eyebrow="Belajar sebelum membeli"
+            title="Edukasi dan video yang mendukung keputusan produk"
+          />
+
+          {supportVideos.length ? (
+            <div className="education-video-grid">
+              {supportVideos.map((video) => (
+                <VideoCard
+                  category={video.category}
+                  ctaLabel={video.youtubeId ? "Tonton" : "Lihat panduan"}
+                  description={video.description}
+                  href={video.href}
+                  key={video.id}
+                  thumbnail={video.thumbnail}
+                  title={video.title}
+                />
+              ))}
+            </div>
+          ) : null}
+
+          {supportArticles.length ? (
+            <div className="article-grid article-grid--editorial">
+              {supportArticles.map((article) => (
+                <ArticleCard article={article} href={`/artikel/${article.slug}`} key={article.slug} />
+              ))}
+            </div>
+          ) : null}
+        </section>
+      ) : null}
+
+      <section className="section-block">
+        <SectionHeader
+          action={{ href: productSolutionHref, label: "Lihat semua produk", variant: "secondary" }}
+          description="Kategori produk tetap tersedia untuk pengguna yang memang datang dengan kebutuhan yang sudah jelas, tetapi sekarang posisinya menjadi jalur sekunder setelah konteks masalah."
+          eyebrow="Kategori produk"
+          title="Masih ingin masuk dari kategori? Jalurnya tetap tersedia."
+        />
+        <StorefrontCategoryNavigator
+          activeCategorySlug={category}
+          activeMainKey={mainCategoryKey}
+          activeQuery={search}
+          activeSubcategory={subcategory}
+          categories={categories}
+        />
       </section>
 
       <PathwaySection

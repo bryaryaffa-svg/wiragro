@@ -128,7 +128,7 @@ export function B2BInquiryForm({
   contextTitle,
   eyebrowLabel = "Inquiry B2B",
   heading = "Kirim kebutuhan B2B dengan format yang rapi.",
-  description = "Isi ringkasannya, lalu tim Wiragro akan menindaklanjuti lewat kanal yang Anda pilih. Form ini cocok untuk kebutuhan kebun, reseller, proyek, atau pembelian rutin.",
+  description = "Isi ringkasannya, lalu tim Wiragro akan menindaklanjuti lewat kanal yang Anda pilih. Form ini cocok untuk kebutuhan kebun, toko pertanian, proyek, atau pembelian rutin.",
   submitLabel = "Kirim inquiry B2B",
   summaryPlaceholder = "Jelaskan kebutuhan utama, komoditas, ritme pembelian, target proyek, atau keputusan yang ingin Anda ambil dari penawaran ini.",
 }: B2BInquiryFormProps) {
@@ -273,7 +273,7 @@ export function B2BInquiryForm({
               status: "upcoming",
             },
             {
-              description: "Lanjut ke penawaran, WhatsApp, atau akun khusus.",
+              description: "Lanjut ke penawaran dan tindak lanjut yang lebih rapi.",
               label: "Tindak lanjut",
               status: "upcoming",
             },
@@ -363,7 +363,7 @@ export function B2BInquiryForm({
             value={form.buyerType}
           >
             <option value="kebun">Kebun / lahan</option>
-            <option value="reseller">Reseller / kios</option>
+            <option value="reseller">Toko pertanian</option>
             <option value="proyek">Proyek</option>
             <option value="rutin">Kebutuhan rutin</option>
           </select>

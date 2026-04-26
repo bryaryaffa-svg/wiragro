@@ -120,7 +120,7 @@ export function GooglePlacesAddressAssist({
 
       onSelect(selection);
       setStatusMessage(
-        "Alamat terpilih. Form diisi otomatis dan tujuan RajaOngkir sedang disiapkan.",
+        "Alamat terpilih. Form diisi otomatis dan tujuan pengiriman siap dihitung.",
       );
     } catch {
       setStatusMessage("Detail alamat Google belum berhasil dimuat. Anda masih bisa isi manual.");

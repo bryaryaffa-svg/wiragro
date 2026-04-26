@@ -21,6 +21,11 @@ export function VideoCard({
   thumbnail: string;
   title: string;
 }) {
+  const isIllustration =
+    thumbnail.includes("/illustrations/") ||
+    thumbnail.includes("/wiragro-illustrations/") ||
+    thumbnail.endsWith(".svg");
+
   return (
     <article className="video-card">
       <Link
@@ -32,7 +37,13 @@ export function VideoCard({
           })
         }
       >
-        <Image alt={title} fill sizes="(max-width: 768px) 92vw, 32vw" src={thumbnail} />
+        <Image
+          alt={title}
+          className={isIllustration ? "video-card__image video-card__image--illustration" : "video-card__image"}
+          fill
+          sizes="(max-width: 768px) 92vw, 32vw"
+          src={thumbnail}
+        />
         <span className="video-card__play">
           <AgriIcon name="video" />
         </span>

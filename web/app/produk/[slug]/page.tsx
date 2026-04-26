@@ -252,7 +252,7 @@ export default async function ProductDetailPage({
       <ProductDetailView
         aiChatHref={aiChatHref}
         b2bInquiryHref="#b2b-quote-form"
-        b2bInquiryLabel="Butuh penawaran partai"
+        b2bInquiryLabel="Butuh penawaran kebutuhan volume"
         consultationLink={consultationLink}
         enrichment={enrichment}
         product={product}

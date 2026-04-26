@@ -256,10 +256,10 @@ export default async function ArticleDetailPage({ params }: { params: Params }) 
           </div>
         ) : (
           <div className="article-video-placeholder">
-            <strong>Video terkait akan segera tersedia</strong>
+            <strong>Video yang sangat spesifik untuk topik ini masih dilengkapi</strong>
             <p>
-              Tim Wiragro sedang menyiapkan studi kasus atau review produk yang paling dekat dengan panduan ini.
-              Sementara itu, Anda masih bisa lanjut ke solusi, AI, atau produk yang relevan.
+              Sementara itu, Anda tetap bisa melanjutkan ke solusi, AI, atau produk yang paling
+              dekat dengan panduan ini tanpa kehilangan konteks.
             </p>
             <div className="article-video-placeholder__actions">
               <SecondaryButton href={solutionHref}>Cari solusi</SecondaryButton>

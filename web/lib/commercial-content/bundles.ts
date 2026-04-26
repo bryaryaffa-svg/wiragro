@@ -28,8 +28,8 @@ export const GROWTH_BUNDLE_SOURCES = [
     actionLabel: "Lihat detail & harga bundle",
     supportingLinks: [
       {
-        href: `/belajar/tujuan/${LEARN_GOAL_REFERENCE_SLUGS.basics}`,
-        label: "Belajar dasar",
+        href: "/artikel",
+        label: "Edukasi dasar",
       },
       {
         href: `/solusi/fase/${STAGE_REFERENCE_SLUGS.nursery}`,
@@ -164,7 +164,7 @@ export const GROWTH_BUNDLE_SOURCES = [
     actionLabel: "Lihat detail & harga bundle",
     supportingLinks: [
       { href: "/solusi/gejala/daun-berlubang", label: "Gejala daun berlubang" },
-      { href: "/belajar/topik/hama-penyakit", label: "Belajar hama & penyakit" },
+      { href: "/artikel?topik=hama-penyakit", label: "Edukasi hama & penyakit" },
     ],
     bundleItems: [
       {
@@ -283,14 +283,14 @@ export const GROWTH_BUNDLE_SOURCES = [
     sku: "BDL-WRG-COM-001",
     slug: BUNDLE_REFERENCE_SLUGS.kioskRestock,
     kind: "commodity",
-    title: "Paket belanja kios",
+    title: "Paket kebutuhan toko",
     description:
-      "Paket terarah untuk kios, reseller, dan pembeli rutin yang ingin mengisi ulang stok inti dengan penawaran yang lebih rapi daripada belanja satu-satu.",
+      "Paket terarah untuk toko pertanian dan pembeli rutin yang ingin mengisi ulang stok inti dengan penawaran yang lebih rapi daripada belanja satu-satu.",
     summary:
       "Paket ini dirancang agar mudah diulang. SKU, jumlah, dan harga paket sudah disusun rapi supaya pembelian berikutnya lebih cepat.",
     audience:
-      "Kios, reseller, pembeli rutin, dan pengunjung yang ingin membuat repeat order terasa lebih singkat.",
-    catalogHref: "/produk?q=kebutuhan kios",
+      "Toko pertanian, pembeli rutin, dan pengunjung yang ingin membuat repeat order terasa lebih singkat.",
+    catalogHref: "/produk?q=kebutuhan toko",
     actionLabel: "Lihat detail & harga bundle",
     supportingLinks: [
       { href: "/b2b", label: "B2B inquiry" },
@@ -302,7 +302,7 @@ export const GROWTH_BUNDLE_SOURCES = [
         productSlug: "pupuk-organik-25-kg",
         qty: 2,
         roleLabel: "Stok pupuk dasar",
-        notes: "Dikunci 2 sak agar lebih dekat dengan pola restock kios kecil-menengah.",
+        notes: "Dikunci 2 sak agar lebih dekat dengan pola restock toko kecil-menengah.",
         fallback: {
           sku: "PRD-001",
           productName: "Pupuk Organik 25 Kg",
@@ -336,7 +336,7 @@ export const GROWTH_BUNDLE_SOURCES = [
         productSlug: "extra-grow-liquid-500-ml",
         qty: 1,
         roleLabel: "Nutrisi cepat jual",
-        notes: "Masuk sebagai item attach rate yang masih masuk akal untuk kios.",
+        notes: "Masuk sebagai item pelengkap yang masih masuk akal untuk toko.",
         fallback: {
           sku: "PRD-NTR-001",
           productName: "Extra Grow Liquid 500 ml",
@@ -370,7 +370,7 @@ export const GROWTH_BUNDLE_SOURCES = [
       bundlePriceAmount: "579000.00",
       priceStatus: "mock",
       note:
-        "Harga paket kios ini masih estimasi awal. Tim Wiragro masih menyesuaikan skema harga retail, reseller, atau harga paket untuk pembelian rutin.",
+        "Harga paket ini masih estimasi awal. Tim Wiragro masih menyesuaikan skema harga publik dan harga paket untuk pembelian rutin.",
     },
     relatedArticleSlugs: [
       ARTICLE_REFERENCE_SLUGS.fertilizerGuide,
@@ -397,7 +397,7 @@ export const GROWTH_BUNDLE_SOURCES = [
       },
       {
         title: "Lebih konkret untuk kebutuhan toko",
-        body: "Daftar kebutuhan tidak perlu disusun dari nol setiap kali. Paket kios ini sudah punya SKU bundle dan komposisi yang konsisten.",
+        body: "Daftar kebutuhan tidak perlu disusun dari nol setiap kali. Paket ini sudah punya SKU bundle dan komposisi yang konsisten.",
       },
       {
         title: "Mudah dibawa ke B2B",
@@ -419,7 +419,7 @@ export const GROWTH_BUNDLE_SOURCES = [
     summary:
       "Paket ini menutup jarak dari komoditas ke pembelian. Ada benih inti, pupuk dasar, dan penguat fase awal yang sudah disusun sebagai paket resmi.",
     audience:
-      "Petani padi, kios area sawah, dan pengunjung yang ingin memulai fase awal padi dengan komposisi yang lebih jelas.",
+      "Petani padi, toko pertanian area sawah, dan pengunjung yang ingin memulai fase awal padi dengan komposisi yang lebih jelas.",
     catalogHref: "/produk?q=benih padi",
     actionLabel: "Lihat detail & harga bundle",
     supportingLinks: [

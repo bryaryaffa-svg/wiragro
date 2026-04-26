@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 
 import { CropSelector } from "@/components/crop-selector";
@@ -145,18 +146,29 @@ export default async function SolusiPage({
           </div>
         </div>
 
-        <div className="solution-experience-hero__meta">
-          <div>
-            <span>Step 1</span>
-            <strong>Pilih tanaman</strong>
+        <div className="solution-experience-hero__visual">
+          <div className="solution-experience-hero__image">
+            <Image
+              alt="Petani memegang tablet untuk mencari solusi tanaman di platform Wiragro."
+              fill
+              priority
+              sizes="(max-width: 1080px) 100vw, 40vw"
+              src="/home/hero-farmer-ai.png"
+            />
           </div>
-          <div>
-            <span>Step 2</span>
-            <strong>Pilih masalah</strong>
-          </div>
-          <div>
-            <span>Step 3</span>
-            <strong>Dapat rekomendasi</strong>
+          <div className="solution-experience-hero__meta">
+            <div>
+              <span>Step 1</span>
+              <strong>Pilih tanaman</strong>
+            </div>
+            <div>
+              <span>Step 2</span>
+              <strong>Pilih masalah</strong>
+            </div>
+            <div>
+              <span>Step 3</span>
+              <strong>Dapat rekomendasi</strong>
+            </div>
           </div>
         </div>
       </section>

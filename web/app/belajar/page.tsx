@@ -4,12 +4,15 @@ import { ArticleCard } from "@/components/article-card";
 import { ArticleTaxonomyDirectory } from "@/components/article-taxonomy-directory";
 import { JsonLd } from "@/components/json-ld";
 import { PathwaySection } from "@/components/pathway-section";
+import { PrimaryButton, SecondaryButton } from "@/components/ui/button";
+import { VideoCard } from "@/components/ui/video-card";
 import { getArticles } from "@/lib/api";
 import {
   buildArticleTaxonomyBrowseHref,
   filterArticlesByState,
   getAvailableArticleTaxonomySlugs,
 } from "@/lib/article-content";
+import { getFeaturedEducationVideos } from "@/lib/education-content";
 import { getLearningHubCards } from "@/lib/hybrid-navigation";
 import {
   buildArticleListingMetadata,
@@ -20,12 +23,12 @@ import {
 
 export const dynamic = "force-dynamic";
 export const metadata = buildArticleListingMetadata({
-  title: "Edukasi Pertanian di Wiragro",
+  title: "Edukasi Pertanian Praktis - Wiragro",
   description:
-    "Masuk ke pusat edukasi Wiragro untuk memahami input pertanian, ritme budidaya, dan konteks belanja sebelum turun ke katalog.",
+    "Pelajari masalah tanaman, cara penanganan, dan produk yang tepat lewat artikel, studi kasus, dan video edukasi Wiragro.",
   path: "/belajar",
   canonicalPath: "/belajar",
-  keywords: ["belajar pertanian", "hub edukasi pertanian", "panduan input pertanian"],
+  keywords: ["edukasi pertanian praktis", "studi kasus pertanian", "artikel pertanian wiragro"],
 });
 
 const fallbackArticles = [
@@ -40,33 +43,35 @@ const fallbackArticles = [
     slug: "dasar-memilih-benih",
     title: "Cara membaca kualitas benih sebelum menyiapkan lahan",
     excerpt:
-      "Panduan ringkas untuk memahami varietas, mutu benih, dan kesiapan sebelum masuk ke katalog.",
+      "Panduan ringkas untuk memahami varietas, mutu benih, dan kesiapan sebelum masuk ke solusi atau produk.",
     published_at: null,
   },
   {
     slug: "manajemen-belanja-toko",
-    title: "Menyusun ritme belanja lahan agar tidak reaktif",
+    title: "Menyusun ritme kebutuhan lapangan agar tidak reaktif",
     excerpt:
-      "Edukasi yang menghubungkan kebutuhan budidaya dengan pola belanja yang lebih rapi dan efisien.",
+      "Edukasi yang menghubungkan kebutuhan budidaya dengan pola keputusan yang lebih rapi dan efisien.",
     published_at: null,
   },
 ];
 
 export default async function BelajarPage() {
-  const articles = await getArticles({ page_size: 6 }).catch(() => ({
+  const articles = await getArticles({ page_size: 8 }).catch(() => ({
     items: [],
-    pagination: { page: 1, page_size: 6, count: 0 },
+    pagination: { page: 1, page_size: 8, count: 0 },
   }));
+
   const hasLiveArticles = articles.items.length > 0;
-  const learningFeed = hasLiveArticles ? articles.items : fallbackArticles;
+  const learningFeed = hasLiveArticles ? articles.items.slice(0, 6) : fallbackArticles;
   const starterFeed = filterArticlesByState(articles.items, { tujuan: "belajar-dasar" }).slice(
     0,
     3,
   );
   const quickProblemFeed = filterArticlesByState(articles.items, { gejala: "daun-menguning" }).slice(
     0,
-    2,
+    3,
   );
+  const featuredVideos = getFeaturedEducationVideos({ format: "all" }, 3);
   const taxonomyFilters = {};
   const availableSlugs = hasLiveArticles
     ? getAvailableArticleTaxonomySlugs(articles.items)
@@ -77,15 +82,15 @@ export default async function BelajarPage() {
       <JsonLd
         data={[
           buildWebPageJsonLd({
-            title: "Edukasi Pertanian di Wiragro",
+            title: "Edukasi Pertanian Praktis - Wiragro",
             description:
-              "Pusat edukasi untuk memahami dasar budidaya, input pertanian, dan konteks belanja sebelum turun ke katalog.",
+              "Pusat edukasi Wiragro yang menggabungkan artikel SEO, studi kasus, review produk, dan jalur lanjut ke solusi atau produk.",
             path: "/belajar",
           }),
           buildCollectionJsonLd({
             title: "Pusat Edukasi Wiragro",
             description:
-              "Kumpulan jalur edukasi dan artikel pertanian untuk membantu pengguna bergerak dari pemahaman ke keputusan.",
+              "Kumpulan artikel dan video pertanian praktis untuk membantu pengguna bergerak dari pemahaman ke tindakan.",
             path: "/belajar",
             itemUrls: hasLiveArticles
               ? articles.items.slice(0, 12).map((article) => `/artikel/${article.slug}`)
@@ -101,35 +106,32 @@ export default async function BelajarPage() {
 
       <section className="hub-hero hub-hero--learn">
         <div className="hub-hero__copy">
-          <span className="eyebrow-label">Edukasi</span>
-          <h1>Pusat edukasi untuk memahami tanaman, masalah, dan keputusan belanja dengan lebih tenang.</h1>
+          <span className="eyebrow-label">Edukasi Pertanian Praktis</span>
+          <h1>Edukasi pertanian yang membantu Anda bergerak dari pemahaman ke tindakan.</h1>
           <p>
-            Mulai dari komoditas, topik, gejala, fase tanam, atau tujuan belajar Anda. Hub ini
-            menjadi pintu masuk edukasi yang terhubung langsung ke solusi dan produk
-            tanpa mendorong Anda ke katalog terlalu cepat.
+            Pelajari masalah tanaman, cara penanganan, dan produk yang tepat berdasarkan
+            kebutuhan lapangan. Di sini artikel, studi kasus, dan video tidak berdiri sendiri,
+            tetapi selalu mengarah ke solusi dan keputusan belanja yang lebih sehat.
           </p>
           <div className="hub-hero__actions">
-            <Link className="btn btn-primary" href="/artikel">
-              Jelajahi semua artikel
-            </Link>
-            <Link className="btn btn-secondary" href="/solusi">
-              Lanjut ke solusi
-            </Link>
+            <PrimaryButton href="/artikel">Cari artikel</PrimaryButton>
+            <SecondaryButton href="/solusi">Lihat studi kasus</SecondaryButton>
+            <SecondaryButton href="/ai-chat">Tanya AI</SecondaryButton>
           </div>
         </div>
 
         <div className="hub-hero__meta">
           <div>
-            <span>Masuk dari</span>
-            <strong>Rasa ingin tahu, gejala awal, atau komoditas yang sedang ditanam</strong>
+            <span>Prioritas konten</span>
+            <strong>Studi kasus, review produk, lalu edukasi umum</strong>
           </div>
           <div>
             <span>Tujuan</span>
-            <strong>Pemahaman yang cukup sebelum memilih tindakan atau produk</strong>
+            <strong>Memberi arahan yang cukup sebelum user pindah ke solusi atau produk</strong>
           </div>
           <div>
-            <span>Langkah berikutnya</span>
-            <strong>Lanjut ke solusi atau belanja saat konteksnya sudah jelas</strong>
+            <span>Jalur lanjut</span>
+            <strong>Semua materi selalu punya pintu ke solusi, AI, dan produk terkait</strong>
           </div>
         </div>
       </section>
@@ -137,11 +139,38 @@ export default async function BelajarPage() {
       <section className="section-block">
         <div className="section-heading">
           <div>
-            <span className="eyebrow-label">Taxonomy edukasi</span>
-            <h2>Masuk ke pusat konten dari jalur yang paling masuk akal untuk Anda.</h2>
+            <span className="eyebrow-label">Studi kasus terbaru</span>
+            <h2>Mulai dari video yang paling dekat dengan masalah lapangan.</h2>
             <p>
-              Struktur ini disusun agar edukasi mudah diperluas per komoditas, topik,
-              gejala, fase tanam, dan tujuan tanpa membuat pengalaman baca terasa rumit.
+              Saat user lebih nyaman belajar secara visual, Wiragro mengutamakan studi kasus
+              lapangan, review produk, lalu edukasi umum sebagai pintu masuk pertama.
+            </p>
+          </div>
+          <Link href="/artikel">Buka semua edukasi</Link>
+        </div>
+        <div className="education-video-grid">
+          {featuredVideos.map((video) => (
+            <VideoCard
+              category={video.category}
+              ctaLabel={video.youtubeId ? "Tonton" : "Lihat panduan"}
+              description={video.description}
+              href={video.href}
+              key={video.id}
+              thumbnail={video.thumbnail}
+              title={video.title}
+            />
+          ))}
+        </div>
+      </section>
+
+      <section className="section-block">
+        <div className="section-heading">
+          <div>
+            <span className="eyebrow-label">Jalur edukasi</span>
+            <h2>Masuk ke pusat konten dari topik, tanaman, atau masalah yang paling relevan.</h2>
+            <p>
+              Struktur ini dibuat agar edukasi tetap mudah dipahami di mobile, tetapi tetap
+              scalable saat konten artikel dan video bertambah banyak.
             </p>
           </div>
           <Link href="/artikel">Buka explorer artikel</Link>
@@ -156,22 +185,22 @@ export default async function BelajarPage() {
       <PathwaySection
         action={{ href: "/artikel", label: "Lihat semua materi" }}
         cards={getLearningHubCards()}
-        description="Struktur ini dipakai agar pengguna yang ingin paham dulu tetap punya jalur yang jelas sebelum diarahkan ke solusi atau produk."
-        eyebrow="Jalur edukasi"
-        title="Edukasi tidak berdiri sendiri. Ia selalu punya jalan lanjut ke solusi dan produk."
+        description="Pusat edukasi ini menjaga artikel dan video tetap dekat dengan solusi dan produk, bukan berdiri sebagai konten pendamping yang terpisah."
+        eyebrow="Ekosistem edukasi"
+        title="Edukasi adalah pilar utama setelah solusi, bukan lapisan tambahan."
       />
 
       <section className="section-block">
         <div className="section-heading">
           <div>
-            <span className="eyebrow-label">Materi terbaru</span>
-            <h2>Artikel yang bisa langsung membantu Anda mulai dari konteks yang benar.</h2>
+            <span className="eyebrow-label">Panduan praktis</span>
+            <h2>Artikel yang bisa langsung membantu Anda memahami konteks sebelum membeli.</h2>
             <p>
-              Feed ini mengambil artikel live saat tersedia, lalu tetap aman dengan
-              fallback editorial bila materi live belum lengkap.
+              Feed ini mengambil artikel live saat tersedia, lalu tetap aman dengan fallback
+              editorial agar pengalaman belajar tidak pernah kosong.
             </p>
           </div>
-          <Link href="/artikel">Buka artikel</Link>
+          <Link href="/artikel">Buka semua artikel</Link>
         </div>
 
         <div className="article-grid article-grid--editorial">
@@ -190,9 +219,11 @@ export default async function BelajarPage() {
           <div className="section-heading">
             <div>
               <span className="eyebrow-label">Mulai dari dasar</span>
-              <h2>Untuk pengunjung yang baru ingin belajar tanpa langsung dibebani katalog.</h2>
+              <h2>Untuk pengunjung yang baru ingin belajar tanpa langsung dibebani produk.</h2>
             </div>
-            <Link href={buildArticleTaxonomyBrowseHref("tujuan", "belajar-dasar")}>Lihat jalur dasar</Link>
+            <Link href={buildArticleTaxonomyBrowseHref("tujuan", "belajar-dasar")}>
+              Lihat jalur dasar
+            </Link>
           </div>
           <div className="article-grid article-grid--editorial">
             {starterFeed.map((article) => (
@@ -209,7 +240,9 @@ export default async function BelajarPage() {
               <span className="eyebrow-label">Masalah populer</span>
               <h2>Contoh jalur dari gejala ke pemahaman sebelum memilih tindakan.</h2>
             </div>
-            <Link href={buildArticleTaxonomyBrowseHref("gejala", "daun-menguning")}>Lihat topik gejala</Link>
+            <Link href={buildArticleTaxonomyBrowseHref("gejala", "daun-menguning")}>
+              Lihat topik gejala
+            </Link>
           </div>
           <div className="article-grid article-grid--editorial">
             {quickProblemFeed.map((article) => (

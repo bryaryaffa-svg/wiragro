@@ -53,7 +53,7 @@ const COMMODITY_HUBS: CommodityHub[] = [
         href: "/belanja/paket/padi-awal-tanam",
         actionLabel: "Buka bundle komoditas",
         supportingLinks: [
-          { href: "/belajar/komoditas/padi", label: "Artikel padi" },
+          { href: "/artikel?tanaman=padi", label: "Artikel padi" },
           { href: "/solusi/komoditas/padi", label: "Solusi padi" },
         ],
       },
@@ -102,7 +102,7 @@ const COMMODITY_HUBS: CommodityHub[] = [
         href: "/belanja/paket/jalur-cabai",
         actionLabel: "Buka bundle komoditas",
         supportingLinks: [
-          { href: "/belajar/komoditas/cabai", label: "Artikel cabai" },
+          { href: "/artikel?tanaman=cabai", label: "Artikel cabai" },
           { href: "/solusi/komoditas/cabai", label: "Solusi cabai" },
         ],
       },

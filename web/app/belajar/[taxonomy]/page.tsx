@@ -62,8 +62,8 @@ export async function generateMetadata({
 
   if (!availableSlugs.length) {
     return buildArticleListingMetadata({
-      title: "Jalur edukasi sedang disiapkan",
-      description: "Taxonomy edukasi ini belum memiliki materi yang siap ditampilkan.",
+      title: "Jalur edukasi belum memiliki materi aktif",
+      description: "Taxonomy edukasi ini belum memiliki materi aktif yang bisa ditampilkan saat ini.",
       path: `/belajar/${taxonomy}`,
       canonicalPath: "/belajar",
       noIndex: true,
@@ -187,7 +187,7 @@ export default async function LearningTaxonomyIndexPage({
               <span className="eyebrow-label">Materi aktif</span>
               <h2>Artikel yang sudah mengisi cluster ini sekarang.</h2>
             </div>
-            <Link href="/belajar">Kembali ke pusat edukasi</Link>
+            <Link href="/artikel">Kembali ke pusat edukasi</Link>
           </div>
           <div className="article-grid article-grid--editorial">
             {axisArticles.map((article) => (

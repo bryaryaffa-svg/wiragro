@@ -79,7 +79,7 @@ function getLearningHref(
     return buildArticleTaxonomyBrowseHref("topik", "hama-penyakit");
   }
 
-  return "/belajar";
+  return "/artikel";
 }
 
 function getLearningLabel(queryKey: Exclude<keyof SolutionFilterState, "q">) {
@@ -122,8 +122,8 @@ export async function generateMetadata({
 
   if (!filteredSolutions.length) {
     return buildPageMetadata({
-      title: "Cluster solusi sedang disiapkan",
-      description: "Cluster solusi ini belum memiliki halaman yang siap ditampilkan.",
+      title: "Cluster solusi belum memiliki halaman aktif",
+      description: "Cluster solusi ini belum memiliki halaman aktif yang bisa ditampilkan saat ini.",
       path: `/solusi/${taxonomy}/${slug}`,
       canonicalPath: buildSolutionTaxonomyBrowseHref(section.queryKey),
       noIndex: true,

@@ -23,7 +23,7 @@ export const CAMPAIGN_LANDING_SOURCES = [
     seasonLabel: "Musim hujan",
     focusLabel: "Cabai",
     audience:
-      "Petani cabai, kios horti, dan pengunjung yang datang dari gejala bercak atau kebutuhan proteksi generatif.",
+      "Petani cabai, toko pertanian hortikultura, dan pengunjung yang datang dari gejala bercak atau kebutuhan proteksi generatif.",
     theme: "rain",
     catalogHref: "/produk?q=fungisida",
     actionLabel: "Buka campaign cabai",
@@ -61,11 +61,11 @@ export const CAMPAIGN_LANDING_SOURCES = [
     description:
       "Halaman untuk kebutuhan awal tanam padi yang menyatukan fase, paket, dan belanja dasar agar pengunjung tidak harus memulai dari pencarian katalog kosong.",
     summary:
-      "Fokus program ini adalah fase awal: benih, nutrisi dasar, dan jalur repeat order yang lebih mudah untuk kios atau petani yang mulai menanam lagi.",
+      "Fokus program ini adalah fase awal: benih, nutrisi dasar, dan jalur repeat order yang lebih mudah untuk toko pertanian atau petani yang mulai menanam lagi.",
     seasonLabel: "Awal musim tanam",
     focusLabel: "Padi",
     audience:
-      "Petani padi, kios sawah, dan pembeli yang sedang menyiapkan kebutuhan awal musim.",
+      "Petani padi, toko pertanian area sawah, dan pembeli yang sedang menyiapkan kebutuhan awal musim.",
     theme: "field",
     catalogHref: "/produk?q=benih padi",
     actionLabel: "Buka campaign padi",

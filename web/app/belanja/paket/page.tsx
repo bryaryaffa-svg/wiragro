@@ -19,7 +19,7 @@ export const dynamic = "force-dynamic";
 export const metadata = buildCatalogMetadata({
   title: "Paket & Bundle Pertanian",
   description:
-    "Hub bundle Wiragro untuk kebutuhan mulai tanam, proteksi, komoditas, dan belanja ulang yang lebih praktis.",
+    "Hub bundle Wiragro untuk kebutuhan mulai tanam, proteksi, komoditas, dan pembelian rutin yang lebih praktis.",
   path: "/belanja/paket",
   canonicalPath: "/belanja/paket",
   keywords: [
@@ -70,18 +70,18 @@ export default async function BundleHubPage() {
       <section className="hub-hero hub-hero--shop">
         <div className="hub-hero__copy">
           <span className="eyebrow-label">Bundle</span>
-          <h1>Paket pertanian yang lebih siap dijual, dibahas, dan diulang pembeliannya.</h1>
+          <h1>Paket pertanian yang membantu keputusan belanja terasa lebih ringkas dan lebih terarah.</h1>
           <p>
-            Di sini pembeli bisa mulai dari komoditas, fase tanam, atau masalah lapangan, lalu
-            turun ke produk, artikel, solusi, dan jalur bantuan beli tanpa harus merakit semuanya
+            Di sini pengguna bisa mulai dari komoditas, fase tanam, atau masalah lapangan, lalu
+            turun ke produk, artikel, solusi, dan jalur bantuan lanjutan tanpa harus merakit semuanya
             sendiri dari nol.
           </p>
           <div className="hub-hero__actions">
             <Link className="btn btn-primary" href="#bundle-grid">
               Jelajahi paket
             </Link>
-            <Link className="btn btn-secondary" href="/b2b">
-              Buka B2B inquiry
+            <Link className="btn btn-secondary" href="/solusi">
+              Mulai dari solusi
             </Link>
           </div>
         </div>
@@ -89,11 +89,11 @@ export default async function BundleHubPage() {
         <div className="hub-hero__meta">
           <div>
             <span>Kegunaan</span>
-            <strong>Memudahkan pembelian paket, repeat order, dan permintaan volume</strong>
+            <strong>Memudahkan pembelian paket, pembelian rutin, dan diskusi kebutuhan volume</strong>
           </div>
           <div>
             <span>Cocok untuk</span>
-            <strong>Pemula, pembeli rutin, komoditas intensif, dan kios</strong>
+            <strong>Pemula, pembeli rutin, komoditas intensif, dan toko pertanian</strong>
           </div>
           <div>
             <span>Jalur lanjut</span>
@@ -129,7 +129,7 @@ export default async function BundleHubPage() {
               <h2>Butuh arahan cepat sebelum memilih paket yang tepat?</h2>
               <p>
                 Di halaman bundle, jalur WhatsApp difokuskan untuk membantu memilih paket yang paling
-                pas sebelum pembeli turun ke landing bundle yang lebih spesifik.
+                pas sebelum pengguna turun ke landing bundle yang lebih spesifik.
               </p>
             </div>
             <Link href="/kontak">Kontak tim</Link>

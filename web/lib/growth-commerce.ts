@@ -506,7 +506,7 @@ function buildIntentMessage(
     case "reorder":
       return `Halo ${storeName}, saya ingin repeat order${context.productName ? ` untuk ${context.productName}` : context.bundleTitle ? ` untuk bundle ${context.bundleTitle}` : ""}. Mohon bantu cek stok, qty yang cocok, dan opsi pengirimannya.`;
     case "b2b":
-      return `Halo ${storeName}, saya ingin diskusi pembelian partai / B2B${context.commodityLabel ? ` untuk ${context.commodityLabel}` : ""}${context.productName ? ` terkait ${context.productName}` : context.bundleTitle ? ` terkait bundle ${context.bundleTitle}` : ""}. Mohon info harga grosir, minimum order, dan opsi pickup atau delivery.`;
+      return `Halo ${storeName}, saya ingin diskusi kebutuhan pembelian volume / B2B${context.commodityLabel ? ` untuk ${context.commodityLabel}` : ""}${context.productName ? ` terkait ${context.productName}` : context.bundleTitle ? ` terkait bundle ${context.bundleTitle}` : ""}. Mohon info minimum order, opsi pickup atau delivery, dan langkah pembelian yang paling tepat.`;
     case "checkout-followup":
       return `Halo ${storeName}, saya sudah masuk ke checkout${context.checkoutLabel ? ` untuk ${context.checkoutLabel}` : ""}${context.productName ? ` (${context.productName})` : context.bundleTitle ? ` (${context.bundleTitle})` : ""} dan butuh bantuan memastikan stok, ongkir, atau metode pembayaran sebelum lanjut.`;
     case "consultation":
@@ -624,16 +624,16 @@ function getHydratedGrowthBundles(now = new Date()) {
 
 export const B2B_OFFERS: B2BOffer[] = [
   {
-    title: "Pembelian partai untuk kebun atau proyek",
+    title: "Pembelian volume untuk kebun atau proyek",
     description:
       "Cocok untuk tim yang butuh suplai lebih besar, diskusi kebutuhan per fase, atau kombinasi beberapa komoditas.",
     bullets: ["Diskusi qty dan ritme pengiriman", "Pilihan pickup atau delivery", "Rekomendasi bundle awal untuk briefing cepat"],
   },
   {
-    title: "Inquiry untuk kios atau reseller",
+    title: "Inquiry untuk toko pertanian atau pembelian rutin",
     description:
       "Jalur ringan untuk toko yang ingin menanyakan ketersediaan produk inti, pelengkap, dan kemungkinan pola repeat order.",
-    bullets: ["Produk inti dan pelengkap", "Alur repeat order yang lebih cepat", "Percakapan harga grosir via WhatsApp"],
+    bullets: ["Produk inti dan pelengkap", "Alur repeat order yang lebih cepat", "Percakapan kebutuhan volume lewat WhatsApp"],
   },
   {
     title: "Pembelian rutin yang butuh arahan cepat",
@@ -834,27 +834,27 @@ function buildCommerceIntentCardCopy(
       if (input.bundleTitle) {
         return {
           eyebrow: "B2B",
-          title: "Ajukan volume untuk paket ini",
+          title: "Ajukan kebutuhan volume untuk paket ini",
           description:
-            "Pisahkan kebutuhan partai atau reseller yang mulai dari bundle ini ke jalur WA yang siap ditindak.",
-          actionLabel: "Diskusi partai",
+            "Pisahkan kebutuhan volume atau kebutuhan toko yang mulai dari bundle ini ke jalur WhatsApp yang lebih siap ditindak.",
+          actionLabel: "Diskusi kebutuhan",
         };
       }
 
       if (input.productName) {
         return {
           eyebrow: "B2B",
-          title: "Diskusi partai produk ini",
+          title: "Diskusi kebutuhan volume produk ini",
           description:
-            "Cocok untuk kebutuhan proyek, reseller, atau kebun yang ingin membahas volume lebih besar dari satu SKU.",
-          actionLabel: "Diskusi partai",
+            "Cocok untuk kebutuhan proyek, toko pertanian, atau kebun yang ingin membahas volume lebih besar dari satu SKU.",
+          actionLabel: "Diskusi kebutuhan",
         };
       }
 
       if (input.campaignTitle) {
         return {
           eyebrow: "B2B",
-          title: "Buka jalur partai dari program ini",
+          title: "Buka jalur kebutuhan volume dari program ini",
           description:
             "Menjaga lead musiman atau komoditas tinggi tetap masuk ke jalur WA yang lebih siap dibaca tim Wiragro.",
           actionLabel: "Minta penawaran",
@@ -863,9 +863,9 @@ function buildCommerceIntentCardCopy(
 
       return {
         eyebrow: "B2B",
-        title: "Diskusi pembelian partai",
+        title: "Diskusi pembelian volume",
         description:
-          "Pisahkan lead kebun, reseller, proyek, atau kebutuhan rutin ke jalur WhatsApp yang lebih siap ditindak.",
+          "Pisahkan lead kebun, toko pertanian, proyek, atau kebutuhan rutin ke jalur WhatsApp yang lebih siap ditindak.",
         actionLabel: "Minta penawaran",
       };
     case "checkout-followup":

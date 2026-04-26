@@ -292,7 +292,7 @@ export default async function BundleDetailPage({
 
       <ContentRelationAlert
         actionLabel="Buka Edukasi"
-        href="/belajar"
+        href="/artikel"
         items={missingRelations}
         title="Sebagian referensi bundle sedang dilengkapi"
       />
@@ -322,7 +322,7 @@ export default async function BundleDetailPage({
         <div className="section-heading">
           <div>
             <span className="eyebrow-label">Penawaran awal untuk paket</span>
-            <h2>Kebutuhan partai bisa diajukan dari paket ini tanpa memulai dari form kosong.</h2>
+            <h2>Kebutuhan volume bisa diajukan dari paket ini tanpa memulai dari form kosong.</h2>
             <p>
               Form ini otomatis membawa konteks paket, halaman sumber, dan komoditas utama
               agar tim Wiragro bisa menyiapkan penawaran awal yang lebih mudah dipahami.
@@ -335,8 +335,8 @@ export default async function BundleDetailPage({
           bundleTitle={bundle.title}
           commoditySlug={commoditySlug}
           defaultCommodityFocus={commodityLabel}
-          description="Jalur ini cocok untuk kios, reseller, atau kebun yang ingin membahas volume paket ini tanpa harus menyusun inquiry ulang dari nol."
-          heading="Ajukan kebutuhan partai dari bundle ini."
+          description="Jalur ini cocok untuk toko pertanian, kebutuhan kebun, atau pembelian rutin yang ingin membahas volume paket ini tanpa harus menyusun inquiry ulang dari nol."
+          heading="Ajukan kebutuhan volume dari bundle ini."
           eyebrowLabel="Inquiry bundle"
           sourcePage={`/belanja/paket/${bundle.slug}`}
           submitLabel="Ajukan penawaran paket ini"
@@ -403,7 +403,7 @@ export default async function BundleDetailPage({
               <span className="eyebrow-label">Edukasi terkait</span>
               <h2>Artikel yang membantu pembeli paham sebelum membeli paket ini.</h2>
             </div>
-            <Link href="/belajar">Buka Edukasi</Link>
+            <Link href="/artikel">Buka Edukasi</Link>
           </div>
           <div className="article-grid article-grid--editorial">
             {relatedArticles.map((article) => (

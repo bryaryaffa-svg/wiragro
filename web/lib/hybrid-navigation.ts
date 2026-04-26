@@ -83,7 +83,7 @@ export const COMMERCIAL_ENTRY_LINKS: NavLink[] = [
   {
     href: "/b2b",
     label: "B2B",
-    description: "Jalur pembelian bisnis untuk kios, usaha tani, proyek, dan kebutuhan partai.",
+    description: "Jalur kebutuhan bisnis untuk toko pertanian, usaha tani, proyek, dan pembelian rutin dalam volume lebih besar.",
   },
 ];
 
@@ -118,7 +118,7 @@ export const FOOTER_LINK_GROUPS: FooterLinkGroup[] = [
     title: "Belanja & Akun",
     links: [
       { href: "/belanja/paket", label: "Bundle" },
-      { href: "/b2b", label: "Pembelian Grosir" },
+      { href: "/b2b", label: "Kebutuhan Volume Besar" },
       { href: "/keranjang", label: "Keranjang" },
       { href: "/masuk", label: "Masuk / Akun" },
     ],
@@ -211,9 +211,9 @@ export const HOMEPAGE_COMMERCIAL_ENTRY_CARDS: PathwayCard[] = [
   {
     pillar: "shop",
     eyebrow: "B2B",
-    title: "B2B menjadi jalur resmi untuk kebutuhan bisnis dan pembelian partai.",
+    title: "B2B menjadi jalur resmi untuk kebutuhan bisnis dan pembelian volume.",
     description:
-      "B2B membantu kios, reseller, proyek, dan kebutuhan rutin dibahas lebih rapi bersama tim Wiragro.",
+      "B2B membantu toko pertanian, proyek, dan kebutuhan rutin dibahas lebih rapi bersama tim Wiragro.",
     href: "/b2b",
     actionLabel: "Ajukan inquiry B2B",
     bullets: ["Permintaan lebih rapi", "Status penawaran awal", "Mudah ditindaklanjuti"],
@@ -319,7 +319,7 @@ const SHOPPING_HUB_CARDS: PathwayCard[] = [
     bullets: ["Paket kebutuhan", "Belanja lebih praktis", "Mudah untuk belanja ulang"],
     supportingLinks: [
       { href: "/produk", label: "Katalog produk" },
-      { href: "/b2b", label: "Inquiry partai" },
+      { href: "/b2b", label: "Inquiry kebutuhan volume" },
     ],
   },
   {
@@ -338,9 +338,9 @@ const SHOPPING_HUB_CARDS: PathwayCard[] = [
   {
     pillar: "shop",
     eyebrow: "B2B inquiry",
-    title: "Permintaan penawaran membantu kebutuhan partai dibahas lebih rapi.",
+    title: "Permintaan penawaran membantu kebutuhan volume dibahas lebih rapi.",
     description:
-      "B2B membantu kios, reseller, proyek, dan kebutuhan rutin dibahas bersama tim tanpa mengganggu alur belanja utama.",
+      "B2B membantu toko pertanian, proyek, dan kebutuhan rutin dibahas bersama tim tanpa mengganggu alur belanja utama.",
     href: "/b2b",
     actionLabel: "Masuk ke B2B inquiry",
     supportingLinks: [

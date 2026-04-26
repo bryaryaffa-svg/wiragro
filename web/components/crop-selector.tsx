@@ -3,6 +3,7 @@
 import Link from "next/link";
 
 import { AgriIcon, type AgriIconName } from "@/components/ui/agri-icon";
+import { AgriScene } from "@/components/ui/agri-scene";
 import { trackUiEvent } from "@/lib/analytics";
 
 type CropSelectorItem = {
@@ -43,11 +44,18 @@ export function CropSelector({
               })
             }
           >
-            <span className="selector-card__icon">
-              <AgriIcon name={item.icon} />
-            </span>
-            <strong>{item.label}</strong>
-            <p>{item.description}</p>
+            <div className="selector-card__visual">
+              <AgriScene mode="crop" name={item.icon} />
+            </div>
+            <div className="selector-card__content">
+              <span className="selector-card__eyebrow">
+                <AgriIcon name="solution" />
+                Komoditas pilihan
+              </span>
+              <strong>{item.label}</strong>
+              <p>{item.description}</p>
+              <span className="selector-card__cta">Pilih tanaman</span>
+            </div>
           </Link>
         ))}
       </div>

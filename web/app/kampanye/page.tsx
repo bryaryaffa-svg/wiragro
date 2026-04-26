@@ -17,7 +17,7 @@ export const dynamic = "force-dynamic";
 export const metadata = buildCatalogMetadata({
   title: "Kampanye Musiman & Kebutuhan Prioritas",
   description:
-    "Halaman kampanye Wiragro untuk musim, komoditas, dan masalah prioritas agar kebutuhan lebih cepat menemukan solusi dan produk yang relevan.",
+    "Halaman kampanye Wiragro untuk musim, komoditas, dan masalah prioritas agar user lebih cepat masuk ke solusi, edukasi, dan produk yang relevan.",
   path: "/kampanye",
   canonicalPath: "/kampanye",
   keywords: [
@@ -66,27 +66,27 @@ export default async function CampaignHubPage() {
       <section className="campaign-hero campaign-hero--hub">
         <div className="campaign-hero__copy">
           <span className="eyebrow-label">Kampanye</span>
-          <h1>Halaman tematik untuk musim, komoditas, dan masalah yang sudah dekat ke transaksi.</h1>
+          <h1>Halaman tematik untuk musim, komoditas, dan masalah lapangan yang sedang paling relevan.</h1>
           <p>
-            Hub ini merangkum landing musiman dan problem-first yang membantu pembeli masuk ke
-            konteks yang lebih tepat sebelum memilih produk, bundle, atau jalur bantuan beli.
+            Hub ini merangkum landing musiman dan problem-first agar pengguna lebih cepat masuk ke
+            konteks yang tepat sebelum memilih solusi, edukasi, produk, atau paket yang paling dekat.
           </p>
           <div className="campaign-hero__actions">
             <Link className="btn btn-primary" href="#campaign-grid">
               Lihat landing aktif
             </Link>
-            <Link className="btn btn-secondary" href="/b2b">
-              Ajukan inquiry B2B
+            <Link className="btn btn-secondary" href="/solusi">
+              Mulai dari solusi
             </Link>
           </div>
         </div>
 
         <aside className="campaign-hero__aside">
           <span className="eyebrow-label">Kapan dipakai</span>
-          <strong>Dipakai saat kebutuhan sudah dipengaruhi musim, komoditas, atau masalah lapangan yang sedang diprioritaskan.</strong>
+          <strong>Dipakai saat keputusan produk mulai dipengaruhi musim, komoditas, atau masalah lapangan yang sedang diprioritaskan.</strong>
           <p>
-            Setiap kampanye membantu pembeli melanjutkan ke bundle, konsultasi kontekstual,
-            atau inquiry B2B tanpa kehilangan konteks halaman asalnya.
+            Setiap kampanye menjaga konteks agar pengguna bisa melanjutkan ke bundle, edukasi,
+            solusi, atau bantuan tim tanpa kehilangan arah.
           </p>
         </aside>
       </section>
@@ -95,11 +95,11 @@ export default async function CampaignHubPage() {
           <div className="section-heading">
             <div>
               <span className="eyebrow-label">Campaign aktif</span>
-              <h2>Pilih kampanye yang paling dekat dengan konteks musim atau masalah Anda.</h2>
+              <h2>Pilih kampanye yang paling dekat dengan konteks musim atau masalah tanaman Anda.</h2>
               <p>
-                Ada kampanye musiman, komoditas, dan problem lapangan agar pembeli lebih cepat masuk
-              ke konteks yang paling relevan.
-            </p>
+                Ada kampanye musiman, komoditas, dan problem lapangan agar pengguna lebih cepat
+                masuk ke konteks yang paling relevan.
+              </p>
           </div>
         </div>
         <div className="campaign-grid">
@@ -116,11 +116,11 @@ export default async function CampaignHubPage() {
               <span className="eyebrow-label">Bantuan WhatsApp</span>
               <h2>Butuh arahan cepat dari jalur campaign?</h2>
               <p>
-                CTA WhatsApp di hub campaign difokuskan untuk membantu memilih landing atau paket
-                yang paling tepat sebelum pembeli turun ke halaman detail.
+                CTA WhatsApp di hub campaign difokuskan untuk membantu memilih landing, paket,
+                atau jalur lanjut yang paling tepat sebelum pengguna turun ke halaman detail.
               </p>
             </div>
-            <Link href="/b2b">B2B inquiry</Link>
+            <Link href="/b2b">Bantuan bisnis</Link>
           </div>
           <CommerceIntentGrid items={intentCards} />
         </section>

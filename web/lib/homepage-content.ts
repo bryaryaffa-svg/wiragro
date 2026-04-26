@@ -8,6 +8,7 @@ export type HomeIconCard = {
   actionLabel: string;
   description: string;
   href: string;
+  imageFit?: "contain" | "cover";
   icon:
     | "chili"
     | "corn"
@@ -25,14 +26,41 @@ export type HomeIconCard = {
     | "tomato"
     | "weed"
     | "yellow-leaf";
+  thumbnail?: string;
   title: string;
 };
 
 export type HomeVideoCard = {
   category: string;
   description: string;
+  duration?: string;
   href: string;
   thumbnail: string;
+  title: string;
+};
+
+export type HomeHeroMetric = {
+  description: string;
+  icon:
+    | "ai"
+    | "article"
+    | "distributor"
+    | "education"
+    | "product"
+    | "solution"
+    | "track";
+  title: string;
+};
+
+export type HomePartnerBenefit = {
+  description: string;
+  icon: "article" | "distributor" | "education" | "product" | "solution" | "track";
+  title: string;
+};
+
+export type HomeTrustStripItem = {
+  description: string;
+  icon: "ai" | "article" | "distributor" | "education" | "product" | "solution" | "track";
   title: string;
 };
 
@@ -49,6 +77,7 @@ export const HOME_PROBLEM_CARDS: HomeIconCard[] = [
     description: "Periksa nutrisi, akar, dan pola air sebelum memilih produk.",
     href: "/solusi?masalah=daun-kuning",
     icon: "yellow-leaf",
+    thumbnail: "/wiragro-illustrations/wiragro_dekor_daun_kiri_transparent.png",
     title: "Daun kuning",
   },
   {
@@ -56,6 +85,7 @@ export const HOME_PROBLEM_CARDS: HomeIconCard[] = [
     description: "Pisahkan gejala hama dan penyakit agar tindakan awal lebih tepat.",
     href: "/solusi?masalah=hama",
     icon: "pest",
+    thumbnail: "/wiragro-illustrations/wiragro_icon_pestisida_transparent.png",
     title: "Hama menyerang",
   },
   {
@@ -63,6 +93,7 @@ export const HOME_PROBLEM_CARDS: HomeIconCard[] = [
     description: "Cek fase tanam, kondisi akar, dan dukungan nutrisi dasarnya.",
     href: "/solusi?masalah=tanaman-kerdil",
     icon: "stunted",
+    thumbnail: "/wiragro-illustrations/wiragro_dekor_tunas_kecil_transparent.png",
     title: "Tanaman kerdil",
   },
   {
@@ -70,6 +101,7 @@ export const HOME_PROBLEM_CARDS: HomeIconCard[] = [
     description: "Evaluasi stres fase generatif sebelum buru-buru menambah booster.",
     href: "/solusi?masalah=buah-rontok",
     icon: "fruit-drop",
+    thumbnail: "/wiragro-illustrations/wiragro_dekor_tanaman_tinggi_transparent.png",
     title: "Buah rontok",
   },
   {
@@ -77,6 +109,7 @@ export const HOME_PROBLEM_CARDS: HomeIconCard[] = [
     description: "Bantu bedakan pola penyakit daun dan kebutuhan proteksi awal.",
     href: "/solusi?masalah=bercak-daun",
     icon: "fungus",
+    thumbnail: "/wiragro-illustrations/wiragro_dekor_ranting_transparent.png",
     title: "Jamur / bercak daun",
   },
   {
@@ -84,6 +117,7 @@ export const HOME_PROBLEM_CARDS: HomeIconCard[] = [
     description: "Masuk dari masalah lapang yang mengganggu pertumbuhan utama tanaman.",
     href: "/solusi?masalah=gulma",
     icon: "weed",
+    thumbnail: "/wiragro-illustrations/wiragro_dekor_semak_transparent.png",
     title: "Gulma",
   },
   {
@@ -91,6 +125,7 @@ export const HOME_PROBLEM_CARDS: HomeIconCard[] = [
     description: "Cocokkan kondisi media, drainase, dan tanda busuk akar.",
     href: "/solusi?masalah=akar-busuk",
     icon: "root",
+    thumbnail: "/wiragro-illustrations/wiragro_dekor_tanah_transparent.png",
     title: "Akar busuk",
   },
   {
@@ -98,6 +133,7 @@ export const HOME_PROBLEM_CARDS: HomeIconCard[] = [
     description: "Pelajari fondasi pemupukan dan ritme aplikasi sebelum belanja.",
     href: "/solusi?masalah=pertumbuhan-lambat",
     icon: "nutrition",
+    thumbnail: "/wiragro-illustrations/wiragro_icon_nutrisi_transparent.png",
     title: "Nutrisi kurang maksimal",
   },
 ];
@@ -108,6 +144,7 @@ export const HOME_CROP_CARDS: HomeIconCard[] = [
     description: "Solusi sawah dan tanaman pangan dari fase awal sampai panen.",
     href: "/solusi?tanaman=padi",
     icon: "rice",
+    thumbnail: "/wiragro-illustrations/wiragro_dekor_tanaman_tinggi_transparent.png",
     title: "Padi",
   },
   {
@@ -115,6 +152,7 @@ export const HOME_CROP_CARDS: HomeIconCard[] = [
     description: "Komoditas intensif dengan kebutuhan solusi dan edukasi yang berjalan beriringan.",
     href: "/solusi?tanaman=cabai",
     icon: "chili",
+    thumbnail: "/wiragro-illustrations/wiragro_dekor_semak_transparent.png",
     title: "Cabai",
   },
   {
@@ -122,6 +160,7 @@ export const HOME_CROP_CARDS: HomeIconCard[] = [
     description: "Mulai dari benih, nutrisi awal, sampai ritme fase vegetatif.",
     href: "/solusi?tanaman=jagung",
     icon: "corn",
+    thumbnail: "/wiragro-illustrations/wiragro_dekor_tanaman_tinggi_transparent.png",
     title: "Jagung",
   },
   {
@@ -129,6 +168,7 @@ export const HOME_CROP_CARDS: HomeIconCard[] = [
     description: "Arahan awal untuk hortikultura yang sensitif pada daun dan fase generatif.",
     href: "/solusi?tanaman=tomat",
     icon: "tomato",
+    thumbnail: "/wiragro-illustrations/wiragro_dekor_semak_transparent.png",
     title: "Tomat",
   },
   {
@@ -136,6 +176,7 @@ export const HOME_CROP_CARDS: HomeIconCard[] = [
     description: "Masuk dari gejala umum dan keputusan input yang lebih terarah.",
     href: "/solusi?tanaman=bawang",
     icon: "onion",
+    thumbnail: "/wiragro-illustrations/wiragro_dekor_tunas_kecil_transparent.png",
     title: "Bawang",
   },
   {
@@ -143,6 +184,7 @@ export const HOME_CROP_CARDS: HomeIconCard[] = [
     description: "Buka jalur problem-solving untuk komoditas skala kebun dan kebutuhan mitra.",
     href: "/solusi?tanaman=sawit",
     icon: "palm",
+    thumbnail: "/wiragro-illustrations/wiragro_dekor_tanaman_tinggi_transparent.png",
     title: "Sawit",
   },
   {
@@ -150,6 +192,7 @@ export const HOME_CROP_CARDS: HomeIconCard[] = [
     description: "Fokus pada fase daun, bunga, buah, dan kualitas hasil.",
     href: "/solusi?tanaman=hortikultura",
     icon: "horti",
+    thumbnail: "/wiragro-illustrations/wiragro_dekor_gerobak_tanam_transparent.png",
     title: "Hortikultura",
   },
   {
@@ -157,6 +200,7 @@ export const HOME_CROP_CARDS: HomeIconCard[] = [
     description: "Kalau komoditas Anda belum ada, mulai dari pencarian gejala atau kebutuhan.",
     href: "/solusi",
     icon: "grid",
+    thumbnail: "/wiragro-illustrations/wiragro_dekor_bukit_transparent.png",
     title: "Lainnya",
   },
 ];
@@ -165,6 +209,7 @@ export const HOME_VIDEO_CARDS: HomeVideoCard[] = [
   {
     category: "Studi kasus lapangan",
     description: "Masuk dari gejala, cek akar dan pola air, lalu pilih tindakan yang lebih masuk akal.",
+    duration: "05:24",
     href: "/artikel/daun-menguning-dan-nutrisi-awal",
     thumbnail: "/illustrations/agri-field-sunrise.svg",
     title: "Membaca daun kuning sebelum memilih input koreksi",
@@ -172,6 +217,7 @@ export const HOME_VIDEO_CARDS: HomeVideoCard[] = [
   {
     category: "Review produk",
     description: "Ringkasan praktis agar pembelian booster tidak terasa terlalu cepat.",
+    duration: "06:31",
     href: "/artikel/panduan-memilih-pupuk",
     thumbnail: "/category-photos/nutrisi-perangsang.png",
     title: "Kapan nutrisi generatif benar-benar dibutuhkan tanaman",
@@ -179,6 +225,7 @@ export const HOME_VIDEO_CARDS: HomeVideoCard[] = [
   {
     category: "Edukasi umum",
     description: "Panduan fase tanam yang membantu user paham sebelum turun ke katalog.",
+    duration: "07:12",
     href: "/artikel/fase-tanam-cabai-dari-semai-sampai-berbuah",
     thumbnail: "/illustrations/agri-seedling-lab.svg",
     title: "Ritme budidaya cabai dari semai sampai fase berbuah",
@@ -196,6 +243,75 @@ export const HOME_AI_CHAT_PROMPTS = [
   "Daun padi saya menguning, mulai dari mana?",
   "Pupuk apa yang cocok untuk fase generatif cabai?",
   "Apa beda gejala hama dan penyakit daun?",
+];
+
+export const HOME_HERO_METRICS: HomeHeroMetric[] = [
+  {
+    description: "Petani terbantu",
+    icon: "solution",
+    title: "50.000+",
+  },
+  {
+    description: "Produk original berkualitas",
+    icon: "product",
+    title: "Produk original",
+  },
+  {
+    description: "Ahli & AI siap membantu",
+    icon: "ai",
+    title: "Ahli & AI",
+  },
+  {
+    description: "Data dan transaksi terlindungi",
+    icon: "track",
+    title: "Aman & terpercaya",
+  },
+];
+
+export const HOME_PARTNER_BENEFITS: HomePartnerBenefit[] = [
+  {
+    description: "Untuk toko, mitra, dan belanja rutin",
+    icon: "product",
+    title: "Harga akun usaha",
+  },
+  {
+    description: "Panduan kampanye dan solusi lapangan",
+    icon: "article",
+    title: "Materi edukasi",
+  },
+  {
+    description: "Bisa lanjut ke tim saat kebutuhan membesar",
+    icon: "education",
+    title: "Pelatihan & bantuan",
+  },
+  {
+    description: "Pantau order dan koordinasi lebih rapi",
+    icon: "track",
+    title: "Sistem order mudah",
+  },
+];
+
+export const HOME_TRUST_STRIP: HomeTrustStripItem[] = [
+  {
+    description: "Dipakai di berbagai kebutuhan lapangan",
+    icon: "solution",
+    title: "Terpercaya oleh petani Indonesia",
+  },
+  {
+    description: "Panduan dan rekomendasi lebih mudah dipahami",
+    icon: "education",
+    title: "Konten dibuat oleh ahli pertanian",
+  },
+  {
+    description: "Solusi, produk, dan edukasi terus disesuaikan",
+    icon: "track",
+    title: "Update setiap hari",
+  },
+  {
+    description: "Akses akun dan data lebih terjaga",
+    icon: "distributor",
+    title: "Aman & terlindungi",
+  },
 ];
 
 export function buildWhatsAppConsultationUrl(

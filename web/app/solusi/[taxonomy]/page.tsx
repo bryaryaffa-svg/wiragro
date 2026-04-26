@@ -59,8 +59,8 @@ export async function generateMetadata({
 
   if (!availableSlugs.length) {
     return buildPageMetadata({
-      title: "Cluster solusi sedang disiapkan",
-      description: "Taxonomy solusi ini belum memiliki halaman yang siap ditampilkan.",
+      title: "Cluster solusi belum memiliki halaman aktif",
+      description: "Taxonomy solusi ini belum memiliki halaman aktif yang bisa ditampilkan saat ini.",
       path: `/solusi/${taxonomy}`,
       canonicalPath: "/solusi",
       noIndex: true,
@@ -186,7 +186,7 @@ export default async function SolutionTaxonomyIndexPage({
               <span className="eyebrow-label">Solusi aktif</span>
               <h2>Halaman solusi yang sudah mengisi cluster ini sekarang.</h2>
             </div>
-            <Link href="/belajar">Buka Edukasi</Link>
+            <Link href="/artikel">Buka Edukasi</Link>
           </div>
           <div className="solution-grid">
             {axisSolutions.map((solution) => (

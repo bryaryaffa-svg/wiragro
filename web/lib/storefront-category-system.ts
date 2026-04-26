@@ -78,7 +78,7 @@ export const STOREFRONT_CATEGORY_CLUSTERS: Record<
   },
   operasional: {
     label: "Operasional & Dukungan",
-    description: "Kebutuhan peternakan, operasional kios, dan layanan yang membantu transaksi tetap lancar.",
+    description: "Kebutuhan peternakan, operasional toko pertanian, dan layanan yang membantu transaksi tetap lancar.",
   },
 };
 
@@ -390,13 +390,13 @@ export const STOREFRONT_MAIN_CATEGORIES: StorefrontMainCategory[] = [
   {
     key: "kebutuhan-kios",
     cluster: "operasional",
-    label: "Kebutuhan Kios",
-    description: "Pelengkap operasional toko dan kebutuhan harian kios.",
-    query: "kebutuhan kios",
+    label: "Kebutuhan Toko",
+    description: "Pelengkap operasional toko pertanian dan kebutuhan harian pembelian rutin.",
+    query: "kebutuhan toko",
     matchers: ["kios", "sembako", "plastik belanja", "nota"],
     mascot: "kios",
     imageSrc: "/category-photos/pupuk.png",
-    imageAlt: "Perlengkapan operasional kios pertanian dan perlindungan kerja untuk kategori kebutuhan kios.",
+    imageAlt: "Perlengkapan operasional toko pertanian dan perlindungan kerja untuk kategori kebutuhan toko.",
     accent: "#5b6f94",
     accentSoft: "#e7eef9",
     accentWarm: "#f7f0e5",

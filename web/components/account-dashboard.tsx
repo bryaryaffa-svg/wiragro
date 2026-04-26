@@ -82,7 +82,7 @@ function formatAccountModeLabel(mode?: string | null) {
     case "distributor":
       return "Akun distributor";
     case "reseller":
-      return "Akun reseller";
+      return "Akun bisnis";
     default:
       return mode?.trim() || "Pengguna";
   }
@@ -97,7 +97,7 @@ function formatAccountRoleLabel(role?: string | null) {
     case "distributor":
       return "Distributor";
     case "reseller":
-      return "Reseller";
+      return "Bisnis";
     case "b2b":
       return "Buyer B2B";
     default:

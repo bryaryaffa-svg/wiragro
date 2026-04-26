@@ -19,18 +19,18 @@ import {
 
 export const dynamic = "force-dynamic";
 export const metadata = buildPageMetadata({
-  title: "B2B Inquiry & Pembelian Partai",
+  title: "Kebutuhan Bisnis Pertanian - Wiragro",
   description:
-    "Jalur B2B Wiragro untuk kebutuhan kios, reseller, kebun, proyek, dan pembelian rutin yang ingin dibahas lebih terarah.",
+    "Jalur kebutuhan bisnis Wiragro untuk toko pertanian, kebun, proyek, dan pembelian rutin yang ingin dibahas lebih terarah.",
   path: "/b2b",
   canonicalPath: "/b2b",
   section: "static",
   keywords: [
     "b2b pertanian",
-    "pembelian partai pertanian",
-    "reseller pertanian",
-    "kios pertanian",
-    "penawaran grosir",
+    "pembelian volume pertanian",
+    "toko pertanian",
+    "pembelian volume besar",
+    "kebutuhan bisnis pertanian",
   ],
 });
 
@@ -49,15 +49,15 @@ export default async function B2BPage() {
       <JsonLd
         data={[
           buildWebPageJsonLd({
-            title: "B2B Inquiry & Pembelian Partai",
+            title: "Kebutuhan Bisnis Pertanian - Wiragro",
             description:
-              "Jalur B2B untuk kebutuhan partai, belanja kios, dan pembelian pertanian yang perlu dibahas lebih lanjut.",
+              "Jalur B2B untuk kebutuhan volume besar, pembelian rutin, dan kebutuhan pertanian yang perlu dibahas lebih lanjut.",
             path: "/b2b",
           }),
           buildCollectionJsonLd({
-            title: "B2B Inquiry Wiragro",
+            title: "Kebutuhan Bisnis Wiragro",
             description:
-              "Entry point untuk kebutuhan pembelian partai, kios, reseller, dan proyek pertanian.",
+              "Entry point untuk kebutuhan toko pertanian, pembelian rutin, dan proyek pertanian.",
             path: "/b2b",
             itemUrls: featuredBundles.map((bundle) => bundle.href),
           }),
@@ -72,10 +72,10 @@ export default async function B2BPage() {
       <section className="bundle-hero bundle-hero--b2b">
         <div className="bundle-hero__copy">
           <span className="eyebrow-label">B2B</span>
-          <h1>Jalur B2B untuk pembelian partai, kios, dan kebutuhan rutin yang butuh penawaran lebih rapi.</h1>
+          <h1>Jalur kebutuhan bisnis untuk pembelian volume besar dan kebutuhan rutin yang butuh penanganan lebih rapi.</h1>
           <p>
             Halaman ini membantu mengirim inquiry, menyimpan konteks kebutuhan, dan memudahkan
-            tindak lanjut penawaran tanpa memindahkan pembeli ke proses grosir yang rumit.
+            tindak lanjut penawaran tanpa memecah pengalaman utama Wiragro.
           </p>
           <div className="bundle-hero__actions">
             <Link className="btn btn-primary" href="/belanja/paket">
@@ -89,7 +89,7 @@ export default async function B2BPage() {
 
         <aside className="bundle-hero__aside">
           <span className="eyebrow-label">Kapan dipakai</span>
-          <strong>Kios, reseller, proyek kebun, atau kebutuhan rutin yang terlalu berat jika disusun manual dari katalog.</strong>
+          <strong>Toko pertanian, proyek kebun, atau kebutuhan rutin yang terlalu berat jika disusun manual dari katalog.</strong>
           <p>
             Gunakan halaman ini saat kebutuhan sudah mulai menyentuh volume, ritme pembelian,
             atau kombinasi item yang lebih nyaman dibahas bersama tim Wiragro.
@@ -126,7 +126,7 @@ export default async function B2BPage() {
               <span className="eyebrow-label">WhatsApp B2B</span>
               <h2>Lanjutkan inquiry lewat jalur WhatsApp yang memang khusus B2B.</h2>
               <p>
-                CTA WhatsApp di halaman ini dikhususkan untuk kebutuhan kios, reseller, proyek,
+                CTA WhatsApp di halaman ini dikhususkan untuk kebutuhan toko pertanian, proyek,
                 dan pembelian rutin agar percakapannya tidak bercampur dengan intent retail umum.
               </p>
             </div>

@@ -1133,7 +1133,7 @@ function buildStaticPageContent(
       title: `Tentang ${SITE_NAME}`,
       excerpt: `${SITE_NAME} adalah platform solusi pertanian digital yang menyatukan solusi tanaman, edukasi, belanja produk, dan layanan B2C maupun B2B dalam satu tempat.`,
       body_html: `
-        <p><strong>${SITE_NAME}</strong> hadir sebagai platform solusi pertanian digital untuk membantu petani, pehobi, kios, dan buyer bisnis bergerak dari masalah ke keputusan yang lebih tepat.</p>
+        <p><strong>${SITE_NAME}</strong> hadir sebagai platform solusi pertanian digital untuk membantu petani, pehobi, toko pertanian, dan buyer bisnis bergerak dari masalah ke keputusan yang lebih tepat.</p>
         <p>Di satu tempat, Anda bisa mencari solusi masalah tanaman, mempelajari praktik budidaya, menemukan produk pertanian yang relevan, dan membuka jalur layanan B2C maupun B2B secara lebih rapi.</p>
         <p>Kami membangun pengalaman yang ramah, modern, dan mudah dipahami agar proses belajar sampai belanja terasa lebih tenang.</p>
         <p><strong>Alamat layanan:</strong> ${store.address ?? "-"}</p>
