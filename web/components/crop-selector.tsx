@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 
 import { AgriIcon, type AgriIconName } from "@/components/ui/agri-icon";
