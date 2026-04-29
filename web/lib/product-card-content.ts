@@ -6,6 +6,7 @@ import {
   type SolutionCropId,
   type SolutionProblemId,
 } from "@/lib/solution-experience";
+import { WIRAGRO_CATEGORY_ASSETS, WIRAGRO_ICON_ASSETS } from "@/lib/wiragro-assets";
 
 const PROFILE_CATEGORY_LABELS: Record<string, string> = {
   general: "Kebutuhan lapangan",
@@ -53,7 +54,7 @@ export function getFallbackProductVisual(product: ProductSummary) {
   const haystack = `${product.name} ${product.category?.name ?? ""} ${product.product_type}`.toLowerCase();
 
   if (haystack.includes("benih") || haystack.includes("bibit")) {
-    return "/wiragro-illustrations/wiragro_produk_benih_transparent.png";
+    return WIRAGRO_CATEGORY_ASSETS.benih;
   }
   if (
     haystack.includes("pestisida") ||
@@ -61,16 +62,18 @@ export function getFallbackProductVisual(product: ProductSummary) {
     haystack.includes("fungisida") ||
     haystack.includes("herbisida")
   ) {
-    return "/wiragro-illustrations/wiragro_produk_herbisida_transparent.png";
+    return WIRAGRO_CATEGORY_ASSETS.pesticide;
   }
   if (haystack.includes("nutrisi") || haystack.includes("booster") || haystack.includes("kalium")) {
-    return "/wiragro-illustrations/wiragro_produk_nutrisi_transparent.png";
+    return WIRAGRO_CATEGORY_ASSETS.nutritionBooster;
   }
   if (haystack.includes("alat") || haystack.includes("sprayer") || haystack.includes("semprot")) {
-    return "/wiragro-illustrations/wiragro_icon_alat_pertanian_transparent.png";
+    return haystack.includes("sprayer") || haystack.includes("semprot")
+      ? WIRAGRO_CATEGORY_ASSETS.sprayer
+      : WIRAGRO_ICON_ASSETS.tool;
   }
 
-  return "/wiragro-illustrations/wiragro_produk_pupuk_transparent.png";
+  return WIRAGRO_CATEGORY_ASSETS.pupuk;
 }
 
 export function getProductCardBadge(product: ProductSummary) {

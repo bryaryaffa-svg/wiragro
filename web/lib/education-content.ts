@@ -1,6 +1,7 @@
 import type { ArticleEnrichmentFields } from "@/lib/article-content";
 import type { ArticleSummaryPayload, ProductSummary } from "@/lib/api";
 import { getProductCatalogContext } from "@/lib/solution-experience";
+import { WIRAGRO_CATEGORY_ASSETS } from "@/lib/wiragro-assets";
 
 export type EducationFormat = "all" | "article" | "video";
 
@@ -56,7 +57,7 @@ const EDUCATION_VIDEO_RESOURCES: EducationVideoResource[] = [
     category: "Studi kasus lapangan",
     href: "/artikel/daun-menguning-dan-nutrisi-awal",
     articleSlug: "daun-menguning-dan-nutrisi-awal",
-    thumbnail: "/illustrations/agri-field-sunrise.svg",
+    thumbnail: WIRAGRO_CATEGORY_ASSETS.aiDiagnosis,
     cropTags: ["cabai", "horti-buah", "sayuran-daun"],
     problemTags: ["daun-menguning", "pertumbuhan-lambat", "akar-lemah"],
     topicTags: ["studi-kasus", "nutrisi-tanaman", "edukasi-umum"],
@@ -70,7 +71,7 @@ const EDUCATION_VIDEO_RESOURCES: EducationVideoResource[] = [
     category: "Review produk",
     href: "/artikel/pengendalian-hama-awal-yang-lebih-tenang",
     articleSlug: "pengendalian-hama-awal-yang-lebih-tenang",
-    thumbnail: "/category-photos/pestisida.png",
+    thumbnail: WIRAGRO_CATEGORY_ASSETS.pesticide,
     cropTags: ["cabai", "horti-buah", "sayuran-daun"],
     problemTags: ["hama-daun"],
     topicTags: ["review-produk", "pestisida", "hama-penyakit"],
@@ -84,7 +85,7 @@ const EDUCATION_VIDEO_RESOURCES: EducationVideoResource[] = [
     category: "Edukasi umum",
     href: "/artikel/fase-tanam-cabai-dari-semai-sampai-berbuah",
     articleSlug: "fase-tanam-cabai-dari-semai-sampai-berbuah",
-    thumbnail: "/illustrations/agri-seedling-lab.svg",
+    thumbnail: WIRAGRO_CATEGORY_ASSETS.education,
     cropTags: ["cabai"],
     problemTags: ["bunga-rontok", "pertumbuhan-lambat"],
     topicTags: ["edukasi-umum", "nutrisi-tanaman", "studi-kasus"],

@@ -12,10 +12,12 @@ import {
   getProductCardBadge,
   getProductCardFit,
 } from "@/lib/product-card-content";
+import { WIRAGRO_CATEGORY_ASSETS } from "@/lib/wiragro-assets";
 import type {
   HomeHeroMetric,
   HomeIconCard,
   HomePartnerBenefit,
+  HomeSeadanceVideoSlot,
   HomeTrustStripItem,
   HomeVideoCard,
 } from "@/lib/homepage-content";
@@ -31,19 +33,19 @@ function pickHomepageArticleVisual(article: {
   const haystack = `${article.title} ${(article.taxonomy_labels ?? []).join(" ")}`.toLowerCase();
 
   if (haystack.includes("benih") || haystack.includes("bibit")) {
-    return "/category-photos/benih.png";
+    return WIRAGRO_CATEGORY_ASSETS.benih;
   }
   if (haystack.includes("pupuk") || haystack.includes("nutrisi")) {
-    return "/category-photos/pupuk.png";
+    return WIRAGRO_CATEGORY_ASSETS.pupuk;
   }
   if (haystack.includes("hama") || haystack.includes("penyakit")) {
-    return "/category-photos/pestisida.png";
+    return WIRAGRO_CATEGORY_ASSETS.pesticide;
   }
   if (haystack.includes("fase") || haystack.includes("persemaian")) {
-    return "/category-photos/persemaian.png";
+    return WIRAGRO_CATEGORY_ASSETS.decorativeSeedling;
   }
 
-  return "/illustrations/agri-seedling-lab.svg";
+  return WIRAGRO_CATEGORY_ASSETS.education;
 }
 
 export function HomepageHeroMetricCard({ item }: { item: HomeHeroMetric }) {
@@ -175,6 +177,45 @@ export function HomepageMiniVideoCard({ video }: { video: HomeVideoCard }) {
   );
 }
 
+export function HomepageSeadanceVideoSlot({ video }: { video: HomeSeadanceVideoSlot }) {
+  return (
+    <article className="home-seadance-slot">
+      <div className="home-seadance-slot__media">
+        {video.videoSrc ? (
+          <video
+            aria-label={video.title}
+            className="home-seadance-slot__video"
+            controls
+            poster={video.poster}
+            preload="metadata"
+          >
+            <source src={video.videoSrc} />
+          </video>
+        ) : (
+          <Image
+            alt={video.title}
+            className="home-seadance-slot__image"
+            fill
+            sizes="(max-width: 768px) 92vw, 520px"
+            src={video.poster}
+          />
+        )}
+        <span className="home-seadance-slot__play">
+          <AgriIcon name="video" />
+        </span>
+      </div>
+      <div className="home-seadance-slot__body">
+        <span>{video.category}</span>
+        <strong>{video.title}</strong>
+        <p>{video.description}</p>
+        <Link className="home-seadance-slot__action" href={video.href}>
+          {video.ctaLabel}
+        </Link>
+      </div>
+    </article>
+  );
+}
+
 export function HomepageArticleList({
   articles,
 }: {
@@ -224,7 +265,7 @@ export function HomepageAiMascot() {
           className="homepage-ai-mascot__image"
           fill
           sizes="180px"
-          src="/wiragro-illustrations/wiragro_feature_petani_indonesia_transparent.png"
+          src={WIRAGRO_CATEGORY_ASSETS.aiDiagnosis}
         />
         <div className="homepage-ai-mascot__readout">
           <span className="homepage-ai-mascot__readout-icon">

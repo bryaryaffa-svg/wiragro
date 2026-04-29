@@ -1,10 +1,12 @@
 import type { ReactNode } from "react";
+import Image from "next/image";
 
 import type {
   CategoryMascotKind,
   StorefrontMainCategory,
   SubcategoryIconKind,
 } from "@/lib/storefront-category-system";
+import { WIRAGRO_ICON_ASSETS } from "@/lib/wiragro-assets";
 
 type MascotPalette = Pick<StorefrontMainCategory, "accent" | "accentSoft" | "accentWarm">;
 
@@ -14,6 +16,26 @@ const LEAF = "#69a947";
 const LEAF_LIGHT = "#cce26a";
 const CREAM = "#fff8ef";
 const LIGHT_FILL = "#f4efe5";
+
+const SUBCATEGORY_ICON_ASSETS: Partial<Record<SubcategoryIconKind, string>> = {
+  bag: WIRAGRO_ICON_ASSETS.bag,
+  box: WIRAGRO_ICON_ASSETS.bag,
+  cover: WIRAGRO_ICON_ASSETS.leaf,
+  feed: WIRAGRO_ICON_ASSETS.fieldBounty,
+  harvest: WIRAGRO_ICON_ASSETS.fieldBounty,
+  pot: WIRAGRO_ICON_ASSETS.polybag,
+  seed: WIRAGRO_ICON_ASSETS.seed,
+  service: WIRAGRO_ICON_ASSETS.service,
+  shield: WIRAGRO_ICON_ASSETS.shield,
+  soil: WIRAGRO_ICON_ASSETS.soil,
+  spark: WIRAGRO_ICON_ASSETS.spark,
+  spray: WIRAGRO_ICON_ASSETS.spray,
+  sprout: WIRAGRO_ICON_ASSETS.sprout,
+  store: WIRAGRO_ICON_ASSETS.product,
+  tool: WIRAGRO_ICON_ASSETS.tool,
+  tray: WIRAGRO_ICON_ASSETS.tray,
+  water: WIRAGRO_ICON_ASSETS.water,
+};
 
 function MascotFrame({
   palette,
@@ -363,6 +385,21 @@ export function CategoryMascot({
 }
 
 export function SubcategoryIcon({ kind }: { kind: SubcategoryIconKind }) {
+  const asset = SUBCATEGORY_ICON_ASSETS[kind];
+
+  if (asset) {
+    return (
+      <Image
+        alt=""
+        aria-hidden="true"
+        className="subcategory-image-icon"
+        fill
+        sizes="28px"
+        src={asset}
+      />
+    );
+  }
+
   switch (kind) {
     case "bag":
       return (

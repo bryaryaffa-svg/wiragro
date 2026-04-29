@@ -3,30 +3,31 @@ import Link from "next/link";
 import { AgriScene } from "@/components/ui/agri-scene";
 import type { AgriIconName } from "@/components/ui/agri-icon";
 import type { CommodityHub } from "@/lib/commodity-content";
+import { WIRAGRO_ICON_ASSETS } from "@/lib/wiragro-assets";
 
 const COMMODITY_SCENE: Record<CommodityHub["theme"], { icon: AgriIconName; asset: string }> = {
   chili: {
-    asset: "/wiragro-illustrations/wiragro_dekor_semak_transparent.png",
+    asset: WIRAGRO_ICON_ASSETS.chili,
     icon: "chili",
   },
   corn: {
-    asset: "/wiragro-illustrations/wiragro_dekor_tanaman_tinggi_transparent.png",
+    asset: WIRAGRO_ICON_ASSETS.corn,
     icon: "corn",
   },
   fruit: {
-    asset: "/wiragro-illustrations/wiragro_dekor_semak_transparent.png",
+    asset: WIRAGRO_ICON_ASSETS.tomato,
     icon: "tomato",
   },
   homegarden: {
-    asset: "/wiragro-illustrations/wiragro_dekor_gerobak_tanam_transparent.png",
+    asset: WIRAGRO_ICON_ASSETS.horti,
     icon: "horti",
   },
   leafy: {
-    asset: "/wiragro-illustrations/wiragro_dekor_daun_kiri_transparent.png",
+    asset: WIRAGRO_ICON_ASSETS.leaf,
     icon: "leaf",
   },
   rice: {
-    asset: "/wiragro-illustrations/wiragro_dekor_tanaman_tinggi_transparent.png",
+    asset: WIRAGRO_ICON_ASSETS.rice,
     icon: "rice",
   },
 };

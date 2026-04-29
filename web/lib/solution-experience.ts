@@ -4,6 +4,7 @@ import { ARTICLE_REFERENCE_SLUGS } from "@/lib/content-reference-catalog";
 import { resolveArticleReferences } from "@/lib/content-relation-resolver";
 import type { ArticleSummaryPayload, ProductDetailPayload, ProductSummary } from "@/lib/api";
 import { buildProductPageEnrichment } from "@/lib/product-content";
+import { WIRAGRO_CATEGORY_ASSETS } from "@/lib/wiragro-assets";
 
 type ProductProfileKey =
   | "general"
@@ -243,7 +244,7 @@ const SOLUTION_VIDEO_RESOURCES: SolutionVideoResource[] = [
     category: "Studi kasus lapangan",
     description: "Cocok untuk petani yang ingin membedakan masalah akar, air, dan nutrisi lebih dulu.",
     href: "/artikel/daun-menguning-dan-nutrisi-awal",
-    thumbnail: "/illustrations/agri-field-sunrise.svg",
+    thumbnail: WIRAGRO_CATEGORY_ASSETS.aiDiagnosis,
     cropIds: ["cabai", "hortikultura", "lainnya", "tomat"],
     problemIds: ["daun-kuning", "pertumbuhan-lambat", "tanaman-kerdil"],
   },
@@ -253,7 +254,7 @@ const SOLUTION_VIDEO_RESOURCES: SolutionVideoResource[] = [
     category: "Review produk",
     description: "Ringkasan gejala hama ringan sampai berat agar pilihan proteksi lebih masuk akal.",
     href: "/artikel/pengendalian-hama-awal-yang-lebih-tenang",
-    thumbnail: "/category-photos/pestisida.png",
+    thumbnail: WIRAGRO_CATEGORY_ASSETS.pesticide,
     cropIds: ["cabai", "hortikultura", "melon", "tomat", "bawang"],
     problemIds: ["hama", "bercak-daun", "hasil-panen"],
   },
@@ -263,7 +264,7 @@ const SOLUTION_VIDEO_RESOURCES: SolutionVideoResource[] = [
     category: "Edukasi umum",
     description: "Membantu memahami kapan tanaman butuh penyesuaian sebelum memilih booster.",
     href: "/artikel/fase-tanam-cabai-dari-semai-sampai-berbuah",
-    thumbnail: "/illustrations/agri-seedling-lab.svg",
+    thumbnail: WIRAGRO_CATEGORY_ASSETS.education,
     cropIds: ["cabai", "tomat", "melon", "hortikultura"],
     problemIds: ["buah-rontok", "pembungaan-buruk", "hasil-panen"],
   },

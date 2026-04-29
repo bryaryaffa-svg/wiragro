@@ -5,6 +5,7 @@ import {
   type GrowthBundleItemDefinition,
 } from "@/lib/growth-commerce";
 import { getProductImageOverride } from "@/lib/product-image-overrides";
+import { WIRAGRO_CATEGORY_ASSETS } from "@/lib/wiragro-assets";
 
 type BundleCatalogSource = "catalog" | "snapshot";
 
@@ -36,11 +37,11 @@ export type ResolvedGrowthBundleCatalog = {
 };
 
 const CATEGORY_IMAGE_BY_NAME: Record<string, string> = {
-  "alat pertanian": "/category-photos/alat-pertanian.png",
-  benih: "/category-photos/benih.png",
-  nutrisi: "/category-photos/nutrisi-perangsang.png",
-  pestisida: "/category-photos/pestisida.png",
-  pupuk: "/category-photos/pupuk.png",
+  "alat pertanian": WIRAGRO_CATEGORY_ASSETS.agriTools,
+  benih: WIRAGRO_CATEGORY_ASSETS.benih,
+  nutrisi: WIRAGRO_CATEGORY_ASSETS.nutritionBooster,
+  pestisida: WIRAGRO_CATEGORY_ASSETS.pesticide,
+  pupuk: WIRAGRO_CATEGORY_ASSETS.pupuk,
 };
 
 function parseAmount(value?: string | null) {

@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 
 import { useAuth } from "@/components/auth-provider";
 import { isHybridNavActive } from "@/lib/hybrid-navigation";
+import { WIRAGRO_ICON_ASSETS } from "@/lib/wiragro-assets";
 
 type MobileNavIconKind = "home" | "solve" | "shop" | "learn" | "account";
 
@@ -25,65 +26,22 @@ function isActivePath(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
+const MOBILE_NAV_ICON_SRC: Record<MobileNavIconKind, string> = {
+  account: WIRAGRO_ICON_ASSETS.account,
+  home: WIRAGRO_ICON_ASSETS.home,
+  learn: WIRAGRO_ICON_ASSETS.education,
+  shop: WIRAGRO_ICON_ASSETS.product,
+  solve: WIRAGRO_ICON_ASSETS.solution,
+};
+
 function MobileNavIcon({ kind }: { kind: MobileNavIconKind }) {
-  switch (kind) {
-    case "home":
-      return (
-        <svg aria-hidden="true" fill="none" viewBox="0 0 24 24">
-          <path
-            d="M4.5 10.5 12 4l7.5 6.5V19a1 1 0 0 1-1 1h-4.8v-5.2H10.3V20H5.5a1 1 0 0 1-1-1v-8.5Z"
-            stroke="currentColor"
-            strokeLinejoin="round"
-            strokeWidth="1.8"
-          />
-        </svg>
-      );
-    case "learn":
-      return (
-        <svg aria-hidden="true" fill="none" viewBox="0 0 24 24">
-          <path
-            d="M5 6.5A2.5 2.5 0 0 1 7.5 4H18v14.5A1.5 1.5 0 0 0 16.5 17H7.5A2.5 2.5 0 0 0 5 19.5V6.5Z"
-            stroke="currentColor"
-            strokeLinejoin="round"
-            strokeWidth="1.8"
-          />
-          <path d="M8.5 8.5H15" stroke="currentColor" strokeLinecap="round" strokeWidth="1.8" />
-          <path d="M8.5 12H15" stroke="currentColor" strokeLinecap="round" strokeWidth="1.8" />
-        </svg>
-      );
-    case "solve":
-      return (
-        <svg aria-hidden="true" fill="none" viewBox="0 0 24 24">
-          <circle cx="11" cy="11" r="6.5" stroke="currentColor" strokeWidth="1.8" />
-          <path d="m16 16 4 4" stroke="currentColor" strokeLinecap="round" strokeWidth="1.8" />
-          <path d="M8.8 11.1h4.4" stroke="currentColor" strokeLinecap="round" strokeWidth="1.8" />
-        </svg>
-      );
-    case "shop":
-      return (
-        <svg aria-hidden="true" fill="none" viewBox="0 0 24 24">
-          <path
-            d="M5 7h14l-1.4 9.1a1 1 0 0 1-1 .9H7.4a1 1 0 0 1-1-.9L5 7Z"
-            stroke="currentColor"
-            strokeLinejoin="round"
-            strokeWidth="1.8"
-          />
-          <path d="M8 7a4 4 0 1 1 8 0" stroke="currentColor" strokeWidth="1.8" />
-        </svg>
-      );
-    case "account":
-      return (
-        <svg aria-hidden="true" fill="none" viewBox="0 0 24 24">
-          <circle cx="12" cy="8" r="3.2" stroke="currentColor" strokeWidth="1.8" />
-          <path
-            d="M5.5 19c1.3-3 3.6-4.5 6.5-4.5s5.2 1.5 6.5 4.5"
-            stroke="currentColor"
-            strokeLinecap="round"
-            strokeWidth="1.8"
-          />
-        </svg>
-      );
-  }
+  return (
+    <img
+      alt=""
+      aria-hidden="true"
+      src={MOBILE_NAV_ICON_SRC[kind]}
+    />
+  );
 }
 
 export function MobileBottomNav() {

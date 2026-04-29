@@ -7,6 +7,7 @@ import type {
   StoreProfile,
 } from "@/lib/api";
 import { getSiteUrl } from "@/lib/config";
+import { WIRAGRO_CATEGORY_ASSETS } from "@/lib/wiragro-assets";
 
 export const SITE_NAME = "Wiragro";
 export const BRAND_TAGLINE = "Platform Solusi Pertanian Digital";
@@ -14,7 +15,7 @@ export const BRAND_SUBTAGLINE =
   "Cari solusi masalah tanaman, pelajari cara terbaik, dan beli produk pertanian yang tepat dalam satu tempat.";
 export const DEFAULT_SITE_TITLE = `Wiragro | ${BRAND_TAGLINE}`;
 export const DEFAULT_DESCRIPTION = BRAND_SUBTAGLINE;
-export const DEFAULT_OG_IMAGE = "/category-photos/pupuk.png";
+export const DEFAULT_OG_IMAGE = WIRAGRO_CATEGORY_ASSETS.pupuk;
 
 const DEFAULT_AUTHOR_NAME = "Tim Wiragro";
 const DEFAULT_KEYWORDS = [

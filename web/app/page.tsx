@@ -9,6 +9,7 @@ import {
   HomepageMiniVideoCard,
   HomepagePartnerBenefitCard,
   HomepageProblemCard,
+  HomepageSeadanceVideoSlot,
   HomepageTrustStripItemCard,
 } from "@/components/homepage-showcase";
 import { JsonLd } from "@/components/json-ld";
@@ -28,9 +29,11 @@ import {
   HOME_AI_CHAT_PROMPTS,
   HOME_PARTNER_BENEFITS,
   HOME_PROBLEM_CARDS,
+  HOME_SEADANCE_VIDEO_SLOT,
   HOME_TRUST_STRIP,
   HOME_VIDEO_CARDS,
 } from "@/lib/homepage-content";
+import { WIRAGRO_CATEGORY_ASSETS, WIRAGRO_HERO_ASSETS } from "@/lib/wiragro-assets";
 import {
   buildCollectionJsonLd,
   buildHomepageMetadata,
@@ -218,7 +221,7 @@ export default async function HomePage() {
               fill
               priority
               sizes="(max-width: 960px) 100vw, 46vw"
-              src="/home/hero-farmer-ai.png"
+              src={WIRAGRO_HERO_ASSETS.farmerDigital}
             />
           </div>
           <div className="homepage-hero__signal homepage-hero__signal--leaf">
@@ -304,6 +307,7 @@ export default async function HomePage() {
             </div>
             <Link href="/artikel">Lihat semua</Link>
           </div>
+          <HomepageSeadanceVideoSlot video={HOME_SEADANCE_VIDEO_SLOT} />
           <div className="home-mini-video-grid">
             {HOME_VIDEO_CARDS.map((video) => (
               <HomepageMiniVideoCard key={video.title} video={video} />
@@ -369,7 +373,7 @@ export default async function HomePage() {
               alt="Ilustrasi dukungan logistik dan operasional untuk mitra Wiragro."
               fill
               sizes="(max-width: 960px) 100vw, 34vw"
-              src="/illustrations/agri-logistics-hub.svg"
+              src={WIRAGRO_CATEGORY_ASSETS.logisticsPartner}
             />
           </div>
         </div>

@@ -5,6 +5,7 @@ import Link from "next/link";
 
 import { trackUiEvent } from "@/lib/analytics";
 import { formatDate } from "@/lib/format";
+import { WIRAGRO_CATEGORY_ASSETS } from "@/lib/wiragro-assets";
 
 export function pickArticleVisual(article: {
   title: string;
@@ -13,19 +14,19 @@ export function pickArticleVisual(article: {
   const haystack = `${article.title} ${(article.taxonomy_labels ?? []).join(" ")}`.toLowerCase();
 
   if (haystack.includes("benih") || haystack.includes("bibit")) {
-    return "/category-photos/benih.png";
+    return WIRAGRO_CATEGORY_ASSETS.benih;
   }
   if (haystack.includes("pupuk") || haystack.includes("nutrisi")) {
-    return "/category-photos/pupuk.png";
+    return WIRAGRO_CATEGORY_ASSETS.pupuk;
   }
   if (haystack.includes("hama") || haystack.includes("penyakit")) {
-    return "/category-photos/pestisida.png";
+    return WIRAGRO_CATEGORY_ASSETS.pesticide;
   }
   if (haystack.includes("fase") || haystack.includes("persemaian")) {
-    return "/category-photos/persemaian.png";
+    return WIRAGRO_CATEGORY_ASSETS.decorativeSeedling;
   }
 
-  return "/illustrations/agri-seedling-lab.svg";
+  return WIRAGRO_CATEGORY_ASSETS.education;
 }
 
 export function ArticleCard({

@@ -1,5 +1,8 @@
+import Image from "next/image";
+
 import { AgriIcon } from "@/components/ui/agri-icon";
 import { PrimaryButton, SecondaryButton } from "@/components/ui/button";
+import { WIRAGRO_CATEGORY_ASSETS } from "@/lib/wiragro-assets";
 
 type StateAction = {
   href: string;
@@ -46,13 +49,23 @@ export function EmptyState({
 
   return (
     <section className="empty-state state-panel">
-      <span className="state-panel__icon">
-        <AgriIcon name="empty" />
-      </span>
-      <span className="eyebrow-label">{eyebrow}</span>
-      <HeadingTag>{title}</HeadingTag>
-      <p>{description}</p>
-      <StateActions actions={actions} />
+      <div className="state-panel__content">
+        <span className="state-panel__icon">
+          <AgriIcon name="empty" />
+        </span>
+        <span className="eyebrow-label">{eyebrow}</span>
+        <HeadingTag>{title}</HeadingTag>
+        <p>{description}</p>
+        <StateActions actions={actions} />
+      </div>
+      <div className="state-panel__visual" aria-hidden="true">
+        <Image
+          alt=""
+          fill
+          sizes="(max-width: 768px) 120px, 180px"
+          src={WIRAGRO_CATEGORY_ASSETS.emptyProduct}
+        />
+      </div>
     </section>
   );
 }
@@ -74,13 +87,23 @@ export function ErrorState({
 
   return (
     <section className="empty-state state-panel state-panel--error">
-      <span className="state-panel__icon">
-        <AgriIcon name="error" />
-      </span>
-      <span className="eyebrow-label">{eyebrow}</span>
-      <HeadingTag>{title}</HeadingTag>
-      <p>{description}</p>
-      <StateActions actions={actions} />
+      <div className="state-panel__content">
+        <span className="state-panel__icon">
+          <AgriIcon name="error" />
+        </span>
+        <span className="eyebrow-label">{eyebrow}</span>
+        <HeadingTag>{title}</HeadingTag>
+        <p>{description}</p>
+        <StateActions actions={actions} />
+      </div>
+      <div className="state-panel__visual" aria-hidden="true">
+        <Image
+          alt=""
+          fill
+          sizes="(max-width: 768px) 120px, 180px"
+          src={WIRAGRO_CATEGORY_ASSETS.errorProduct}
+        />
+      </div>
     </section>
   );
 }

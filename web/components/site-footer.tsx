@@ -84,8 +84,8 @@ export async function SiteFooter() {
           {FOOTER_LINK_GROUPS.map((group) => (
             <div className="site-footer__links" key={group.title}>
               <h3>{group.title}</h3>
-              {group.links.map((link) => (
-                <Link href={link.href} key={`${group.title}-${link.href}`}>
+              {group.links.map((link, index) => (
+                <Link href={link.href} key={`${group.title}-${link.label}-${link.href}-${index}`}>
                   {link.label}
                 </Link>
               ))}
