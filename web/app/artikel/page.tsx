@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 
 import { ArticleCard } from "@/components/article-card";
 import { JsonLd } from "@/components/json-ld";
-import { FilterChip } from "@/components/ui/filter-chip";
 import { SearchInput } from "@/components/ui/search-input";
 import { SectionHeader } from "@/components/ui/section-header";
 import { EmptyState } from "@/components/ui/state";
@@ -12,7 +11,6 @@ import { getArticles } from "@/lib/api";
 import {
   EDUCATION_FORMAT_OPTIONS,
   EDUCATION_TOPIC_OPTIONS,
-  buildEducationHref,
   filterEducationArticles,
   filterEducationVideos,
   getFeaturedEducationVideos,
@@ -51,6 +49,13 @@ function hasActiveFilters(filters: EducationFilterState) {
       filters.topik ||
       (filters.format && filters.format !== "all"),
   );
+}
+
+function getSelectedLabel<T extends { id: string; label: string }>(
+  items: T[],
+  id?: string,
+) {
+  return items.find((item) => item.id === id)?.label;
 }
 
 export async function generateMetadata({
@@ -107,6 +112,15 @@ export default async function ArticlesPage({
   const featuredVideos = getFeaturedEducationVideos(filters, 3);
   const cropOptions = getSolutionCropOptions();
   const problemOptions = getSolutionProblemOptions();
+  const selectedFilterLabels = [
+    getSelectedLabel(cropOptions, filters.tanaman),
+    getSelectedLabel(problemOptions, filters.masalah),
+    getSelectedLabel(EDUCATION_TOPIC_OPTIONS, filters.topik),
+    getSelectedLabel(
+      EDUCATION_FORMAT_OPTIONS,
+      filters.format && filters.format !== "all" ? filters.format : undefined,
+    ),
+  ].filter(Boolean);
   const productHref = buildProductSolutionHref(
     normalizeSolutionCropId(filters.tanaman),
     normalizeSolutionProblemId(filters.masalah),
@@ -202,86 +216,68 @@ export default async function ArticlesPage({
           size="large"
         />
 
-        <div className="education-filter-groups">
-          <div className="education-chip-group">
-            <strong>Tanaman</strong>
-            <div className="education-chip-group__items">
-              <FilterChip
-                active={!filters.tanaman}
-                href={buildEducationHref(filters, { tanaman: undefined })}
-              >
-                Semua
-              </FilterChip>
+        <form action="/artikel" className="education-filter-form">
+          {filters.q ? <input name="q" type="hidden" value={filters.q} /> : null}
+
+          <label className="education-select-field">
+            <span>Tanaman</span>
+            <select defaultValue={filters.tanaman ?? ""} name="tanaman">
+              <option value="">Pilih tanaman</option>
               {cropOptions.map((item) => (
-                <FilterChip
-                  active={filters.tanaman === item.id}
-                  href={buildEducationHref(filters, { tanaman: item.id })}
-                  key={item.id}
-                >
+                <option key={item.id} value={item.id}>
                   {item.label}
-                </FilterChip>
+                </option>
               ))}
-            </div>
-          </div>
+            </select>
+          </label>
 
-          <div className="education-chip-group">
-            <strong>Masalah</strong>
-            <div className="education-chip-group__items">
-              <FilterChip
-                active={!filters.masalah}
-                href={buildEducationHref(filters, { masalah: undefined })}
-              >
-                Semua
-              </FilterChip>
+          <label className="education-select-field">
+            <span>Masalah</span>
+            <select defaultValue={filters.masalah ?? ""} name="masalah">
+              <option value="">Pilih masalah</option>
               {problemOptions.map((item) => (
-                <FilterChip
-                  active={filters.masalah === item.id}
-                  href={buildEducationHref(filters, { masalah: item.id })}
-                  key={item.id}
-                >
+                <option key={item.id} value={item.id}>
                   {item.label}
-                </FilterChip>
+                </option>
               ))}
-            </div>
-          </div>
+            </select>
+          </label>
 
-          <div className="education-chip-group">
-            <strong>Topik</strong>
-            <div className="education-chip-group__items">
-              <FilterChip
-                active={!filters.topik}
-                href={buildEducationHref(filters, { topik: undefined })}
-              >
-                Semua
-              </FilterChip>
+          <label className="education-select-field">
+            <span>Topik</span>
+            <select defaultValue={filters.topik ?? ""} name="topik">
+              <option value="">Semua topik</option>
               {EDUCATION_TOPIC_OPTIONS.map((item) => (
-                <FilterChip
-                  active={filters.topik === item.id}
-                  href={buildEducationHref(filters, { topik: item.id })}
-                  key={item.id}
-                >
+                <option key={item.id} value={item.id}>
                   {item.label}
-                </FilterChip>
+                </option>
               ))}
-            </div>
-          </div>
+            </select>
+          </label>
 
-          <div className="education-chip-group">
-            <strong>Format</strong>
-            <div className="education-chip-group__items">
+          <label className="education-select-field">
+            <span>Format</span>
+            <select
+              defaultValue={filters.format && filters.format !== "all" ? filters.format : ""}
+              name="format"
+            >
               {EDUCATION_FORMAT_OPTIONS.map((item) => (
-                <FilterChip
-                  active={(filters.format ?? "all") === item.id}
-                  href={buildEducationHref(filters, {
-                    format: item.id === "all" ? undefined : item.id,
-                  })}
-                  key={item.id}
-                >
+                <option key={item.id} value={item.id === "all" ? "" : item.id}>
                   {item.label}
-                </FilterChip>
+                </option>
               ))}
-            </div>
+            </select>
+          </label>
+
+          <div className="education-filter-actions">
+            <button type="submit">Terapkan</button>
+            {activeFilters ? <a href={resetHref}>Reset</a> : null}
           </div>
+        </form>
+
+        <div className="education-filter-summary">
+          <span>Filter aktif</span>
+          <strong>{selectedFilterLabels.length ? selectedFilterLabels.join(" / ") : "Semua edukasi"}</strong>
         </div>
       </section>
 

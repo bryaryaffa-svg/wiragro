@@ -15,7 +15,7 @@ export async function SiteFooter() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="site-footer">
+    <footer className="site-footer" id="site-footer">
       <div className="site-footer__hero">
         <div className="site-footer__brand">
           <span className="site-footer__eyebrow">Wiragro</span>
