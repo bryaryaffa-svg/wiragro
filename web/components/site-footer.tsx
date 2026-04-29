@@ -24,17 +24,6 @@ export async function SiteFooter() {
             tone="light"
             variant="footer"
           />
-          <h2>Dari gejala lapangan ke keputusan beli yang lebih yakin.</h2>
-          <p>
-            Wiragro menyatukan solusi tanaman, edukasi praktis, produk terarah, dan bantuan tim agar
-            keputusan di lapangan terasa lebih cepat dipahami.
-          </p>
-          <div className="site-footer__badges">
-            <span>Solusi Tanaman</span>
-            <span>Video & Artikel</span>
-            <span>Produk Terarah</span>
-            <span>AI Pertanian</span>
-          </div>
         </div>
 
         {store ? (
@@ -55,12 +44,6 @@ export async function SiteFooter() {
                 <span>{store.operational_hours || "Senin - Sabtu, 08:00 - 17:00"}</span>
               </div>
 
-              {store.whatsapp_number ? (
-                <div className="site-footer__contact">
-                  <strong>WhatsApp resmi</strong>
-                  <span>{store.whatsapp_number}</span>
-                </div>
-              ) : null}
             </div>
 
             <div className="site-footer__contact-actions">
@@ -97,7 +80,6 @@ export async function SiteFooter() {
       <div className="site-footer__bottom">
         <p>&copy; {year} Wiragro. Platform solusi pertanian digital untuk belajar, menyelesaikan masalah, dan berbelanja lebih terarah.</p>
         <div className="site-footer__bottom-links">
-          <Link href="/kontak">Kontak</Link>
           <Link href="/faq">FAQ</Link>
           <Link href="/kebijakan-privasi">Privasi</Link>
           <Link href="/syarat-dan-ketentuan">Syarat</Link>

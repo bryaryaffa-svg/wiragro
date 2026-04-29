@@ -108,7 +108,6 @@ export const FOOTER_LINK_GROUPS: FooterLinkGroup[] = [
     title: "Tentang",
     links: [
       { href: "/tentang-kami", label: "Tentang Wiragro" },
-      { href: "/kontak", label: "Kontak" },
       { href: "/faq", label: "FAQ" },
       { href: "/kebijakan-privasi", label: "Kebijakan Privasi" },
       { href: "/syarat-dan-ketentuan", label: "Syarat & Ketentuan" },
@@ -126,7 +125,6 @@ export const FOOTER_LINK_GROUPS: FooterLinkGroup[] = [
   {
     title: "Kanal Resmi",
     links: [
-      { href: "/kontak", label: "WhatsApp Resmi" },
       { href: "/kontak", label: "Sosial Media" },
       { href: "/pengiriman-pembayaran", label: "Pengiriman & Pembayaran" },
       { href: "/garansi-retur", label: "Garansi & Retur" },
