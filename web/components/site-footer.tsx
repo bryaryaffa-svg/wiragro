@@ -1,3 +1,4 @@
+import { Fragment } from "react";
 import Link from "next/link";
 
 import { WiragroLockup } from "@/components/wiragro-lockup";
@@ -13,6 +14,11 @@ export async function SiteFooter() {
     : null;
   const consultationUrl = buildWhatsAppConsultationUrl(store?.whatsapp_number, store?.name);
   const year = new Date().getFullYear();
+  const footerLinkPairs = [];
+
+  for (let index = 0; index < FOOTER_LINK_GROUPS.length; index += 2) {
+    footerLinkPairs.push(FOOTER_LINK_GROUPS.slice(index, index + 2));
+  }
 
   return (
     <footer className="site-footer" id="site-footer">
@@ -34,29 +40,28 @@ export async function SiteFooter() {
             </div>
 
             <div className="site-footer__contact-grid">
-              <div className="site-footer__contact">
+              <div className="site-footer__contact site-footer__contact--address">
                 <strong>Alamat</strong>
                 <span>{store.address || "Alamat layanan sedang diperbarui."}</span>
               </div>
 
-              <div className="site-footer__contact">
+              <div className="site-footer__contact site-footer__contact--hours">
                 <strong>Jam layanan</strong>
                 <span>{store.operational_hours || "Senin - Sabtu, 08:00 - 17:00"}</span>
               </div>
 
-            </div>
-
-            <div className="site-footer__contact-actions">
-              {consultationUrl ? (
-                <a href={consultationUrl} rel="noreferrer" target="_blank">
-                  Hubungi WhatsApp resmi
-                </a>
-              ) : null}
-              {mapsUrl ? (
-                <a href={mapsUrl} rel="noreferrer" target="_blank">
-                  Buka Google Maps
-                </a>
-              ) : null}
+              <div className="site-footer__contact-actions">
+                {consultationUrl ? (
+                  <a href={consultationUrl} rel="noreferrer" target="_blank">
+                    Hubungi WhatsApp resmi
+                  </a>
+                ) : null}
+                {mapsUrl ? (
+                  <a href={mapsUrl} rel="noreferrer" target="_blank">
+                    Buka Google Maps
+                  </a>
+                ) : null}
+              </div>
             </div>
           </div>
         ) : null}
@@ -64,16 +69,48 @@ export async function SiteFooter() {
 
       <div className="site-footer__links-shell">
         <div className="site-footer__columns">
-          {FOOTER_LINK_GROUPS.map((group) => (
-            <div className="site-footer__links" key={group.title}>
-              <h3>{group.title}</h3>
-              {group.links.map((link, index) => (
-                <Link href={link.href} key={`${group.title}-${link.label}-${link.href}-${index}`}>
-                  {link.label}
-                </Link>
-              ))}
-            </div>
-          ))}
+          {footerLinkPairs.map(([leftGroup, rightGroup]) => {
+            const rowCount = Math.max(
+              leftGroup.links.length,
+              rightGroup?.links.length ?? 0,
+            );
+
+            return (
+              <div className="site-footer__link-pair" key={leftGroup.title}>
+                <h3 className="site-footer__link-heading">{leftGroup.title}</h3>
+                {rightGroup ? (
+                  <h3 className="site-footer__link-heading">{rightGroup.title}</h3>
+                ) : (
+                  <span aria-hidden="true" className="site-footer__link-heading-placeholder" />
+                )}
+
+                {Array.from({ length: rowCount }).map((_, index) => {
+                  const leftLink = leftGroup.links[index];
+                  const rightLink = rightGroup?.links[index];
+
+                  return (
+                    <Fragment key={`${leftGroup.title}-${rightGroup?.title ?? "empty"}-${index}`}>
+                      {leftLink ? (
+                        <Link className="site-footer__link-cell" href={leftLink.href}>
+                          {leftLink.label}
+                        </Link>
+                      ) : (
+                        <span aria-hidden="true" className="site-footer__link-placeholder" />
+                      )}
+
+                      {rightLink ? (
+                        <Link className="site-footer__link-cell" href={rightLink.href}>
+                          {rightLink.label}
+                        </Link>
+                      ) : (
+                        <span aria-hidden="true" className="site-footer__link-placeholder" />
+                      )}
+                    </Fragment>
+                  );
+                })}
+              </div>
+            );
+          })}
         </div>
       </div>
 

@@ -662,7 +662,7 @@ textarea:focus {
 
 .site-footer__columns {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1rem;
 }
 
@@ -728,6 +728,10 @@ textarea:focus {
   gap: 0.85rem;
 }
 
+.site-footer__contact--address {
+  grid-column: 1 / -1;
+}
+
 .site-footer__contact {
   padding: 0.95rem 1rem;
   border-radius: 20px;
@@ -743,13 +747,15 @@ textarea:focus {
 }
 
 .site-footer__contact-actions {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: 1fr;
   gap: 0.75rem;
 }
 
 .site-footer__contact-actions a {
-  flex: 1 1 220px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   min-height: 48px;
   padding: 0.85rem 1rem;
   border-radius: 18px;
@@ -763,7 +769,14 @@ textarea:focus {
   background: rgba(255, 255, 255, 0.06);
 }
 
-.site-footer__links h3 {
+.site-footer__link-pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.55rem 1rem;
+  align-items: stretch;
+}
+
+.site-footer__link-heading {
   margin: 0;
   font-size: 0.82rem;
   text-transform: uppercase;
@@ -771,14 +784,23 @@ textarea:focus {
   color: rgba(216, 239, 136, 0.85);
 }
 
-.site-footer__links a {
+.site-footer__link-heading-placeholder {
+  display: block;
+}
+
+.site-footer__link-cell {
   padding: 0.18rem 0;
 }
 
-.site-footer__links a:hover,
+.site-footer__link-cell:hover,
 .site-footer__bottom-links a:hover,
 .site-footer__contact-actions a:hover {
   color: #ffffff;
+}
+
+.site-footer__link-placeholder {
+  display: block;
+  visibility: hidden;
 }
 
 .site-footer__bottom {
@@ -5050,7 +5072,7 @@ textarea:focus {
   }
 
   .homepage-hero--entry .homepage-hero__visual {
-    min-height: 230px;
+    display: none;
   }
 
   .homepage-hero--entry .homepage-hero__image {
@@ -5085,8 +5107,7 @@ textarea:focus {
   }
 
   .homepage-entry-paths {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 0.42rem;
+    display: none;
   }
 
   .homepage-entry-path-card {
@@ -6953,7 +6974,7 @@ textarea:focus {
     gap: 0.52rem;
   }
 
-  .site-footer__contact:first-child {
+  .site-footer__contact--address {
     grid-column: 1 / -1;
   }
 
@@ -6972,8 +6993,10 @@ textarea:focus {
 
   .site-footer__contact-actions {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: 1fr;
+    grid-auto-rows: minmax(0, 1fr);
     gap: 0.52rem;
+    align-self: stretch;
   }
 
   .site-footer__contact-actions a {
@@ -7004,28 +7027,23 @@ textarea:focus {
   }
 
   .site-footer__columns {
+    grid-template-columns: 1fr;
+    gap: 0.9rem;
+  }
+
+  .site-footer__link-pair {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 0.58rem;
   }
 
-  .site-footer__links,
-  .site-footer__links:last-child {
-    grid-column: auto;
-    gap: 0.36rem;
-    padding: 0;
-    border: 0;
-    border-radius: 0;
-    background: transparent;
-    box-shadow: none;
-  }
-
-  .site-footer__links h3 {
+  .site-footer__link-heading {
     color: #d8ef88;
     font-size: 0.68rem;
     letter-spacing: 0.14em;
   }
 
-  .site-footer__links a {
+  .site-footer__link-cell,
+  .site-footer__link-placeholder {
     position: relative;
     display: flex;
     align-items: center;
@@ -7041,7 +7059,11 @@ textarea:focus {
     line-height: 1.16;
   }
 
-  .site-footer__links a::after {
+  .site-footer__link-placeholder {
+    visibility: hidden;
+  }
+
+  .site-footer__link-cell::after {
     flex: 0 0 auto;
     width: 0.36rem;
     height: 0.36rem;
