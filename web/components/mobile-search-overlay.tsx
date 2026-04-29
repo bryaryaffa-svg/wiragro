@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 
 import { useGlobalSearchResults } from "@/components/global-search";
 import { SearchResultTabs } from "@/components/search-result-tabs";
+import { SearchSuggestionGroups } from "@/components/search-suggestion-groups";
 import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 import { trackUiEvent } from "@/lib/analytics";
 
@@ -24,7 +25,7 @@ export function MobileSearchOverlay({
   open: boolean;
 }) {
   const router = useRouter();
-  const { href, isLoading, query, results, setQuery, suggestions } = useGlobalSearchResults("");
+  const { href, isLoading, query, results, setQuery } = useGlobalSearchResults("");
 
   if (!open) {
     return null;
@@ -52,13 +53,13 @@ export function MobileSearchOverlay({
         }}
       >
         <label className="sr-only" htmlFor="mobile-search-input">
-          Cari solusi, produk, artikel, atau masalah tanaman
+          Cari produk, tanaman, hama, gejala, atau artikel
         </label>
         <input
           autoFocus
           id="mobile-search-input"
           onChange={(event) => setQuery(event.target.value)}
-          placeholder="Cari solusi, produk, artikel, atau masalah tanaman..."
+          placeholder="Cari produk, tanaman, hama, gejala, atau artikel..."
           type="search"
           value={query}
         />
@@ -69,24 +70,15 @@ export function MobileSearchOverlay({
 
       {query.trim().length < 2 ? (
         <div className="mobile-search-overlay__suggestions">
-          <span className="eyebrow-label">Pencarian populer</span>
-          <div className="global-search__chips">
-            {suggestions.map((suggestion) => (
-              <button
-                key={suggestion}
-                onClick={() => {
-                  setQuery(suggestion);
-                  trackUiEvent("global_search_suggestion_clicked", {
-                    query: suggestion,
-                    surface: "mobile_overlay",
-                  });
-                }}
-                type="button"
-              >
-                {suggestion}
-              </button>
-            ))}
-          </div>
+          <SearchSuggestionGroups
+            onSuggestionClick={(suggestion) => {
+              setQuery(suggestion);
+              trackUiEvent("global_search_suggestion_clicked", {
+                query: suggestion,
+                surface: "mobile_overlay",
+              });
+            }}
+          />
           <div className="mobile-search-overlay__quick-links">
             <Link href="/solusi" onClick={onClose}>
               Buka Solusi

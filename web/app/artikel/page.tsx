@@ -198,7 +198,7 @@ export default async function ArticlesPage({
             format: filters.format && filters.format !== "all" ? filters.format : undefined,
           }}
           inputLabel="Cari edukasi pertanian"
-          placeholder="Cari hama, tanaman, pupuk, pestisida, atau masalah..."
+          placeholder="Cari produk, tanaman, hama, gejala, atau artikel..."
           size="large"
         />
 
@@ -210,7 +210,7 @@ export default async function ArticlesPage({
                 active={!filters.tanaman}
                 href={buildEducationHref(filters, { tanaman: undefined })}
               >
-                Semua tanaman
+                Semua
               </FilterChip>
               {cropOptions.map((item) => (
                 <FilterChip
@@ -231,7 +231,7 @@ export default async function ArticlesPage({
                 active={!filters.masalah}
                 href={buildEducationHref(filters, { masalah: undefined })}
               >
-                Semua masalah
+                Semua
               </FilterChip>
               {problemOptions.map((item) => (
                 <FilterChip
@@ -252,7 +252,7 @@ export default async function ArticlesPage({
                 active={!filters.topik}
                 href={buildEducationHref(filters, { topik: undefined })}
               >
-                Semua topik
+                Semua
               </FilterChip>
               {EDUCATION_TOPIC_OPTIONS.map((item) => (
                 <FilterChip

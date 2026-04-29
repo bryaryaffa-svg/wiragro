@@ -1,9 +1,10 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
+import { useDeferredValue, useEffect, useRef, useState } from "react";
 
 import { SearchResultTabs } from "@/components/search-result-tabs";
+import { SearchSuggestionGroups } from "@/components/search-suggestion-groups";
 import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 import { trackUiEvent } from "@/lib/analytics";
 import {
@@ -99,8 +100,7 @@ export function GlobalSearch({
   defaultValue?: string;
 }) {
   const router = useRouter();
-  const { href, isLoading, query, results, setQuery, suggestions } =
-    useGlobalSearchResults(defaultValue);
+  const { href, isLoading, query, results, setQuery } = useGlobalSearchResults(defaultValue);
   const [isOpen, setIsOpen] = useState(false);
   const wrapperRef = useRef<HTMLDivElement | null>(null);
 
@@ -116,7 +116,6 @@ export function GlobalSearch({
   }, []);
 
   const shouldShowPanel = isOpen || query.trim().length > 0;
-  const suggestionItems = useMemo(() => suggestions.slice(0, 5), [suggestions]);
 
   return (
     <div className="global-search" ref={wrapperRef}>
@@ -132,7 +131,7 @@ export function GlobalSearch({
         }}
       >
         <label className="sr-only" htmlFor="global-search-input">
-          Cari solusi, produk, artikel, atau masalah tanaman
+          Cari produk, tanaman, hama, gejala, atau artikel
         </label>
         <div className="global-search__control">
           <SearchGlyph />
@@ -140,7 +139,7 @@ export function GlobalSearch({
             id="global-search-input"
             onChange={(event) => setQuery(event.target.value)}
             onFocus={() => setIsOpen(true)}
-            placeholder="Cari solusi, produk, artikel, atau masalah tanaman..."
+            placeholder="Cari produk, tanaman, hama, gejala, atau artikel..."
             type="search"
             value={query}
           />
@@ -154,23 +153,14 @@ export function GlobalSearch({
         <div className="global-search__panel">
           {query.trim().length < 2 ? (
             <div className="global-search__suggestions">
-              <span className="eyebrow-label">Saran cepat</span>
-              <div className="global-search__chips">
-                {suggestionItems.map((suggestion) => (
-                  <button
-                    key={suggestion}
-                    onClick={() => {
-                      setQuery(suggestion);
-                      trackUiEvent("global_search_suggestion_clicked", {
-                        query: suggestion,
-                      });
-                    }}
-                    type="button"
-                  >
-                    {suggestion}
-                  </button>
-                ))}
-              </div>
+              <SearchSuggestionGroups
+                onSuggestionClick={(suggestion) => {
+                  setQuery(suggestion);
+                  trackUiEvent("global_search_suggestion_clicked", {
+                    query: suggestion,
+                  });
+                }}
+              />
             </div>
           ) : isLoading ? (
             <LoadingSkeleton

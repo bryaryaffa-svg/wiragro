@@ -38,6 +38,43 @@ import { resolveStorefrontCategorySelection } from "@/lib/storefront-category-sy
 export const dynamic = "force-dynamic";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
+type CategorySummary = Awaited<ReturnType<typeof getCategories>>[number];
+
+const PRODUCT_SORT_OPTIONS = [
+  { label: "Terbaru", value: "latest" },
+  { label: "Promo aktif", value: "promo" },
+  { label: "Terlaris", value: "best_seller" },
+  { label: "Nama A-Z", value: "name_asc" },
+  { label: "Harga termurah", value: "price_asc" },
+  { label: "Harga tertinggi", value: "price_desc" },
+];
+
+const PRODUCT_PROBLEM_OPTIONS = [
+  { label: "Daun kuning", value: "daun-kuning" },
+  { label: "Hama", value: "hama" },
+  { label: "Jamur / bercak", value: "bercak-daun" },
+  { label: "Gulma", value: "gulma" },
+  { label: "Pertumbuhan lambat", value: "pertumbuhan-lambat" },
+  { label: "Buah rontok", value: "buah-rontok" },
+  { label: "Pembungaan buruk", value: "pembungaan-buruk" },
+  { label: "Hasil panen kurang maksimal", value: "hasil-panen" },
+];
+
+const PRODUCT_PRICE_OPTIONS = [
+  { label: "Semua harga", value: "all" },
+  { label: "Di bawah 100 ribu", value: "under-100k" },
+  { label: "100 ribu - 250 ribu", value: "100k-250k" },
+  { label: "Di atas 250 ribu", value: "250k+" },
+];
+
+const QUICK_PROBLEM_CHIPS = [
+  { label: "Untuk daun kuning", value: "daun-kuning" },
+  { label: "Untuk hama", value: "hama" },
+  { label: "Untuk pembungaan", value: "pembungaan-buruk" },
+  { label: "Untuk buah rontok", value: "buah-rontok" },
+  { label: "Untuk gulma", value: "gulma" },
+  { label: "Untuk pertumbuhan", value: "pertumbuhan-lambat" },
+];
 
 function getParam(
   params: Record<string, string | string[] | undefined>,
@@ -59,6 +96,138 @@ function buildProductsHref(
 
   const query = search.toString();
   return query ? `/produk?${query}` : "/produk";
+}
+
+function HiddenQueryInputs({
+  values,
+}: {
+  values: Record<string, string | undefined>;
+}) {
+  return Object.entries(values).map(([key, value]) =>
+    value ? <input key={key} name={key} type="hidden" value={value} /> : null,
+  );
+}
+
+function CatalogFilterForm({
+  category,
+  className,
+  cropId,
+  mainCategoryKey,
+  priceBand,
+  problemId,
+  promoOnly,
+  search,
+  sort,
+  stockOnly,
+  subcategory,
+}: {
+  category?: string;
+  className?: string;
+  cropId?: string | null;
+  mainCategoryKey?: string;
+  priceBand: "100k-250k" | "250k+" | "all" | "under-100k";
+  problemId?: string | null;
+  promoOnly: boolean;
+  search?: string;
+  sort: string;
+  stockOnly: boolean;
+  subcategory?: string;
+}) {
+  return (
+    <form action="/produk" className={`catalog-filter-form ${className ?? ""}`}>
+      <HiddenQueryInputs
+        values={{
+          kategori: category,
+          kelompok: mainCategoryKey,
+          q: search,
+          sort,
+          subkategori: subcategory,
+        }}
+      />
+      <label className="catalog-search-card__field">
+        <span>Tanaman</span>
+        <select defaultValue={cropId ?? ""} name="tanaman">
+          <option value="">Semua tanaman</option>
+          {getSolutionCropOptions().map((item) => (
+            <option key={item.id} value={item.id}>
+              {item.label}
+            </option>
+          ))}
+        </select>
+      </label>
+
+      <label className="catalog-search-card__field">
+        <span>Masalah</span>
+        <select defaultValue={problemId ?? ""} name="masalah">
+          <option value="">Semua masalah</option>
+          {PRODUCT_PROBLEM_OPTIONS.map((item) => (
+            <option key={item.value} value={item.value}>
+              {item.label}
+            </option>
+          ))}
+        </select>
+      </label>
+
+      <label className="catalog-search-card__field">
+        <span>Harga</span>
+        <select defaultValue={priceBand} name="harga">
+          {PRODUCT_PRICE_OPTIONS.map((item) => (
+            <option key={item.value} value={item.value}>
+              {item.label}
+            </option>
+          ))}
+        </select>
+      </label>
+
+      <label className="catalog-checkbox">
+        <input defaultChecked={promoOnly} name="promo" type="checkbox" value="1" />
+        <span>Promo</span>
+      </label>
+
+      <label className="catalog-checkbox">
+        <input defaultChecked={stockOnly} name="stok" type="checkbox" value="1" />
+        <span>Stok tersedia</span>
+      </label>
+
+      <div className="catalog-filter-form__actions">
+        <button className="btn btn-secondary" type="submit">
+          Terapkan filter
+        </button>
+        <a className="btn btn-secondary" href="/produk">
+          Reset filter
+        </a>
+      </div>
+    </form>
+  );
+}
+
+function CatalogCategoryChips({
+  baseParams,
+  categories,
+  category,
+  className,
+}: {
+  baseParams: Record<string, string | undefined>;
+  categories: CategorySummary[];
+  category?: string;
+  className?: string;
+}) {
+  return (
+    <div className={`catalog-chip-row ${className ?? ""}`} aria-label="Kategori produk">
+      <FilterChip active={!category} href={buildProductsHref({ ...baseParams, kategori: undefined })}>
+        Semua kategori
+      </FilterChip>
+      {categories.map((item) => (
+        <FilterChip
+          active={category === item.slug}
+          href={buildProductsHref({ ...baseParams, kategori: item.slug })}
+          key={item.id}
+        >
+          {item.name}
+        </FilterChip>
+      ))}
+    </div>
+  );
 }
 
 export async function generateMetadata({
@@ -147,14 +316,6 @@ export default async function ProductsPage({
     query: search,
   });
   const activeStorefrontMain = storefrontSelection.main;
-  const quickProblemChips = [
-    { label: "Untuk daun kuning", value: "daun-kuning" },
-    { label: "Untuk hama", value: "hama" },
-    { label: "Untuk pembungaan", value: "pembungaan-buruk" },
-    { label: "Untuk buah rontok", value: "buah-rontok" },
-    { label: "Untuk gulma", value: "gulma" },
-    { label: "Untuk pertumbuhan", value: "pertumbuhan-lambat" },
-  ];
   const cropChips = getSolutionCropOptions().slice(0, 8);
 
   const baseParams = {
@@ -186,8 +347,21 @@ export default async function ProductsPage({
       : cropId
         ? "Produk ini dipersempit berdasarkan tanaman yang sedang Anda tangani."
         : problemId
-          ? "Produk ini dipersempit berdasarkan masalah yang sedang Anda hadapi."
-          : "Mulai dari masalah tanaman, lalu persempit dengan filter yang paling relevan.";
+        ? "Produk ini dipersempit berdasarkan masalah yang sedang Anda hadapi."
+        : "Mulai dari masalah tanaman, lalu persempit dengan filter yang paling relevan.";
+  const activeFilterCount = [
+    cropId,
+    problemId,
+    priceBand !== "all",
+    promoOnly,
+    stockOnly,
+    category,
+    mainCategoryKey,
+    subcategory,
+  ].filter(Boolean).length;
+  const filterSummary = activeFilterCount
+    ? `${activeFilterCount} filter aktif`
+    : "Tanaman, masalah, harga, promo";
 
   return (
     <section className="page-stack">
@@ -208,7 +382,7 @@ export default async function ProductsPage({
         id="products-page-jsonld"
       />
 
-      <section className="page-intro page-intro--compact">
+      <section className="page-intro page-intro--compact page-intro--catalog">
         <span className="eyebrow-label">Produk berbasis solusi</span>
         <h1>Produk Pertanian Wiragro</h1>
         <p>
@@ -221,7 +395,7 @@ export default async function ProductsPage({
         </div>
       </section>
 
-      <section className="section-block">
+      <section className="section-block catalog-context-strip">
         <SectionHeader
           description="Jika kebutuhan Anda datang dari gejala tanaman, mulai dari masalah dan komoditas lebih dulu agar produk yang muncul terasa lebih relevan."
           eyebrow="Mulai dari masalah"
@@ -229,7 +403,7 @@ export default async function ProductsPage({
         />
 
         <div className="catalog-chip-row" aria-label="Masalah tanaman populer">
-          {quickProblemChips.map((chip) => (
+          {QUICK_PROBLEM_CHIPS.map((chip) => (
             <FilterChip
               active={problemId === chip.value}
               href={buildProductsHref({
@@ -260,7 +434,7 @@ export default async function ProductsPage({
       </section>
 
       <section className="catalog-shell">
-        <div className="catalog-search-card">
+        <div className="catalog-search-card catalog-search-card--compact">
           <SectionHeader
             description="Cari pupuk, pestisida, benih, hama, tanaman, atau kebutuhan budidaya lain untuk mempersempit hasil dengan cepat."
             eyebrow="Cari dan saring"
@@ -283,7 +457,7 @@ export default async function ProductsPage({
                 tanaman: cropId ?? undefined,
               }}
               inputLabel="Cari produk pertanian"
-              placeholder="Cari pupuk, pestisida, hama, tanaman, atau masalah..."
+              placeholder="Cari pupuk, hama, tanaman..."
             />
 
             <form action="/produk" className="catalog-sort-form">
@@ -291,113 +465,80 @@ export default async function ProductsPage({
                 <span>Urutkan</span>
                 <select defaultValue={sort} name="sort">
                   <option value="latest">Terbaru</option>
-                  <option value="promo">Promo aktif</option>
-                  <option value="best_seller">Terlaris</option>
-                  <option value="name_asc">Nama A-Z</option>
-                  <option value="price_asc">Harga termurah</option>
-                  <option value="price_desc">Harga tertinggi</option>
+                  {PRODUCT_SORT_OPTIONS.slice(1).map((item) => (
+                    <option key={item.value} value={item.value}>
+                      {item.label}
+                    </option>
+                  ))}
                 </select>
               </label>
-              {Object.entries({
-                harga: priceBand !== "all" ? priceBand : undefined,
-                kategori: category,
-                kelompok: mainCategoryKey,
-                masalah: problemId ?? undefined,
-                promo: promoOnly ? "1" : undefined,
-                q: search,
-                stok: stockOnly ? "1" : undefined,
-                subkategori: subcategory,
-                tanaman: cropId ?? undefined,
-              }).map(([key, value]) =>
-                value ? <input key={key} name={key} type="hidden" value={value} /> : null,
-              )}
+              <HiddenQueryInputs
+                values={{
+                  harga: priceBand !== "all" ? priceBand : undefined,
+                  kategori: category,
+                  kelompok: mainCategoryKey,
+                  masalah: problemId ?? undefined,
+                  promo: promoOnly ? "1" : undefined,
+                  q: search,
+                  stok: stockOnly ? "1" : undefined,
+                  subkategori: subcategory,
+                  tanaman: cropId ?? undefined,
+                }}
+              />
               <button className="btn btn-secondary" type="submit">
                 Terapkan
               </button>
             </form>
           </div>
 
-          <form action="/produk" className="catalog-filter-form">
-            {Object.entries({
-              kategori: category,
-              kelompok: mainCategoryKey,
-              q: search,
-              sort,
-              subkategori: subcategory,
-            }).map(([key, value]) =>
-              value ? <input key={key} name={key} type="hidden" value={value} /> : null,
-            )}
-            <label className="catalog-search-card__field">
-              <span>Tanaman</span>
-              <select defaultValue={cropId ?? ""} name="tanaman">
-                <option value="">Semua tanaman</option>
-                {getSolutionCropOptions().map((item) => (
-                  <option key={item.id} value={item.id}>
-                    {item.label}
-                  </option>
-                ))}
-              </select>
-            </label>
+          <CatalogFilterForm
+            category={category}
+            className="catalog-filter-form--desktop"
+            cropId={cropId}
+            mainCategoryKey={mainCategoryKey}
+            priceBand={priceBand}
+            problemId={problemId}
+            promoOnly={promoOnly}
+            search={search}
+            sort={sort}
+            stockOnly={stockOnly}
+            subcategory={subcategory}
+          />
 
-            <label className="catalog-search-card__field">
-              <span>Masalah</span>
-              <select defaultValue={problemId ?? ""} name="masalah">
-                <option value="">Semua masalah</option>
-                <option value="daun-kuning">Daun kuning</option>
-                <option value="hama">Hama</option>
-                <option value="bercak-daun">Jamur / bercak</option>
-                <option value="gulma">Gulma</option>
-                <option value="pertumbuhan-lambat">Pertumbuhan lambat</option>
-                <option value="buah-rontok">Buah rontok</option>
-                <option value="pembungaan-buruk">Pembungaan buruk</option>
-                <option value="hasil-panen">Hasil panen kurang maksimal</option>
-              </select>
-            </label>
-
-            <label className="catalog-search-card__field">
-              <span>Harga</span>
-              <select defaultValue={priceBand} name="harga">
-                <option value="all">Semua harga</option>
-                <option value="under-100k">Di bawah 100 ribu</option>
-                <option value="100k-250k">100 ribu - 250 ribu</option>
-                <option value="250k+">Di atas 250 ribu</option>
-              </select>
-            </label>
-
-            <label className="catalog-checkbox">
-              <input defaultChecked={promoOnly} name="promo" type="checkbox" value="1" />
-              <span>Promo</span>
-            </label>
-
-            <label className="catalog-checkbox">
-              <input defaultChecked={stockOnly} name="stok" type="checkbox" value="1" />
-              <span>Stok tersedia</span>
-            </label>
-
-            <div className="catalog-filter-form__actions">
-              <button className="btn btn-secondary" type="submit">
-                Terapkan filter
-              </button>
-              <a className="btn btn-secondary" href="/produk">
-                Reset filter
-              </a>
+          <details className="catalog-mobile-filter">
+            <summary>
+              <span>Filter lanjutan</span>
+              <small>{filterSummary}</small>
+            </summary>
+            <div className="catalog-mobile-filter__panel">
+              <CatalogFilterForm
+                category={category}
+                className="catalog-filter-form--mobile"
+                cropId={cropId}
+                mainCategoryKey={mainCategoryKey}
+                priceBand={priceBand}
+                problemId={problemId}
+                promoOnly={promoOnly}
+                search={search}
+                sort={sort}
+                stockOnly={stockOnly}
+                subcategory={subcategory}
+              />
+              <CatalogCategoryChips
+                baseParams={baseParams}
+                categories={categories}
+                category={category}
+                className="catalog-chip-row--mobile"
+              />
             </div>
-          </form>
+          </details>
 
-          <div className="catalog-chip-row" aria-label="Kategori produk">
-            <FilterChip active={!category} href={buildProductsHref({ ...baseParams, kategori: undefined })}>
-              Semua kategori
-            </FilterChip>
-            {categories.map((item) => (
-              <FilterChip
-                active={category === item.slug}
-                href={buildProductsHref({ ...baseParams, kategori: item.slug })}
-                key={item.id}
-              >
-                {item.name}
-              </FilterChip>
-            ))}
-          </div>
+          <CatalogCategoryChips
+            baseParams={baseParams}
+            categories={categories}
+            category={category}
+            className="catalog-chip-row--desktop"
+          />
         </div>
 
         <SectionHeader

@@ -4,10 +4,18 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import { useAuth } from "@/components/auth-provider";
-import { useCart } from "@/components/cart/cart-provider";
 import { isHybridNavActive } from "@/lib/hybrid-navigation";
 
 type MobileNavIconKind = "home" | "solve" | "shop" | "learn" | "account";
+
+type MobileNavLink = {
+  href: string;
+  label: string;
+  badge?: string | null;
+  icon: MobileNavIconKind;
+  hybrid?: boolean;
+  aliases?: string[];
+};
 
 function isActivePath(pathname: string, href: string) {
   if (href === "/") {
@@ -80,14 +88,9 @@ function MobileNavIcon({ kind }: { kind: MobileNavIconKind }) {
 
 export function MobileBottomNav() {
   const pathname = usePathname();
-  const { cart } = useCart();
   const { session } = useAuth();
-  const cartCount = cart?.items.reduce((total, item) => total + item.qty, 0) ?? 0;
-  const accountOrCartHref =
-    pathname === "/keranjang" || cartCount > 0 ? "/keranjang" : session ? "/akun" : "/masuk";
-  const accountOrCartLabel =
-    pathname === "/keranjang" || cartCount > 0 ? "Keranjang" : session ? "Akun" : "Akun";
-  const mobileLinks = [
+  const accountHref = session ? "/akun" : "/masuk";
+  const mobileLinks: MobileNavLink[] = [
     {
       href: "/",
       label: "Beranda",
@@ -117,11 +120,12 @@ export function MobileBottomNav() {
       hybrid: true,
     },
     {
-      href: accountOrCartHref,
-      label: accountOrCartLabel,
-      badge: cartCount > 0 ? String(cartCount) : null,
+      href: accountHref,
+      label: "Akun",
+      badge: null,
       icon: "account" as const,
       hybrid: false,
+      aliases: ["/akun", "/masuk", "/login"],
     },
   ];
 
@@ -130,7 +134,8 @@ export function MobileBottomNav() {
       {mobileLinks.map((link) => {
         const isActive = link.hybrid
           ? isHybridNavActive(pathname, link.href)
-          : isActivePath(pathname, link.href);
+          : isActivePath(pathname, link.href) ||
+            Boolean(link.aliases?.some((href) => isActivePath(pathname, href)));
         return (
           <Link className={isActive ? "is-active" : undefined} href={link.href} key={link.href}>
             <span className="mobile-nav__icon">

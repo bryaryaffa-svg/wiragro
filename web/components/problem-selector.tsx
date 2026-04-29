@@ -24,8 +24,8 @@ export function ProblemSelector({
     <section className="solution-selector-panel">
       <div className="section-heading">
         <div>
-          <span className="eyebrow-label">State 2</span>
-          <h2>Apa masalah yang terlihat?</h2>
+          <span className="eyebrow-label">Langkah 2</span>
+          <h2>Pilih masalah/gejala</h2>
           <p>
             Pilih gejala atau masalah utama yang paling mendekati kondisi tanaman.
           </p>

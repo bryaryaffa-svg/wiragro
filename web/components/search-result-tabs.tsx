@@ -16,7 +16,17 @@ const SEARCH_TABS: Array<{
   { id: "solutions", label: "Solusi" },
   { id: "products", label: "Produk" },
   { id: "education", label: "Edukasi" },
-  { id: "videos", label: "Video" },
+  { id: "videos", label: "Video/artikel" },
+];
+
+const SEARCH_RESULT_GROUPS: Array<{
+  id: Exclude<GlobalSearchTab, "all">;
+  label: string;
+}> = [
+  { id: "solutions", label: "Solusi terkait" },
+  { id: "products", label: "Produk terkait" },
+  { id: "education", label: "Edukasi terkait" },
+  { id: "videos", label: "Video/artikel" },
 ];
 
 function SearchResultItem({
@@ -130,11 +140,13 @@ function SearchResultItem({
 }
 
 export function SearchResultTabs({
+  consultationHref = "/kontak",
   compact = false,
   defaultTab = "all",
   onResultClick,
   results,
 }: {
+  consultationHref?: string | null;
   compact?: boolean;
   defaultTab?: GlobalSearchTab;
   onResultClick?: (href: string) => void;
@@ -144,6 +156,15 @@ export function SearchResultTabs({
   const activeItems = useMemo(() => {
     return results.groups[activeTab];
   }, [activeTab, results.groups]);
+  const showGroupedResults = activeTab === "all" && results.query.length > 0;
+
+  const renderResultList = (items: GlobalSearchResults["groups"]["all"]) => (
+    <div className="search-result-tabs__list">
+      {items.map((item) => (
+        <SearchResultItem item={item} key={`${item.kind}-${item.id}`} onResultClick={onResultClick} />
+      ))}
+    </div>
+  );
 
   return (
     <div className={`search-result-tabs${compact ? " search-result-tabs--compact" : ""}`}>
@@ -163,26 +184,67 @@ export function SearchResultTabs({
         ))}
       </div>
 
+      {results.solutionCta ? (
+        <Link
+          className="search-solution-cta"
+          href={results.solutionCta.href}
+          onClick={() => onResultClick?.(results.solutionCta?.href ?? "/solusi")}
+        >
+          <span className="search-solution-cta__icon">
+            <AgriIcon name="solution" />
+          </span>
+          <span>
+            <strong>{results.solutionCta.label}</strong>
+            <small>{results.solutionCta.description}</small>
+          </span>
+        </Link>
+      ) : null}
+
       {activeItems.length ? (
-        <div className="search-result-tabs__list">
-          {activeItems.map((item) => (
-            <SearchResultItem item={item} key={`${item.kind}-${item.id}`} onResultClick={onResultClick} />
-          ))}
-        </div>
+        showGroupedResults ? (
+          <div className="search-result-tabs__grouped">
+            {SEARCH_RESULT_GROUPS.map((group) => {
+              const groupItems = results.groups[group.id];
+
+              return (
+                <section className="search-result-tabs__group" key={group.id}>
+                  <div className="search-result-tabs__group-header">
+                    <h3>{group.label}</h3>
+                    <span>{groupItems.length}</span>
+                  </div>
+                  {groupItems.length ? (
+                    renderResultList(groupItems)
+                  ) : (
+                    <p className="search-result-tabs__group-empty">
+                      Belum ada hasil di kelompok ini.
+                    </p>
+                  )}
+                </section>
+              );
+            })}
+          </div>
+        ) : (
+          renderResultList(activeItems)
+        )
       ) : (
         <div className="search-result-tabs__empty">
-          <strong>Belum ada hasil untuk pencarian ini</strong>
-          <p>Coba buka solusi tanaman, lihat semua produk, atau lanjutkan ke AI untuk arahan awal.</p>
+          <strong>Belum ada hasil yang cocok</strong>
+          <p>
+            Coba mulai dari alur solusi, baca edukasi terkait, atau hubungi tim Wiragro
+            untuk konsultasi singkat.
+          </p>
           <div className="search-result-tabs__empty-actions">
-            <Link className="btn btn-primary" href="/ai-chat">
-              Tanya AI
-            </Link>
-            <Link className="btn btn-secondary" href="/produk">
-              Lihat semua produk
-            </Link>
             <Link className="btn btn-secondary" href="/solusi">
-              Buka halaman Solusi
+              Buka Solusi
             </Link>
+            <Link className="btn btn-secondary" href="/artikel">
+              Buka Edukasi
+            </Link>
+            {consultationHref ? (
+              <Link className="btn btn-primary" href={consultationHref}>
+                Konsultasi WhatsApp
+              </Link>
+            ) : null}
           </div>
         </div>
       )}

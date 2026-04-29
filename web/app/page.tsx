@@ -5,8 +5,6 @@ import { getFallbackArticleSummaries } from "@/lib/article-content";
 import {
   HomepageAiMascot,
   HomepageArticleList,
-  HomepageCropTile,
-  HomepageHeroMetricCard,
   HomepageMiniProductCard,
   HomepageMiniVideoCard,
   HomepagePartnerBenefitCard,
@@ -14,11 +12,10 @@ import {
   HomepageTrustStripItemCard,
 } from "@/components/homepage-showcase";
 import { JsonLd } from "@/components/json-ld";
-import { TrackedLinkButton } from "@/components/tracked-link-button";
-import { AgriIcon } from "@/components/ui/agri-icon";
+import { AgriIcon, type AgriIconName } from "@/components/ui/agri-icon";
 import { EmptyState, ErrorState } from "@/components/ui/state";
 import { PrimaryButton, SecondaryButton } from "@/components/ui/button";
-import { StickyMobileCTA } from "@/components/ui/sticky-mobile-cta";
+import { SearchInput } from "@/components/ui/search-input";
 import { TrustBadge } from "@/components/ui/trust-badge";
 import {
   type ArticleListPayload,
@@ -29,8 +26,6 @@ import {
 } from "@/lib/api";
 import {
   HOME_AI_CHAT_PROMPTS,
-  HOME_CROP_CARDS,
-  HOME_HERO_METRICS,
   HOME_PARTNER_BENEFITS,
   HOME_PROBLEM_CARDS,
   HOME_TRUST_STRIP,
@@ -45,6 +40,51 @@ import {
 
 export const dynamic = "force-dynamic";
 export const metadata = buildHomepageMetadata();
+
+const HOME_ENTRY_PATHS: Array<{
+  actionLabel: string;
+  description: string;
+  href: string;
+  icon: AgriIconName;
+  tone: "solution" | "product" | "education";
+  title: string;
+}> = [
+  {
+    actionLabel: "Mulai diagnosis",
+    description: "Masuk dari tanaman, gejala, fase tanam, atau masalah lapangan.",
+    href: "/solusi",
+    icon: "solution",
+    tone: "solution",
+    title: "Cari Solusi",
+  },
+  {
+    actionLabel: "Buka belanja",
+    description: "Masuk ke produk, paket, dan kategori saat kebutuhan sudah lebih jelas.",
+    href: "/belanja",
+    icon: "product",
+    tone: "product",
+    title: "Belanja Produk",
+  },
+  {
+    actionLabel: "Buka panduan",
+    description: "Baca artikel praktis sebelum memilih tindakan atau produk.",
+    href: "/artikel",
+    icon: "education",
+    tone: "education",
+    title: "Baca Edukasi",
+  },
+];
+
+const HOME_QUICK_CHIPS = [
+  "Padi",
+  "Cabai",
+  "Jagung",
+  "Tomat",
+  "Daun kuning",
+  "Hama",
+  "Jamur",
+  "Pupuk",
+];
 
 function dedupeProducts(products: Array<ProductSummary | null | undefined>) {
   return products
@@ -85,15 +125,6 @@ export default async function HomePage() {
     HOME_PROBLEM_CARDS[0],
     HOME_PROBLEM_CARDS[4],
     HOME_PROBLEM_CARDS[1],
-    HOME_PROBLEM_CARDS[3],
-  ].filter(Boolean);
-  const spotlightCrops = [
-    HOME_CROP_CARDS[0],
-    HOME_CROP_CARDS[2],
-    HOME_CROP_CARDS[1],
-    HOME_CROP_CARDS[3],
-    HOME_CROP_CARDS[4],
-    HOME_CROP_CARDS[7],
   ].filter(Boolean);
 
   return (
@@ -130,40 +161,52 @@ export default async function HomePage() {
         />
       ) : null}
 
-      <section className="homepage-hero">
+      <section className="homepage-hero homepage-hero--entry">
         <div className="homepage-hero__copy">
           <span className="homepage-hero__welcome">
             <span className="homepage-hero__welcome-icon">
               <AgriIcon name="leaf" />
             </span>
-            Selamat datang di Wiragro
+            Solusi, edukasi, toko
           </span>
-          <h1>Platform Solusi Pertanian Digital</h1>
+          <h1>Temukan solusi tanaman, pelajari caranya, lalu beli produk yang tepat.</h1>
           <p>
-            Semua yang petani butuhkan untuk hasil panen lebih baik. Solusi penyakit,
-            rekomendasi produk, edukasi, hingga dukungan AI dalam satu platform.
+            Cari berdasarkan tanaman, gejala, hama, pupuk, pestisida, benih, atau
+            kebutuhan budidaya.
           </p>
-          <div className="homepage-hero__actions">
-            <TrackedLinkButton
-              event="click_cari_solusi"
-              href="/solusi"
-              payload={{ placement: "homepage_hero" }}
-            >
-              Temukan Solusi Sekarang
-            </TrackedLinkButton>
-            <TrackedLinkButton
-              event="ask_ai"
-              href="/ai-chat"
-              payload={{ placement: "homepage_hero" }}
-              variant="secondary"
-            >
-              Tanya AI Chat
-            </TrackedLinkButton>
+
+          <div className="homepage-hero__search">
+            <SearchInput
+              action="/cari"
+              buttonLabel="Cari"
+              inputLabel="Cari solusi tanaman, edukasi, atau produk"
+              placeholder="Cari produk, tanaman, hama, gejala, atau artikel..."
+              size="large"
+            />
           </div>
 
-          <div className="homepage-hero__metrics">
-            {HOME_HERO_METRICS.map((item) => (
-              <HomepageHeroMetricCard item={item} key={item.title} />
+          <div className="homepage-topic-chips homepage-topic-chips--quick" aria-label="Pencarian cepat">
+            {HOME_QUICK_CHIPS.map((chip) => (
+              <Link className="filter-chip" href={`/cari?q=${encodeURIComponent(chip)}`} key={chip}>
+                {chip}
+              </Link>
+            ))}
+          </div>
+
+          <div className="homepage-entry-paths" aria-label="Pilih jalur utama Wiragro">
+            {HOME_ENTRY_PATHS.map((path) => (
+              <Link
+                className={`homepage-entry-path-card homepage-entry-path-card--${path.tone}`}
+                href={path.href}
+                key={path.title}
+              >
+                <span className="homepage-entry-path-card__icon">
+                  <AgriIcon name={path.icon} />
+                </span>
+                <strong>{path.title}</strong>
+                <p>{path.description}</p>
+                <span className="homepage-entry-path-card__action">{path.actionLabel}</span>
+              </Link>
             ))}
           </div>
         </div>
@@ -211,61 +254,33 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="homepage-discovery">
-        <div className="homepage-panel homepage-discovery__panel">
+      <section className="homepage-spotlight-grid">
+        <div className="homepage-panel homepage-panel--compact">
           <div className="homepage-panel__header">
             <div>
-              <h2>Masalah Tanaman Anda?</h2>
-              <p>Kenali masalah dan dapatkan solusi yang lebih tepat.</p>
+              <h2>Solusi populer</h2>
+              <p>Mulai dari gejala yang paling sering dicari.</p>
             </div>
-            <Link href="/solusi">Lihat Semua</Link>
+            <Link href="/solusi">Lihat semua</Link>
           </div>
-          <div className="home-problem-grid">
+          <div className="home-problem-grid home-problem-grid--compact">
             {spotlightProblems.map((card) => (
               <HomepageProblemCard card={card} key={card.title} />
             ))}
-            <Link className="home-problem-card home-problem-card--more" href="/solusi">
-              <div className="home-problem-card__media home-problem-card__media--more">
-                <span className="home-problem-card__more-icon">
-                  <AgriIcon name="solution" />
-                </span>
-              </div>
-              <div className="home-problem-card__body">
-                <strong>Lihat Semua Masalah</strong>
-                <p>Buka explorer solusi lengkap untuk gejala lain.</p>
-                <span>Masuk ke Solusi</span>
-              </div>
-            </Link>
           </div>
         </div>
 
-        <div className="homepage-panel homepage-discovery__panel homepage-discovery__panel--crops">
+        <div className="homepage-panel homepage-panel--compact">
           <div className="homepage-panel__header">
             <div>
-              <h2>Pilih Tanaman Anda</h2>
-              <p>Dapatkan rekomendasi yang lebih tepat berdasarkan komoditas.</p>
+              <h2>Produk sering dicari</h2>
+              <p>Rekomendasi awal sebelum masuk katalog lengkap.</p>
             </div>
-          </div>
-          <div className="home-crop-grid">
-            {spotlightCrops.map((card) => (
-              <HomepageCropTile card={card} key={card.title} />
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="homepage-showcase-row">
-        <div className="homepage-panel homepage-showcase-card">
-          <div className="homepage-panel__header">
-            <div>
-              <h2>Rekomendasi Produk</h2>
-              <p>Produk terbaik sesuai kebutuhan tanaman Anda.</p>
-            </div>
-            <Link href="/produk">Lihat Semua</Link>
+            <Link href="/belanja">Lihat semua</Link>
           </div>
           {featuredProducts.length ? (
-            <div className="home-mini-product-grid">
-              {featuredProducts.map((product) => (
+            <div className="home-mini-product-grid home-mini-product-grid--compact">
+              {featuredProducts.slice(0, 3).map((product) => (
                 <HomepageMiniProductCard key={product.id} product={product} />
               ))}
             </div>
@@ -278,14 +293,16 @@ export default async function HomePage() {
             />
           )}
         </div>
+      </section>
 
+      <section className="homepage-showcase-row homepage-showcase-row--learning">
         <div className="homepage-panel homepage-showcase-card">
           <div className="homepage-panel__header">
             <div>
               <h2>Belajar dari Video</h2>
               <p>Video praktis dari ahli pertanian.</p>
             </div>
-            <Link href="/artikel">Lihat Semua</Link>
+            <Link href="/artikel">Lihat semua</Link>
           </div>
           <div className="home-mini-video-grid">
             {HOME_VIDEO_CARDS.map((video) => (
@@ -300,7 +317,7 @@ export default async function HomePage() {
               <h2>Artikel Praktis</h2>
               <p>Tips dan info terbaru untuk petani.</p>
             </div>
-            <Link href="/artikel">Lihat Semua</Link>
+            <Link href="/artikel">Lihat semua</Link>
           </div>
           <HomepageArticleList articles={latestArticles} />
         </div>
@@ -363,11 +380,6 @@ export default async function HomePage() {
           <HomepageTrustStripItemCard item={item} key={item.title} />
         ))}
       </section>
-
-      <StickyMobileCTA
-        primary={{ href: "/solusi", label: "Cari Solusi" }}
-        secondary={{ href: "/ai-chat", label: "Tanya AI" }}
-      />
     </div>
   );
 }

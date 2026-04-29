@@ -47,7 +47,7 @@ export function SolutionResult({
     <section className="solution-result">
       <div className="solution-result__hero">
         <div className="solution-result__copy">
-          <span className="eyebrow-label">State 3</span>
+          <span className="eyebrow-label">Langkah 3</span>
           <h2>{solution.title}</h2>
           <p>
             Hasil ini disusun untuk membantu Anda bergerak dari gejala ke tindakan awal
@@ -78,15 +78,15 @@ export function SolutionResult({
 
       <div className="solution-result__layout">
         <article className="solution-panel">
-          <span className="eyebrow-label">Ringkasan masalah</span>
-          <h3>Mulai dari pemahaman yang sederhana</h3>
+          <span className="eyebrow-label">Kemungkinan penyebab</span>
+          <h3>Apa yang mungkin sedang terjadi?</h3>
           {solution.summary.map((item) => (
             <p key={item}>{item}</p>
           ))}
         </article>
 
         <article className="solution-panel">
-          <span className="eyebrow-label">Langkah penanganan</span>
+          <span className="eyebrow-label">Langkah awal</span>
           <h3>Apa yang sebaiknya dilakukan lebih dulu?</h3>
           <ol className="solution-step-list">
             {solution.steps.map((item, index) => (
@@ -103,7 +103,7 @@ export function SolutionResult({
         <SectionHeader
           action={{ href: solution.productBrowseHref, label: "Lihat semua produk" }}
           description="Produk tetap hadir sebagai bagian dari solusi. Prioritas utamanya adalah pilihan yang paling masuk akal untuk masalah ini."
-          eyebrow="Produk rekomendasi"
+          eyebrow="Produk terkait"
           title="Produk yang bisa dipertimbangkan"
         />
         {products.length ? (

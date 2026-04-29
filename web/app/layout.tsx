@@ -139,7 +139,7 @@ export default function RootLayout({
             <WishlistProvider>
               <div className="app-shell">
                 <SiteHeader />
-                <main className="app-main">{children}</main>
+                <main className="app-main mobile-safe-bottom">{children}</main>
                 <SiteFooter />
                 <MobileBottomNav />
               </div>

@@ -1,11 +1,17 @@
 import Image from "next/image";
 import Link from "next/link";
 
+import { AddToCartButton } from "@/components/cart/add-to-cart-button";
 import { AgriIcon } from "@/components/ui/agri-icon";
 import { AgriScene } from "@/components/ui/agri-scene";
 import { RoleAwarePrice } from "@/components/ui/role-aware-price";
 import { formatDate } from "@/lib/format";
 import type { ProductSummary } from "@/lib/api";
+import {
+  getFallbackProductVisual,
+  getProductCardBadge,
+  getProductCardFit,
+} from "@/lib/product-card-content";
 import type {
   HomeHeroMetric,
   HomeIconCard,
@@ -16,36 +22,6 @@ import type {
 
 function getPrimaryProductImage(product: ProductSummary) {
   return product.images.find((image) => image.is_primary) ?? product.images[0] ?? null;
-}
-
-function getFallbackProductVisual(product: ProductSummary) {
-  const haystack = `${product.name} ${product.category?.name ?? ""} ${product.product_type}`.toLowerCase();
-
-  if (haystack.includes("benih") || haystack.includes("bibit")) {
-    return "/wiragro-illustrations/wiragro_produk_benih_transparent.png";
-  }
-  if (haystack.includes("pestisida") || haystack.includes("insektisida") || haystack.includes("herbisida")) {
-    return "/wiragro-illustrations/wiragro_produk_herbisida_transparent.png";
-  }
-  if (haystack.includes("nutrisi")) {
-    return "/wiragro-illustrations/wiragro_produk_nutrisi_transparent.png";
-  }
-
-  return "/wiragro-illustrations/wiragro_produk_pupuk_transparent.png";
-}
-
-function getProductBadge(product: ProductSummary) {
-  if (product.badges.best_seller) {
-    return "Terlaris";
-  }
-  if (product.badges.featured || product.price.is_promo) {
-    return "Promo";
-  }
-  if (product.badges.new_arrival) {
-    return "Baru";
-  }
-
-  return null;
 }
 
 function pickHomepageArticleVisual(article: {
@@ -89,6 +65,7 @@ export function HomepageProblemCard({ card }: { card: HomeIconCard }) {
     <Link className="home-problem-card" href={card.href}>
       <div className="home-problem-card__media">
         <AgriScene
+          assetFit={card.imageFit}
           assetSrc={card.thumbnail}
           className="home-problem-card__scene"
           mode="problem"
@@ -109,6 +86,7 @@ export function HomepageCropTile({ card }: { card: HomeIconCard }) {
     <Link className="home-crop-tile" href={card.href}>
       <div className="home-crop-tile__visual">
         <AgriScene
+          assetFit={card.imageFit}
           assetSrc={card.thumbnail}
           className="home-crop-tile__scene"
           mode="crop"
@@ -123,7 +101,8 @@ export function HomepageCropTile({ card }: { card: HomeIconCard }) {
 export function HomepageMiniProductCard({ product }: { product: ProductSummary }) {
   const primaryImage = getPrimaryProductImage(product);
   const visual = primaryImage?.url ?? getFallbackProductVisual(product);
-  const badge = getProductBadge(product);
+  const badge = getProductCardBadge(product);
+  const fit = getProductCardFit(product);
   const useUnoptimizedImage = primaryImage?.url.startsWith("/") ?? visual.startsWith("/");
 
   return (
@@ -140,9 +119,28 @@ export function HomepageMiniProductCard({ product }: { product: ProductSummary }
         />
       </Link>
       <div className="home-mini-product-card__body">
-        <span>{product.category?.name ?? product.product_type}</span>
+        <span>{fit.categoryLabel}</span>
         <strong>{product.name}</strong>
+        <div className="home-mini-product-card__fit" aria-label="Kecocokan produk">
+          {fit.previewLabels.map((item) => (
+            <span key={`${product.id}-${item}`}>{item}</span>
+          ))}
+        </div>
+        <span className={`home-mini-product-card__stock home-mini-product-card__stock--${fit.stockState}`}>
+          {fit.stockLabel}
+        </span>
         <RoleAwarePrice compact availabilityText={null} price={product.price} />
+        <div className="home-mini-product-card__actions">
+          <Link className="btn btn-secondary btn-block" href={`/produk/${product.slug}`}>
+            Lihat Detail
+          </Link>
+          <AddToCartButton
+            buttonClassName="btn btn-primary btn-block"
+            disabled={product.availability.state === "out_of_stock"}
+            label="Tambah"
+            productId={product.id}
+          />
+        </div>
       </div>
     </article>
   );
@@ -220,15 +218,21 @@ export function HomepageArticleList({
 export function HomepageAiMascot() {
   return (
     <div className="homepage-ai-mascot" aria-hidden="true">
-      <span className="homepage-ai-mascot__halo" />
-      <div className="homepage-ai-mascot__shell">
-        <span className="homepage-ai-mascot__antenna" />
-        <div className="homepage-ai-mascot__head">
-          <div className="homepage-ai-mascot__screen">
-            <AgriIcon className="homepage-ai-mascot__screen-icon" name="ai" />
-          </div>
+      <div className="homepage-ai-mascot__panel">
+        <Image
+          alt=""
+          className="homepage-ai-mascot__image"
+          fill
+          sizes="180px"
+          src="/wiragro-illustrations/wiragro_feature_petani_indonesia_transparent.png"
+        />
+        <div className="homepage-ai-mascot__readout">
+          <span className="homepage-ai-mascot__readout-icon">
+            <AgriIcon name="ai" />
+          </span>
+          <strong>AI siap bantu</strong>
+          <small>Solusi awal</small>
         </div>
-        <div className="homepage-ai-mascot__body" />
       </div>
     </div>
   );

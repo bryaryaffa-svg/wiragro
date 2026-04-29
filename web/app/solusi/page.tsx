@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 
 import { CropSelector } from "@/components/crop-selector";
@@ -31,6 +30,19 @@ import {
 export const dynamic = "force-dynamic";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
+type PopularSymptom = {
+  label: string;
+  problemId: ReturnType<typeof getSolutionProblemOptions>[number]["id"];
+};
+
+const POPULAR_SYMPTOMS: PopularSymptom[] = [
+  { label: "Daun kuning", problemId: "daun-kuning" },
+  { label: "Daun keriting", problemId: "hama" },
+  { label: "Hama", problemId: "hama" },
+  { label: "Jamur", problemId: "bercak-daun" },
+  { label: "Busuk buah", problemId: "buah-rontok" },
+  { label: "Pertumbuhan lambat", problemId: "pertumbuhan-lambat" },
+];
 
 export const metadata: Metadata = buildPageMetadata({
   title: "Solusi Masalah Tanaman - Wiragro",
@@ -132,43 +144,38 @@ export default async function SolusiPage({
 
       <section className="solution-experience-hero">
         <div className="solution-experience-hero__copy">
-          <span className="eyebrow-label">Core Experience</span>
-          <h1>Solusi tanaman dimulai dari pertanyaan yang paling sederhana.</h1>
+          <span className="eyebrow-label">Core experience Wiragro</span>
+          <h1>Cari Solusi Tanaman</h1>
           <p>
-            Pilih tanaman, pilih masalah, lalu dapatkan arahan awal, edukasi, video,
-            dan produk rekomendasi dalam satu alur yang mudah diikuti petani.
+            Pilih tanaman dan masalah yang terlihat di lapangan. Wiragro bantu
+            arahkan ke edukasi dan produk yang relevan.
+          </p>
+          <p className="solution-experience-hero__disclaimer">
+            Arahan ini bersifat panduan awal. Kondisi lapangan bisa berbeda.
           </p>
           <div className="solution-experience-hero__actions">
             <PrimaryButton href={selectedCrop ? "#wizard-solusi" : buildSolutionHref("cabai")}>
-              Mulai dari tanaman
+              Mulai Langkah 1
             </PrimaryButton>
-            <SecondaryButton href="/ai-chat">Tanya AI Pertanian</SecondaryButton>
+            {solution ? <SecondaryButton href="#hasil-solusi">Lihat rekomendasi</SecondaryButton> : null}
           </div>
         </div>
 
-        <div className="solution-experience-hero__visual">
-          <div className="solution-experience-hero__image">
-            <Image
-              alt="Petani memegang tablet untuk mencari solusi tanaman di platform Wiragro."
-              fill
-              priority
-              sizes="(max-width: 1080px) 100vw, 40vw"
-              src="/home/hero-farmer-ai.png"
-            />
+        <div className="solution-flow-map" aria-label="Alur Cari Solusi Tanaman">
+          <div className={`solution-flow-card${selectedCrop ? " is-complete" : " is-current"}`}>
+            <span>Langkah 1</span>
+            <strong>Pilih tanaman</strong>
+            <p>{selectedCrop ? selectedCrop.label : "Mulai dari komoditas yang sedang ditangani."}</p>
           </div>
-          <div className="solution-experience-hero__meta">
-            <div>
-              <span>Step 1</span>
-              <strong>Pilih tanaman</strong>
-            </div>
-            <div>
-              <span>Step 2</span>
-              <strong>Pilih masalah</strong>
-            </div>
-            <div>
-              <span>Step 3</span>
-              <strong>Dapat rekomendasi</strong>
-            </div>
+          <div className={`solution-flow-card${selectedCrop ? (selectedProblem ? " is-complete" : " is-current") : ""}`}>
+            <span>Langkah 2</span>
+            <strong>Pilih masalah/gejala</strong>
+            <p>{selectedProblem ? selectedProblem.label : "Cocokkan dengan kondisi yang terlihat di lapangan."}</p>
+          </div>
+          <div className={`solution-flow-card${solution ? " is-current" : ""}`}>
+            <span>Langkah 3</span>
+            <strong>Lihat rekomendasi</strong>
+            <p>Masuk ke penyebab, langkah awal, produk, dan artikel terkait.</p>
           </div>
         </div>
       </section>
@@ -178,21 +185,39 @@ export default async function SolusiPage({
           steps={[
             {
               description: selectedCrop ? selectedCrop.label : "Pilih komoditas yang sedang Anda tangani.",
-              label: "Tanaman",
+              label: "Langkah 1: Pilih tanaman",
               status: selectedCrop ? "complete" : "current",
             },
             {
               description: selectedProblem ? selectedProblem.label : "Pilih gejala atau masalah utama.",
-              label: "Masalah",
+              label: "Langkah 2: Pilih masalah/gejala",
               status: selectedCrop ? (selectedProblem ? "complete" : "current") : "upcoming",
             },
             {
               description: solution ? "Rekomendasi solusi, edukasi, video, dan produk." : "Hasil akan muncul setelah pilihan lengkap.",
-              label: "Rekomendasi",
+              label: "Langkah 3: Lihat rekomendasi",
               status: solution ? "current" : "upcoming",
             },
           ]}
         />
+
+        <div className="solution-popular-symptoms">
+          <div>
+            <span className="eyebrow-label">Gejala populer</span>
+            <strong>Pilih gejala yang paling dekat dengan kondisi tanaman.</strong>
+          </div>
+          <div className="solution-popular-symptoms__chips" aria-label="Gejala populer">
+            {POPULAR_SYMPTOMS.map((item) => (
+              <FilterChip
+                active={selectedProblem?.id === item.problemId && item.label === selectedProblem.label}
+                href={buildSolutionHref(selectedCrop?.id ?? null, item.problemId)}
+                key={item.label}
+              >
+                {item.label}
+              </FilterChip>
+            ))}
+          </div>
+        </div>
 
         {(selectedCrop || selectedProblem) ? (
           <div className="solution-wizard-toolbar">
@@ -214,18 +239,20 @@ export default async function SolusiPage({
         {!selectedCrop ? <CropSelector items={cropCards} /> : null}
         {selectedCrop && !selectedProblem ? <ProblemSelector items={problemCards} /> : null}
 
-        {solution && selectedCrop && selectedProblem ? (
-          <SolutionResult
-            aiHref={aiHref}
-            articles={relatedArticles}
-            crop={selectedCrop}
-            problem={selectedProblem}
-            products={recommendedProducts}
-            solution={solution}
-            videos={relatedVideos}
-            whatsappHref={whatsappHref}
-          />
-        ) : null}
+        <div id="hasil-solusi">
+          {solution && selectedCrop && selectedProblem ? (
+            <SolutionResult
+              aiHref={aiHref}
+              articles={relatedArticles}
+              crop={selectedCrop}
+              problem={selectedProblem}
+              products={recommendedProducts}
+              solution={solution}
+              videos={relatedVideos}
+              whatsappHref={whatsappHref}
+            />
+          ) : null}
+        </div>
       </section>
     </section>
   );

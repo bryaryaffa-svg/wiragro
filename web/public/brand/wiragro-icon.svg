@@ -1,22 +1,24 @@
 <svg width="512" height="512" viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="wiragroBrandBg" x1="12" x2="84" y1="12" y2="84" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#16591F" />
-      <stop offset="1" stop-color="#2C7B33" />
+    <linearGradient id="wiragroBrandBg" x1="14" x2="82" y1="12" y2="84" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0F5A2C" />
+      <stop offset="1" stop-color="#1F7A39" />
     </linearGradient>
-    <linearGradient id="wiragroBrandLeafMain" x1="45" x2="60" y1="21" y2="52" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#F3FF6A" />
-      <stop offset="1" stop-color="#B7DE2F" />
+    <linearGradient id="wiragroBrandField" x1="18" x2="78" y1="63" y2="78" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F2B33A" />
+      <stop offset="1" stop-color="#A7D447" />
+    </linearGradient>
+    <linearGradient id="wiragroBrandLeaf" x1="35" x2="63" y1="22" y2="55" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F6FFD8" />
+      <stop offset="1" stop-color="#BFE75B" />
     </linearGradient>
   </defs>
-  <rect x="10" y="10" width="76" height="76" rx="22" fill="url(#wiragroBrandBg)" />
-  <path d="M16.2 62.8C24.6 57.7 35.4 55.1 48.4 55.1C61.8 55.1 72.4 57.5 80 62.2V66C71.4 69 60.7 70.5 48 70.5C35.4 70.5 24.8 69.2 16.2 66.6V62.8Z" fill="#F59E0B" />
-  <path d="M16.5 67.4C24.9 64.4 35.1 62.9 47.2 62.9C59 62.9 69.1 64.5 77.8 67.7C70.7 73.5 60.9 76.5 48.8 76.5C36 76.5 25.2 73.4 16.5 67.4Z" fill="#78B82A" />
-  <path d="M31.6 69.6C37.1 67.6 43.1 66.7 49.4 66.7C58.8 66.7 66.6 68.8 72.6 73.1C66.7 78 59.2 80.4 50 80.4C41.2 80.4 35 76.8 31.6 69.6Z" fill="#D8F147" />
-  <path d="M23.8 31H35.4L41 49.3L45.6 31H52.5L48.2 60.1H38.4L23.8 31Z" fill="#FFF8EE" />
-  <path d="M72.2 31H60.6L55 49.3L50.4 31H43.5L47.8 60.1H57.6L72.2 31Z" fill="#FFF8EE" />
-  <path d="M50.6 20.6C56.6 24.5 59.6 30.4 59.6 38.2C59.6 43.8 57.1 48.7 52.1 52.8C47.2 49.2 44.8 44.2 44.8 37.8C44.8 31.4 46.7 25.6 50.6 20.6Z" fill="url(#wiragroBrandLeafMain)" />
-  <path d="M39.7 28.8C44.7 29.9 48.2 33.4 50.5 39.1C49.4 44.3 46.4 48.1 41.5 50.6C36.8 46.8 34.5 42.8 34.5 38.4C34.5 34.6 36.2 31.4 39.7 28.8Z" fill="#58B72B" />
-  <path d="M48.8 29.2V56.8" stroke="#1D5B1F" stroke-linecap="round" stroke-width="1.8" />
-  <path d="M48.8 39.3C46.8 37.4 45.2 35.1 43.9 32.3" stroke="#1D5B1F" stroke-linecap="round" stroke-width="1.1" />
+  <rect x="10" y="10" width="76" height="76" rx="20" fill="url(#wiragroBrandBg)" />
+  <path d="M18 65.4C27.8 58.9 39.2 55.7 52.2 55.7C63 55.7 71.6 57.8 78 62V70.8C70.5 76 60.4 78.6 47.8 78.6C35.9 78.6 26 76.1 18 71.1V65.4Z" fill="url(#wiragroBrandField)" />
+  <path d="M20.5 69.6C29.1 66.8 38.4 65.4 48.5 65.4C58.6 65.4 67.7 66.9 75.7 69.9" stroke="#FFF8D6" stroke-linecap="round" stroke-width="3.4" opacity="0.9" />
+  <path d="M48 67V31" stroke="#F8FFE3" stroke-linecap="round" stroke-width="5.2" />
+  <path d="M45.6 48.4C35.6 47.3 29.3 39.5 29.6 27.1C41.6 27.7 47.7 34.6 45.6 48.4Z" fill="#F8FFE3" />
+  <path d="M50.3 50.6C62.4 48.1 69.1 38.9 66.7 24.6C54.2 27.6 48.5 36.1 50.3 50.6Z" fill="url(#wiragroBrandLeaf)" />
+  <path d="M48 55.8C43.6 53.8 39.9 50.9 36.9 47.1" stroke="#0E552B" stroke-linecap="round" stroke-width="2.1" opacity="0.45" />
+  <path d="M48.4 56.3C54.6 52.7 59.2 47.6 62.2 41.1" stroke="#0E552B" stroke-linecap="round" stroke-width="2.1" opacity="0.45" />
 </svg>

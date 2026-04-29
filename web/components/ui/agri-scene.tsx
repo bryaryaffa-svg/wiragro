@@ -3,6 +3,7 @@ import Image from "next/image";
 import { AgriIcon, type AgriIconName } from "@/components/ui/agri-icon";
 
 type AgriSceneMode = "crop" | "problem";
+type AgriSceneAssetFit = "contain" | "cover";
 type AgriSceneTone = "amber" | "earth" | "gold" | "green" | "rose" | "teal";
 
 type AgriSceneConfig = {
@@ -122,6 +123,7 @@ function joinClassNames(...values: Array<string | undefined>) {
 }
 
 export function AgriScene({
+  assetFit = "contain",
   assetSrc,
   badgeText,
   chipText,
@@ -130,6 +132,7 @@ export function AgriScene({
   name,
   showLabels = false,
 }: {
+  assetFit?: AgriSceneAssetFit;
   assetSrc?: string | null;
   badgeText?: string;
   chipText?: string;
@@ -154,6 +157,7 @@ export function AgriScene({
         "agri-scene",
         `agri-scene--${mode}`,
         `agri-scene--${config.tone}`,
+        assetFit === "cover" ? "agri-scene--asset-cover" : undefined,
         className,
       )}
     >

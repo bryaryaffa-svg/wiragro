@@ -11,6 +11,7 @@ import {
   getProductCatalogContext,
   getSolutionCropOptions,
   getSolutionProblemOptions,
+  resolveSolutionSelection,
 } from "@/lib/solution-experience";
 
 export type GlobalSearchTab = "all" | "education" | "products" | "solutions" | "videos";
@@ -61,17 +62,32 @@ export type GlobalSearchResults = {
   counts: Record<GlobalSearchTab, number>;
   groups: Record<GlobalSearchTab, GlobalSearchItem[]>;
   query: string;
+  solutionCta?: {
+    description: string;
+    href: string;
+    label: string;
+  } | null;
   suggestions: string[];
 };
 
-export const DEFAULT_GLOBAL_SEARCH_SUGGESTIONS = [
-  "daun kuning",
-  "wereng",
-  "pupuk cabai",
-  "fungisida",
-  "buah rontok",
-  "gulma",
+export const GLOBAL_SEARCH_SUGGESTION_GROUPS = [
+  {
+    title: "Pencarian populer",
+    items: ["daun kuning", "wereng", "pupuk cabai", "fungisida"],
+  },
+  {
+    title: "Masalah tanaman populer",
+    items: ["hama", "jamur", "buah rontok", "gulma"],
+  },
+  {
+    title: "Tanaman populer",
+    items: ["Padi", "Cabai", "Jagung", "Tomat"],
+  },
 ];
+
+export const DEFAULT_GLOBAL_SEARCH_SUGGESTIONS = GLOBAL_SEARCH_SUGGESTION_GROUPS.flatMap(
+  (group) => group.items,
+);
 
 function normalize(value?: string | null) {
   return (value ?? "")
@@ -197,6 +213,25 @@ function rankItems<T extends GlobalSearchItem>(
     .map((entry) => entry.item);
 }
 
+function buildSolutionCta(query: string) {
+  if (!query) {
+    return null;
+  }
+
+  const selection = resolveSolutionSelection({ q: query });
+
+  if (!selection.problemId) {
+    return null;
+  }
+
+  return {
+    description:
+      "Gejala seperti ini lebih aman dibaca lewat alur solusi sebelum langsung memilih produk.",
+    href: buildSolutionHref(selection.cropId, selection.problemId),
+    label: "Mulai alur solusi untuk masalah ini",
+  };
+}
+
 export async function searchGlobalContent(
   query: string,
   options?: {
@@ -246,7 +281,7 @@ export async function searchGlobalContent(
         ...new Set(
           [
             ...DEFAULT_GLOBAL_SEARCH_SUGGESTIONS.filter((item) =>
-              item.includes(normalize(trimmedQuery)),
+              normalize(item).includes(normalize(trimmedQuery)),
             ),
             ...allItems.slice(0, 4).map((item) => item.title),
           ].filter(Boolean),
@@ -270,6 +305,7 @@ export async function searchGlobalContent(
       videos: videoItems,
     },
     query: trimmedQuery,
+    solutionCta: buildSolutionCta(trimmedQuery),
     suggestions,
   };
 }

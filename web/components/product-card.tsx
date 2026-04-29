@@ -5,12 +5,15 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { AddToCartButton } from "@/components/cart/add-to-cart-button";
-import { BuyNowButton } from "@/components/cart/buy-now-button";
 import { RoleAwarePrice } from "@/components/ui/role-aware-price";
 import { WishlistButton } from "@/components/wishlist-button";
 import { trackUiEvent } from "@/lib/analytics";
 import type { ProductSummary } from "@/lib/api";
-import { getProductCatalogContext } from "@/lib/solution-experience";
+import {
+  getFallbackProductVisual,
+  getProductCardBadge,
+  getProductCardFit,
+} from "@/lib/product-card-content";
 
 const PRODUCT_CARD_MEDIA_SHELL_STYLE = {
   position: "relative",
@@ -37,28 +40,23 @@ const PRODUCT_CARD_WISHLIST_SLOT_STYLE = {
   zIndex: 3,
 } as const;
 
-function getFallbackProductVisual(product: ProductSummary) {
-  const haystack = `${product.name} ${product.category?.name ?? ""} ${product.product_type}`.toLowerCase();
-
-  if (haystack.includes("benih") || haystack.includes("bibit")) {
-    return "/wiragro-illustrations/wiragro_produk_benih_transparent.png";
-  }
-  if (
-    haystack.includes("pestisida") ||
-    haystack.includes("insektisida") ||
-    haystack.includes("fungisida") ||
-    haystack.includes("herbisida")
-  ) {
-    return "/wiragro-illustrations/wiragro_produk_herbisida_transparent.png";
-  }
-  if (haystack.includes("nutrisi") || haystack.includes("booster") || haystack.includes("kalium")) {
-    return "/wiragro-illustrations/wiragro_produk_nutrisi_transparent.png";
-  }
-  if (haystack.includes("alat") || haystack.includes("sprayer") || haystack.includes("semprot")) {
-    return "/wiragro-illustrations/wiragro_icon_alat_pertanian_transparent.png";
+function ProductFitGroup({ items, label }: { items: string[]; label: string }) {
+  if (!items.length) {
+    return null;
   }
 
-  return "/wiragro-illustrations/wiragro_produk_pupuk_transparent.png";
+  return (
+    <div className="product-card__fit-row">
+      <span className="product-card__fit-label">{label}</span>
+      <div className="product-card__fit-chips">
+        {items.map((item) => (
+          <span className="product-card__fit-chip" key={`${label}-${item}`}>
+            {item}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
 }
 
 export function ProductCard({
@@ -80,24 +78,12 @@ export function ProductCard({
   const isOutOfStock = product.availability.state === "out_of_stock";
   const showAvailabilityBadge = product.availability.state !== "in_stock";
   const useUnoptimizedImage = resolvedImageUrl.startsWith("/");
-  const context = getProductCatalogContext(product);
-  const primaryBadge = product.badges.featured
-    ? "Promo"
-    : product.badges.new_arrival
-      ? "Baru"
-      : product.badges.best_seller
-        ? "Terlaris"
-        : null;
+  const fit = getProductCardFit(product);
+  const primaryBadge = getProductCardBadge(product);
   const totalReviews = product.review_summary?.total_reviews ?? 0;
   const averageRating = product.review_summary?.average_rating ?? null;
   const hasReviewSummary = totalReviews > 0 && averageRating !== null;
-  const availabilityText =
-    product.availability.state === "low_stock"
-      ? "Stok menipis"
-      : product.availability.state === "out_of_stock"
-        ? "Stok habis"
-        : "Siap dipesan";
-  const contextualBadge = contextBadge ?? context.quickBadge;
+  const contextualBadge = contextBadge ?? null;
 
   useEffect(() => {
     setImageFailed(false);
@@ -156,21 +142,37 @@ export function ProductCard({
         </div>
       </div>
 
-        <div className="product-card__body">
-          <div className="product-card__meta">
-            <span>{product.category?.name ?? product.product_type}</span>
-            <span>{product.unit}</span>
-          </div>
+      <div className="product-card__body">
+        <div className="product-card__meta">
+          <span>{fit.categoryLabel}</span>
+          <span>{product.unit}</span>
+        </div>
 
-          {contextualBadge ? (
-            <div className="product-card__context-hint">
-              <span>{contextualBadge}</span>
-            </div>
+        <div className="product-card__state-row">
+          <span className={`product-card__stock product-card__stock--${fit.stockState}`}>
+            {fit.stockLabel}
+          </span>
+          {product.price.is_promo || product.badges.featured ? (
+            <span className="product-card__state-pill product-card__state-pill--promo">
+              Promo aktif
+            </span>
           ) : null}
+          {fit.needsConsultation ? (
+            <span className="product-card__state-pill product-card__state-pill--consult">
+              Butuh konsultasi
+            </span>
+          ) : null}
+        </div>
 
-          <Link
-            className="product-card__title"
-            href={`/produk/${product.slug}`}
+        {contextualBadge ? (
+          <div className="product-card__context-hint">
+            <span>{contextualBadge}</span>
+          </div>
+        ) : null}
+
+        <Link
+          className="product-card__title"
+          href={`/produk/${product.slug}`}
           onClick={() =>
             trackingContext
               ? trackUiEvent("recommended_product_clicked", {
@@ -195,28 +197,24 @@ export function ProductCard({
           </div>
         ) : null}
 
+        <div className="product-card__fit" aria-label="Kecocokan produk">
+          {fit.hasSpecificFit ? (
+            <>
+              <ProductFitGroup items={fit.cropLabels} label="Tanaman" />
+              <ProductFitGroup items={fit.problemLabels} label="Masalah" />
+            </>
+          ) : (
+            <ProductFitGroup items={[fit.categoryLabel]} label="Kategori" />
+          )}
+        </div>
+
         <p className="product-card__summary">
-          {benefitOverride ||
-            context.benefit ||
-            product.summary ||
-            "Produk pertanian aktif dari Wiragro yang siap dipilih sesuai kebutuhan Anda."}
+          {benefitOverride || fit.summary}
         </p>
 
-        <RoleAwarePrice availabilityText={availabilityText} price={product.price} />
+        <RoleAwarePrice price={product.price} />
 
-        <div className="product-card__actions">
-          <AddToCartButton
-            buttonClassName="btn btn-secondary btn-block"
-            disabled={isOutOfStock}
-            label="Tambah"
-            productId={product.id}
-          />
-          <BuyNowButton
-            buttonClassName="btn btn-primary btn-block"
-            disabled={isOutOfStock}
-            label="Beli sekarang"
-            productId={product.id}
-          />
+        <div className="product-card__actions product-card__actions--two">
           <Link
             className="btn btn-secondary btn-block product-card__detail-link"
             href={`/produk/${product.slug}`}
@@ -230,8 +228,14 @@ export function ProductCard({
                 : undefined
             }
           >
-            Detail
+            Lihat Detail
           </Link>
+          <AddToCartButton
+            buttonClassName="btn btn-primary btn-block"
+            disabled={isOutOfStock}
+            label="Tambah"
+            productId={product.id}
+          />
         </div>
       </div>
     </article>

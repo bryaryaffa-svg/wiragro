@@ -23,8 +23,8 @@ export function CropSelector({
     <section className="solution-selector-panel">
       <div className="section-heading">
         <div>
-          <span className="eyebrow-label">State 1</span>
-          <h2>Pilih tanaman Anda</h2>
+          <span className="eyebrow-label">Langkah 1</span>
+          <h2>Pilih tanaman</h2>
           <p>
             Agar rekomendasi lebih tepat, mulai dari jenis tanaman yang sedang Anda tangani.
           </p>

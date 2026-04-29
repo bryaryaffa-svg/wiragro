@@ -139,7 +139,7 @@ export const SOLUTION_CROP_OPTIONS: SolutionCropOption[] = [
   },
   {
     id: "melon",
-    label: "Semangka / Melon",
+    label: "Melon",
     description: "Untuk buah horti yang sensitif pada fase generatif.",
     icon: "melon",
   },
@@ -173,14 +173,14 @@ export const SOLUTION_PROBLEM_OPTIONS: SolutionProblemOption[] = [
   },
   {
     id: "hama",
-    label: "Hama wereng / kutu / ulat",
+    label: "Hama",
     description: "Daun rusak, berlubang, atau ada serangga yang cepat menyebar.",
     symptomHint: "Perlu dibedakan dulu antara serangan hama dan penyakit daun.",
     icon: "pest",
   },
   {
     id: "bercak-daun",
-    label: "Bercak daun / jamur",
+    label: "Jamur",
     description: "Daun menunjukkan bercak, noda, atau gejala menyebar.",
     symptomHint: "Sering berkaitan dengan kelembapan tinggi dan sanitasi area tanam.",
     icon: "fungus",
@@ -229,7 +229,7 @@ export const SOLUTION_PROBLEM_OPTIONS: SolutionProblemOption[] = [
   },
   {
     id: "hasil-panen",
-    label: "Hasil panen kurang maksimal",
+    label: "Hasil panen",
     description: "Produksi tidak sesuai harapan walau tanaman tampak tumbuh.",
     symptomHint: "Biasanya perlu evaluasi bertahap dari fase, kesehatan tanaman, dan input.",
     icon: "nutrition",

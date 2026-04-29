@@ -3,13 +3,14 @@ import Link from "next/link";
 
 import { JsonLd } from "@/components/json-ld";
 import { SearchResultTabs } from "@/components/search-result-tabs";
-import { FilterChip } from "@/components/ui/filter-chip";
+import { SearchSuggestionGroups } from "@/components/search-suggestion-groups";
 import { SearchInput } from "@/components/ui/search-input";
 import { SectionHeader } from "@/components/ui/section-header";
 import {
-  DEFAULT_GLOBAL_SEARCH_SUGGESTIONS,
   searchGlobalContent,
 } from "@/lib/global-search";
+import { buildWhatsAppConsultationUrl } from "@/lib/homepage-content";
+import { getFallbackStoreProfile, getStoreProfile } from "@/lib/api";
 import {
   buildBreadcrumbJsonLd,
   buildCatalogMetadata,
@@ -49,7 +50,12 @@ export default async function SearchPage({
   const resolved = await searchParams;
   const search = typeof resolved.q === "string" ? resolved.q : "";
   const trimmedSearch = search.trim();
-  const results = await searchGlobalContent(trimmedSearch, { limitPerGroup: 10 });
+  const [results, store] = await Promise.all([
+    searchGlobalContent(trimmedSearch, { limitPerGroup: 10 }),
+    getStoreProfile().catch(() => getFallbackStoreProfile()),
+  ]);
+  const consultationHref =
+    buildWhatsAppConsultationUrl(store.whatsapp_number, store.name) ?? "/kontak";
 
   return (
     <section className="page-stack search-page">
@@ -91,32 +97,24 @@ export default async function SearchPage({
           action="/cari"
           buttonLabel="Cari"
           defaultValue={trimmedSearch}
-          inputLabel="Cari solusi, produk, artikel, atau masalah tanaman"
-          placeholder="Cari solusi, produk, artikel, atau masalah tanaman..."
+          inputLabel="Cari produk, tanaman, hama, gejala, atau artikel"
+          placeholder="Cari produk, tanaman, hama, gejala, atau artikel..."
           size="large"
         />
 
-        <div className="search-page__chips" aria-label="Saran pencarian">
-          {DEFAULT_GLOBAL_SEARCH_SUGGESTIONS.map((suggestion) => (
-            <FilterChip href={`/cari?q=${encodeURIComponent(suggestion)}`} key={suggestion}>
-              {suggestion}
-            </FilterChip>
-          ))}
-        </div>
+        {!trimmedSearch ? <SearchSuggestionGroups /> : null}
       </div>
 
-      <section className="section-block">
-        <SectionHeader
-          description={
-            trimmedSearch
-              ? "Hasil dibagi ke tab Solusi, Produk, Edukasi, dan Video agar user cepat masuk ke pintu yang paling relevan."
-              : "Coba salah satu saran pencarian atau gunakan tab di bawah untuk menjelajah lintas konten."
-          }
-          eyebrow="Hasil pencarian"
-          title={trimmedSearch ? "Masuk ke hasil yang paling relevan lebih dulu." : "Jelajahi hasil lintas pilar."}
-        />
-        <SearchResultTabs results={results} />
-      </section>
+      {trimmedSearch ? (
+        <section className="section-block">
+          <SectionHeader
+            description="Hasil dibagi menjadi solusi, produk, edukasi, dan video agar user cepat masuk ke pintu yang paling relevan."
+            eyebrow="Hasil pencarian"
+            title="Masuk ke hasil yang paling relevan lebih dulu."
+          />
+          <SearchResultTabs consultationHref={consultationHref} results={results} />
+        </section>
+      ) : null}
 
       <section className="section-block">
         <SectionHeader

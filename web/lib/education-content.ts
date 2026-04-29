@@ -93,18 +93,18 @@ const EDUCATION_VIDEO_RESOURCES: EducationVideoResource[] = [
 ];
 
 export const EDUCATION_TOPIC_OPTIONS: EducationOption<EducationTopicId>[] = [
-  { id: "nutrisi-tanaman", label: "Nutrisi tanaman" },
+  { id: "nutrisi-tanaman", label: "Nutrisi" },
   { id: "pestisida", label: "Pestisida" },
   { id: "benih", label: "Benih" },
-  { id: "hama-penyakit", label: "Hama penyakit" },
-  { id: "efisiensi-biaya", label: "Efisiensi biaya" },
-  { id: "studi-kasus", label: "Studi kasus" },
-  { id: "review-produk", label: "Review produk" },
-  { id: "edukasi-umum", label: "Edukasi umum" },
+  { id: "hama-penyakit", label: "Hama" },
+  { id: "efisiensi-biaya", label: "Biaya" },
+  { id: "studi-kasus", label: "Kasus" },
+  { id: "review-produk", label: "Review" },
+  { id: "edukasi-umum", label: "Umum" },
 ];
 
 export const EDUCATION_FORMAT_OPTIONS: EducationOption<EducationFormat>[] = [
-  { id: "all", label: "Semua format" },
+  { id: "all", label: "Semua" },
   { id: "article", label: "Artikel" },
   { id: "video", label: "Video" },
 ];
