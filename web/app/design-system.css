@@ -4696,8 +4696,8 @@ textarea:focus {
     position: relative;
     display: grid;
     justify-items: center;
-    gap: 0.22rem;
-    padding: 0.55rem 0.35rem;
+    gap: 0.18rem;
+    padding: 0.52rem 0.28rem;
     border-radius: var(--radius-control);
     color: var(--text-soft);
     font-size: var(--font-size-xs);
@@ -4715,17 +4715,18 @@ textarea:focus {
   .mobile-nav__icon {
     position: relative;
     display: inline-flex;
-    width: 1.65rem;
-    height: 1.65rem;
+    width: 2.2rem;
+    height: 2.2rem;
     overflow: hidden;
-    border-radius: 10px;
+    border-radius: 12px;
   }
 
   .mobile-nav__icon img,
   .mobile-nav__icon svg {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
+    transform: scale(1.16);
   }
 
   .mobile-nav__label {
