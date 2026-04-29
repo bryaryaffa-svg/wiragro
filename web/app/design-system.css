@@ -6723,6 +6723,66 @@ textarea:focus {
   .app-header__brand .wiragro-lockup__wordmark {
     font-size: 1.28rem;
   }
+
+  .site-footer {
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .site-footer__brand,
+  .site-footer__contact-card,
+  .site-footer__links {
+    border: 1px solid rgba(24, 40, 23, 0.1);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.99), rgba(248, 244, 235, 0.97));
+    box-shadow: 0 14px 28px rgba(15, 33, 23, 0.06);
+    color: var(--text);
+  }
+
+  .site-footer__eyebrow,
+  .site-footer__contact-heading span,
+  .site-footer__links h3 {
+    color: var(--primary-deep);
+  }
+
+  .site-footer__brand h2,
+  .site-footer__contact-heading strong,
+  .site-footer__contact strong {
+    color: var(--text);
+  }
+
+  .site-footer__brand p,
+  .site-footer__contact span,
+  .site-footer__links a,
+  .site-footer__bottom p,
+  .site-footer__bottom-links a {
+    color: #3f4d42;
+  }
+
+  .site-footer__links a {
+    font-weight: 700;
+  }
+
+  .site-footer__badges span,
+  .site-footer__contact {
+    border-color: rgba(24, 40, 23, 0.08);
+    background: rgba(35, 75, 49, 0.07);
+    color: var(--primary-deep);
+  }
+
+  .site-footer__contact-actions a {
+    border-color: rgba(24, 40, 23, 0.1);
+    background: var(--primary-deep);
+    color: #fff8ef;
+  }
+
+  .site-footer__contact-actions a:last-child {
+    background: rgba(35, 75, 49, 0.08);
+    color: var(--primary-deep);
+  }
+
+  .site-footer__bottom {
+    border-top-color: rgba(24, 40, 23, 0.1);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
