@@ -1,4 +1,3 @@
-import { Fragment } from "react";
 import Link from "next/link";
 
 import { WiragroLockup } from "@/components/wiragro-lockup";
@@ -14,17 +13,11 @@ export async function SiteFooter() {
     : null;
   const consultationUrl = buildWhatsAppConsultationUrl(store?.whatsapp_number, store?.name);
   const year = new Date().getFullYear();
-  const footerLinkPairs = [];
-
-  for (let index = 0; index < FOOTER_LINK_GROUPS.length; index += 2) {
-    footerLinkPairs.push(FOOTER_LINK_GROUPS.slice(index, index + 2));
-  }
 
   return (
     <footer className="site-footer" id="site-footer">
       <div className="site-footer__hero">
         <div className="site-footer__brand">
-          <span className="site-footer__eyebrow">Wiragro</span>
           <WiragroLockup
             contextLabel="Platform Solusi Pertanian Digital"
             tone="light"
@@ -67,52 +60,22 @@ export async function SiteFooter() {
         ) : null}
       </div>
 
-      <div className="site-footer__links-shell">
+      <nav aria-label="Navigasi footer" className="site-footer__links-shell">
         <div className="site-footer__columns">
-          {footerLinkPairs.map(([leftGroup, rightGroup]) => {
-            const rowCount = Math.max(
-              leftGroup.links.length,
-              rightGroup?.links.length ?? 0,
-            );
-
-            return (
-              <div className="site-footer__link-pair" key={leftGroup.title}>
-                <h3 className="site-footer__link-heading">{leftGroup.title}</h3>
-                {rightGroup ? (
-                  <h3 className="site-footer__link-heading">{rightGroup.title}</h3>
-                ) : (
-                  <span aria-hidden="true" className="site-footer__link-heading-placeholder" />
-                )}
-
-                {Array.from({ length: rowCount }).map((_, index) => {
-                  const leftLink = leftGroup.links[index];
-                  const rightLink = rightGroup?.links[index];
-
-                  return (
-                    <Fragment key={`${leftGroup.title}-${rightGroup?.title ?? "empty"}-${index}`}>
-                      {leftLink ? (
-                        <Link className="site-footer__link-cell" href={leftLink.href}>
-                          {leftLink.label}
-                        </Link>
-                      ) : (
-                        <span aria-hidden="true" className="site-footer__link-placeholder" />
-                      )}
-
-                      {rightLink ? (
-                        <Link className="site-footer__link-cell" href={rightLink.href}>
-                          {rightLink.label}
-                        </Link>
-                      ) : (
-                        <span aria-hidden="true" className="site-footer__link-placeholder" />
-                      )}
-                    </Fragment>
-                  );
-                })}
+          {FOOTER_LINK_GROUPS.map((group) => (
+            <section className="site-footer__link-group" key={group.title}>
+              <h3 className="site-footer__link-heading">{group.title}</h3>
+              <div className="site-footer__link-list">
+                {group.links.map((link) => (
+                  <Link className="site-footer__link-cell" href={link.href} key={link.href}>
+                    {link.label}
+                  </Link>
+                ))}
               </div>
-            );
-          })}
+            </section>
+          ))}
         </div>
-      </div>
+      </nav>
 
       <div className="site-footer__bottom">
         <p>&copy; {year} Wiragro. Platform solusi pertanian digital untuk belajar, menyelesaikan masalah, dan berbelanja lebih terarah.</p>

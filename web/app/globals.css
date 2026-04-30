@@ -11174,3 +11174,9 @@ textarea:focus {
     text-align: left;
   }
 }
+
+@media (max-width: 640px) {
+  .app-shell .app-main {
+    width: min(var(--container-width), calc(100vw - 1.5rem));
+  }
+}

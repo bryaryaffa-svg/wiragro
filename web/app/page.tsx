@@ -166,16 +166,9 @@ export default async function HomePage() {
 
       <section className="homepage-hero homepage-hero--entry">
         <div className="homepage-hero__copy">
-          <span className="homepage-hero__welcome">
-            <span className="homepage-hero__welcome-icon">
-              <AgriIcon name="leaf" />
-            </span>
-            Solusi, edukasi, toko
-          </span>
-          <h1>Temukan solusi tanaman, pelajari caranya, lalu beli produk yang tepat.</h1>
+          <h1>Temukan solusi tanaman, lalu beli produk yang tepat.</h1>
           <p>
-            Cari berdasarkan tanaman, gejala, hama, pupuk, pestisida, benih, atau
-            kebutuhan budidaya.
+            Cari berdasarkan tanaman, gejala, hama, pupuk, pestisida, benih, atau kebutuhan budidaya.
           </p>
 
           <div className="homepage-hero__search">
@@ -183,7 +176,7 @@ export default async function HomePage() {
               action="/cari"
               buttonLabel="Cari"
               inputLabel="Cari solusi tanaman, edukasi, atau produk"
-              placeholder="Cari produk, tanaman, hama, gejala, atau artikel..."
+              placeholder="Cari tanaman, gejala, produk..."
               size="large"
             />
           </div>

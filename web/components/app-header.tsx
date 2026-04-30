@@ -86,6 +86,21 @@ export function AppHeader() {
     setIsSearchOpen(false);
   }, [pathname]);
 
+  useEffect(() => {
+    if (!isMenuOpen) {
+      return;
+    }
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setIsMenuOpen(false);
+      }
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [isMenuOpen]);
+
   return (
     <>
       <header
@@ -118,6 +133,7 @@ export function AppHeader() {
             </div>
 
             <button
+              aria-controls="site-mobile-menu"
               aria-expanded={isMenuOpen}
               aria-label={isMenuOpen ? "Tutup menu navigasi" : "Buka menu navigasi"}
               className="site-header__bar-toggle app-header__toggle"
@@ -166,7 +182,19 @@ export function AppHeader() {
             </nav>
           </div>
 
-          <div className={`site-header__mobile-panel app-header__mobile-panel${isMenuOpen ? " is-open" : ""}`}>
+          {isMenuOpen ? (
+            <button
+              aria-label="Tutup menu navigasi"
+              className="site-header__mobile-backdrop"
+              onClick={() => setIsMenuOpen(false)}
+              type="button"
+            />
+          ) : null}
+
+          <div
+            className={`site-header__mobile-panel app-header__mobile-panel${isMenuOpen ? " is-open" : ""}`}
+            id="site-mobile-menu"
+          >
             <div className="site-header__mobile-panel-group">
               <span className="site-header__mobile-panel-label">Jelajah platform</span>
               {HEADER_NAV_LINKS.map((link) => {
