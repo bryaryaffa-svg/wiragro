@@ -12,9 +12,14 @@ export default function manifest(): MetadataRoute.Manifest {
     lang: "id-ID",
     icons: [
       {
-        src: "/brand/wiragro-icon.svg",
-        sizes: "any",
-        type: "image/svg+xml",
+        src: "/brand/wiragro-icon-192.png",
+        sizes: "192x192",
+        type: "image/png",
+      },
+      {
+        src: "/brand/wiragro-icon-512.png",
+        sizes: "512x512",
+        type: "image/png",
       },
     ],
   };

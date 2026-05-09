@@ -470,7 +470,7 @@ export function buildOrganizationJsonLd() {
     url: absoluteUrl("/"),
     logo: {
       "@type": "ImageObject",
-      url: absoluteUrl("/brand/wiragro-icon.svg"),
+      url: absoluteUrl("/brand/wiragro-icon.png"),
     },
   };
 }
@@ -650,7 +650,7 @@ export function buildArticleJsonLd(article: ContentPagePayload, slug: string) {
       name: SITE_NAME,
       logo: {
         "@type": "ImageObject",
-        url: absoluteUrl("/brand/wiragro-icon.svg"),
+        url: absoluteUrl("/brand/wiragro-icon.png"),
       },
     },
     articleSection: "Edukasi Pertanian",
